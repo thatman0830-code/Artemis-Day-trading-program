@@ -1,0 +1,37 @@
+{
+  "schema_version": "codex-hermes-phase4-findings-1",
+  "source_commit": "7abb545c313c942f0e90b6e07e73a12d912df147",
+  "production_defects": [],
+  "production_files_modified": false,
+  "integrated_test_count": 67,
+  "rejected_redundant_count": 45,
+  "rejected_implementation_coupled_count": 1,
+  "accepted_unchanged_groups": [
+    "Variation settlement",
+    "Mark/unrealized",
+    "Identity/version/chronology/grid/effective dates",
+    "Event payload validation",
+    "Position state validation",
+    "Margin specification validation",
+    "Fill economics validation"
+  ],
+  "accepted_after_correction_groups": [
+    "BTC spot",
+    "BTC perpetual",
+    "Margin",
+    "Duplicate prevention",
+    "Determinism/replay",
+    "Residual gates",
+    "Unsupported capabilities"
+  ],
+  "rejected_redundant_groups": [
+    "Futures transitions",
+    "Cost attribution",
+    "Accounting reconciliation"
+  ],
+  "rejected_implementation_coupled_groups": [
+    "BTC logon-task source inspection"
+  ],
+  "rejected_incorrect_groups": [],
+  "checksum_correction": "Original Windows-checkout hashes were replaced with canonical Git-object hashes."
+}

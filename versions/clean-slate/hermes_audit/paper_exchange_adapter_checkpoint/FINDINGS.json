@@ -1,0 +1,31 @@
+{
+  "audit_assignment": "AUDIT-PAPER-EXCHANGE-ADAPTER-CHECKPOINT",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "7e279de1ea56808809e26f155149970ef2a2592e",
+  "parent_sha": "ebb12d91fceae280992ff6f7a10d13d0190dcbdd",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_exchange_adapter_checkpoint_v1.py:1-13", "description": "No network/credential/pickle/live imports. Only hashlib, json, os, pathlib, uuid, paper_exchange_adapter_v1, paper_gateway_checkpoint_v1 used. trading_authority=False in payload, receipts, and round-trip.", "tested_by": "TestOfflinePaperOnly"},
+    {"id": "OBS-002", "location": "paper_exchange_adapter_checkpoint_v1.py:44-67", "description": "Single atomic unit: gateway checkpoint + receipts + adapter_id in one envelope. adapter_id binds complete gateway snapshot + receipt history. No split-brain.", "tested_by": "TestAtomicUnit"},
+    {"id": "OBS-003", "location": "paper_exchange_adapter_checkpoint_v1.py:63-67", "description": "Deterministic serialization: identical states produce identical bytes, UTF-8 canonical JSON, round-trip preserves exact state, receipt order preserved.", "tested_by": "TestDeterministicSerialization"},
+    {"id": "OBS-004", "location": "paper_exchange_adapter_checkpoint_v1.py:70-109", "description": "Integrity: outer payload SHA-256 checked, nested gateway checkpoint integrity independently checked (snapshot_from_bytes), adapter_id independently verified, receipt mutation/deletion/insertion rejects with recompute, trading_authority tamper rejects at payload and receipt layer.", "tested_by": "TestIntegrity"},
+    {"id": "OBS-005", "location": "paper_exchange_adapter_checkpoint_v1.py:70-88", "description": "Schema: missing/unknown/duplicate fields reject, unsupported schema rejects, empty/truncated/malformed/non-UTF-8/oversized reject, receipts must be list, non-boolean accepted rejects, invalid reason rejects, non-False trading_authority rejects.", "tested_by": "TestSchemaEnforcement"},
+    {"id": "OBS-006", "location": "paper_exchange_adapter_checkpoint_v1.py:117-153", "description": "Filesystem safety: missing parent rejects, existing checkpoint cannot be overwritten by initialize, existing lock fails closed, lock contention preserves checkpoint, missing checkpoint load rejects, temp files in checkpoint dir.", "tested_by": "TestFilesystemSafety"},
+    {"id": "OBS-007", "location": "paper_exchange_adapter_checkpoint_v1.py:128-145", "description": "Atomic replacement: os.replace, os.fsync, stream.flush, temp cleaned after success/failure, lock cleaned after normal exceptions, repeated transactions no artifacts.", "tested_by": "TestAtomicReplacement"},
+    {"id": "OBS-008", "location": "paper_exchange_adapter_checkpoint_v1.py:155-168", "description": "Transactional execution: store loads authoritative under lock, execute→verify→replace forms one transaction, exact retry no duplicate, conflicting retry rejected, gateway-rejected remains idempotent, stale in-memory cannot overwrite.", "tested_by": "TestTransactionalExecution"},
+    {"id": "OBS-009", "location": "paper_exchange_adapter_checkpoint_v1.py:155-165", "description": "Crash windows: failure before load preserves checkpoint (lock contention), failure during execution no false acceptance, failure preserves prior checkpoint.", "tested_by": "TestCrashWindows"},
+    {"id": "OBS-010", "location": "paper_exchange_adapter_checkpoint_v1.py:170-172", "description": "Restart: atomically sets connected=false, reconciliation_required=true, preserves records, deterministic, submission blocked after restart.", "tested_by": "TestRestart"},
+    {"id": "OBS-011", "location": "paper_exchange_adapter_checkpoint_v1.py:174-176", "description": "Reconciliation: under writer lock, exact observation required, mismatch durably persisted with kill_switch+disconnected, exact restores, cannot clear kill switch, never grants trading authority, stale snapshot rejects.", "tested_by": "TestReconciliation"},
+    {"id": "OBS-012", "location": "paper_exchange_adapter_checkpoint_v1.py:71-76", "description": "Recovery from incomplete artifacts: empty, truncated, and corrupt checkpoints all reject safely. No guessing which state is authoritative.", "tested_by": "TestRecoveryFromArtifacts"},
+    {"id": "OBS-013", "location": "paper_exchange_adapter_checkpoint_v1.py:73-76", "description": "Failure normalization: JSON, Unicode, size, and checksum errors all surface as PaperAdapterCheckpointError. No raw exceptions create unclear behavior.", "tested_by": "TestFailureNormalization"},
+    {"id": "OBS-014", "location": "paper_exchange_adapter_checkpoint_v1.py:10-14", "description": "Implementation coupling: imports only paper_exchange_adapter_v1 and paper_gateway_checkpoint_v1 public contracts. No private helpers used.", "tested_by": "TestImplementationCoupling"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_deterministic_round_trip_preserves_gateway_and_receipts", "test_initialize_execute_and_exact_retry_are_atomic", "test_restart_is_durably_disconnected_and_requires_reconciliation", "test_exact_reconciliation_persists_before_submission_resumes", "test_reconciliation_mismatch_is_durably_fail_closed", "test_existing_lock_preserves_checkpoint", "test_failed_operation_preserves_checkpoint_and_removes_lock", "test_tamper_truncation_unknown_duplicate_and_authority_reject", "test_receipt_tamper_rejects_even_when_outer_checksum_is_recomputed", "test_missing_parent_existing_checkpoint_and_missing_load_reject", "test_module_has_no_external_transport_credentials_pickle_or_live_submission"],
+    "accepted_after_correction": ["test_stale_in_memory_cannot_overwrite (corrected: same command_id gets IDEMPOTENT_REPLAY before STALE check — need a new command_id with stale snapshot_id to test stale binding)"],
+    "redundant": ["Some adversarial tests overlap with existing on round-trip, tamper, lock, missing parent, no network"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

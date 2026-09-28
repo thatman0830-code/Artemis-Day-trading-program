@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "backtesting.execution_accounting.v2/ohlc-execution-v2.schema.json",
+  "title": "Execution and Accounting v2 Phase 3 records",
+  "oneOf": [
+    {"$ref": "#/$defs/bar"},
+    {"$ref": "#/$defs/policy"},
+    {"$ref": "#/$defs/instruction"},
+    {"$ref": "#/$defs/fill"}
+  ],
+  "$defs": {
+    "decimal": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+    "positive": {"type": "string", "pattern": "^(0\\.[0-9]*[1-9][0-9]*|[1-9][0-9]*(\\.[0-9]+)?)$"},
+    "nonnegative": {"type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "bar": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version","bar_id","market","instrument_id","contract_id","open_time","close_time","available_at","open","high","low","close","volume","finalized","session_eligible","data_quality_valid","contract_eligible","source_version"],
+      "properties": {
+        "schema_version":{"const":"ohlc-bar-v2-1"}, "bar_id":{"$ref":"#/$defs/sha"},
+        "market":{"type":"string","minLength":1}, "instrument_id":{"type":"string","minLength":1},
+        "contract_id":{"type":["string","null"]}, "open_time":{"$ref":"#/$defs/utc"},
+        "close_time":{"$ref":"#/$defs/utc"}, "available_at":{"$ref":"#/$defs/utc"},
+        "open":{"$ref":"#/$defs/positive"}, "high":{"$ref":"#/$defs/positive"},
+        "low":{"$ref":"#/$defs/positive"}, "close":{"$ref":"#/$defs/positive"},
+        "volume":{"oneOf":[{"$ref":"#/$defs/decimal"},{"type":"null"}]},
+        "finalized":{"type":"boolean"}, "session_eligible":{"type":"boolean"},
+        "data_quality_valid":{"type":"boolean"}, "contract_eligible":{"type":"boolean"},
+        "source_version":{"type":"string","minLength":1}
+      }
+    },
+    "policy": {
+      "type":"object", "additionalProperties":false,
+      "required":["schema_version","policy_id","execution_policy_version","liquidity_policy_version","maximum_participation_rate","assumption_version"],
+      "properties": {
+        "schema_version":{"const":"ohlc-execution-policy-v2-1"}, "policy_id":{"$ref":"#/$defs/sha"},
+        "execution_policy_version":{"const":"CONSERVATIVE_OHLC_1M_V1"},
+        "liquidity_policy_version":{"const":"BAR_VOLUME_PARTICIPATION_V1"},
+        "maximum_participation_rate":{"$ref":"#/$defs/positive"},
+        "assumption_version":{"type":"string","minLength":1}
+      }
+    },
+    "instruction": {
+      "type":"object", "additionalProperties":false,
+      "required":["schema_version","instruction_id","order_id","priority","participation_rate","slippage_ticks","assumption_version","source_lineage"],
+      "properties": {
+        "schema_version":{"const":"execution-instruction-v2-1"}, "instruction_id":{"$ref":"#/$defs/sha"},
+        "order_id":{"$ref":"#/$defs/sha"}, "priority":{"enum":[10,20,30,40,50]},
+        "participation_rate":{"$ref":"#/$defs/positive"}, "slippage_ticks":{"$ref":"#/$defs/nonnegative"},
+        "assumption_version":{"type":"string","minLength":1},
+        "source_lineage":{"$ref":"#/$defs/sourceLineage"}
+      }
+    },
+    "sourceLineage": {
+      "type":"object", "additionalProperties":false,
+      "required":["schema_version","lineage_id","source_bar","action_id","order_id","activation_event_id","activation_event_time"],
+      "properties": {
+        "schema_version":{"const":"execution-source-lineage-v2-1"},
+        "lineage_id":{"$ref":"#/$defs/sha"}, "source_bar":{"$ref":"#/$defs/bar"},
+        "action_id":{"$ref":"#/$defs/sha"}, "order_id":{"$ref":"#/$defs/sha"},
+        "activation_event_id":{"$ref":"#/$defs/sha"}, "activation_event_time":{"$ref":"#/$defs/utc"}
+      }
+    },
+    "fill": {
+      "type":"object", "additionalProperties":true,
+      "required":["schema_version","fill_id","order_id","market_event_id","fill_time","quantity","reference_price","unrounded_economic_price","economic_price","adverse_friction","execution_rule_code","execution_policy_version","liquidity_policy_version"],
+      "properties": {
+        "schema_version":{"const":"execution-fill-v2-1"}, "fill_id":{"$ref":"#/$defs/sha"},
+        "order_id":{"$ref":"#/$defs/sha"}, "market_event_id":{"$ref":"#/$defs/sha"},
+        "fill_time":{"$ref":"#/$defs/utc"}, "quantity":{"$ref":"#/$defs/positive"},
+        "reference_price":{"$ref":"#/$defs/positive"}, "unrounded_economic_price":{"$ref":"#/$defs/positive"},
+        "economic_price":{"$ref":"#/$defs/positive"}, "adverse_friction":{"$ref":"#/$defs/nonnegative"},
+        "execution_rule_code":{"type":"string","minLength":1},
+        "execution_policy_version":{"const":"CONSERVATIVE_OHLC_1M_V1"},
+        "liquidity_policy_version":{"const":"BAR_VOLUME_PARTICIPATION_V1"}
+      }
+    }
+  }
+}

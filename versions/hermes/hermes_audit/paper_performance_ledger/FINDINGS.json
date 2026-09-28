@@ -1,0 +1,26 @@
+{
+  "audit_assignment": "AUDIT-PAPER-PERFORMANCE-LEDGER",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "d526a301f2c4522b1403c5db5a1f160e5f62ed83",
+  "parent_sha": "0761677e704fd24a42b3c5ce55659830dfb5f8f3",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_performance_ledger_v1.py:1-7,51-53", "description": "No orders/fills created; advisory_only=True, live_trading_permitted=False, trading_authority=False. No network/credential imports.", "tested_by": "TestNoTradingAuthority"},
+    {"id": "OBS-002", "location": "paper_performance_ledger_v1.py:92-141", "description": "Every fill retained in valid PaperGatewaySnapshotV1: missing order rejects, cancel event rejects, wrong fill_id/quantity/market all reject. Binding identity is SHA-256.", "tested_by": "TestFillBinding"},
+    {"id": "OBS-003", "location": "paper_performance_ledger_v1.py:126-129,143-156", "description": "Idempotent fill and mark replay: exact replay returns self (no-op). Mark replay is idempotent.", "tested_by": "TestIdempotency"},
+    {"id": "OBS-004", "location": "paper_performance_ledger_v1.py:55-68", "description": "Ledger immutable, tamper detection via identity mismatch, deterministic replay, fill bindings must be tuple.", "tested_by": "TestLedgerIntegrity"},
+    {"id": "OBS-005", "location": "paper_performance_ledger_v1.py:143-156", "description": "Marks require exact market/instrument/contract identity. Wrong market rejects. Mark produces unrealized P&L from fill price, not notional.", "tested_by": "TestMarkValidation"},
+    {"id": "OBS-006", "location": "paper_performance_ledger_v1.py:158-174", "description": "Gateway reconciliation detects missing accounted fill and filled-quantity divergence.", "tested_by": "TestReconciliation"},
+    {"id": "OBS-007", "location": "paper_performance_ledger_v1.py:76-84", "description": "BTC-only: non-BTC accounting rejects. Empty accounting required for new ledger.", "tested_by": "TestBtcOnly"},
+    {"id": "OBS-008", "location": "paper_performance_ledger_v1.py:130-140", "description": "Exact Decimal costs: commission=1, exchange_fee=2, slippage=0, total=3, cash=4997. No P&L inferred from notional (unrealized=0 before mark).", "tested_by": "TestExactCosts"},
+    {"id": "OBS-009", "location": "paper_performance_ledger_v1.py:46,92-141", "description": "Sell/short behavior: sell fill enters accounting with negative position. No notional inference: costs from FillEconomicsV2, not from order notional.", "tested_by": "TestSellBehavior"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_verified_fill_enters_phase4_accounting_exactly_once", "test_exact_mark_produces_equity_without_fabrication", "test_mismatched_fill_evidence_fails_closed", "test_cancel_event_cannot_enter_accounting", "test_gateway_reconciliation_detects_missing_accounted_fill", "test_empty_accounting_and_btc_are_required", "test_ledger_is_immutable_and_has_no_authority", "test_tampered_identity_rejects"],
+    "accepted_after_correction": ["test_wrong_market_rejects (corrected: error message is 'gateway and execution fill evidence disagree' not 'identity disagree')", "test_filled_quantity_mismatch_rejects (corrected: must change state to PARTIALLY_FILLED with conserved quantity)"],
+    "redundant": ["Some adversarial tests overlap with existing on trading authority, immutability, tampered identity, cancel event, BTC-only"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

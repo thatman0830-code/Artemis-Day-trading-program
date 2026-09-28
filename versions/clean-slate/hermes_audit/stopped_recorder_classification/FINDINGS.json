@@ -1,0 +1,30 @@
+{
+  "audit_assignment": "AUDIT-STOPPED-RECORDER-CLASSIFICATION-CORRECTION",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "fef6caf94e9bf12947862a556ff4d950036e1680",
+  "parent_sha": "6391b9af8cb336dfa40ff65e984778f6f4701039",
+  "defects": [],
+  "correction_background": {
+    "root_cause": "BTC permitted_instance_counts was (1,) — instance_count=0 from a stopped recorder was rejected as 'task identity or policy mismatch' before the readiness engine could classify TASK_NOT_RUNNING and STALE_HEARTBEAT.",
+    "fix": "Changed permitted_instance_counts from (1,) to (0, 1). Zero instances is accepted as authentic runtime evidence (not healthy). Duplicate instances (>=2) remain prohibited.",
+    "live_verification": "BTC is now Running and Healthy with zero gaps; ES/NQ remained untouched. Watchdog correctly failed closed as HEALTH_EVALUATION_FAILED; drill controller automatically restarted BTC."
+  },
+  "observations": [
+    {"id": "OBS-001", "location": "owner_context_health_report.py:41", "description": "BTC permitted_instance_counts changed from (1,) to (0,1). Zero instances accepted as authentic runtime evidence. instance_count=1 remains healthy.", "tested_by": "TestZeroInstancesAccepted, TestOneInstanceHealthy"},
+    {"id": "OBS-002", "location": "owner_context_health_report.py:41 + adapter.py:219", "description": "instance_count=0 with task_state=Ready produces TASK_NOT_RUNNING. Ready state alone cannot establish health.", "tested_by": "TestTaskNotRunning, TestReadyNotHealthy"},
+    {"id": "OBS-003", "location": "adapter.py:181 + operational_resilience.py:181", "description": "Heartbeat older than BTC 90-second SLA produces STALE_HEARTBEAT. Stopped+stale produces both TASK_NOT_RUNNING and STALE_HEARTBEAT.", "tested_by": "TestStaleHeartbeat, TestRegression"},
+    {"id": "OBS-004", "location": "owner_context_health_report.py:41", "description": "instance_count>=2 rejects as identity/policy mismatch. Duplicate instances remain prohibited.", "tested_by": "TestDuplicateInstances"},
+    {"id": "OBS-005", "location": "owner_context_health_report.py:38-44", "description": "Wrong task name, wrong script path still reject. ES/NQ identity unchanged: Ready/Running, (0,1) instances, 93600s SLA.", "tested_by": "TestWrongIdentity, TestEsNqUnchanged"},
+    {"id": "OBS-006", "location": "owner_context_health_report.py:87-91", "description": "trading_authority=false in report, readiness, and JSON output. Stopped/stale reports also have trading_authority=false.", "tested_by": "TestTradingAuthority"},
+    {"id": "OBS-007", "location": "owner_context_health_report.py:1-13", "description": "No network/credential/task-mutation imports. Only json, pathlib, datetime, operational_resilience, owner_context_health_adapter used.", "tested_by": "TestNoProhibited"},
+    {"id": "OBS-008", "location": "test_owner_context_health_report.py:50-60", "description": "New regression test test_stopped_stale_btc_is_classified_unhealthy_not_rejected verifies stopped+stale BTC produces both TASK_NOT_RUNNING and STALE_HEARTBEAT without throwing.", "tested_by": "TestRegression"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_sanitized_facts_produce_healthy_nontrading_report", "test_daily_es_nq_heartbeat_does_not_weaken_btc_sla", "test_authority_duplicate_and_shape_attacks_reject", "test_absent_clock_and_es_integrity_remain_unhealthy", "test_stopped_stale_btc_is_classified_unhealthy_not_rejected"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial tests overlap with existing on healthy report, stale heartbeat, authority attacks, clock skew"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

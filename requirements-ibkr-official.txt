@@ -1,0 +1,3 @@
+# ibapi itself must be installed only from the official TWS API download.
+# See execution/IBKR_OFFICIAL_CLIENT_INSTALLATION.md.
+protobuf==5.29.5

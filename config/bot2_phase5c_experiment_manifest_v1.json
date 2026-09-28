@@ -1,0 +1,87 @@
+{
+  "calibration": "Temperature scaling fitted only on validation targets; no OOS fitting.",
+  "candidate_models": [
+    "A0_PREVIOUS_LABEL_PERSISTENCE",
+    "A0_TRAIN_MAJORITY",
+    "A0_TRAIN_TRANSITION_MATRIX",
+    "A1_NUMPY_MULTIHEAD_MLP",
+    "A2_FIXED_CAUSAL_TEMPORAL_TRANSFORM_PLUS_MLP"
+  ],
+  "baseline_specifications": {
+    "A0_PREVIOUS_LABEL_PERSISTENCE": "For each target head, carry forward the most recent label whose full information interval ended no later than the prediction observation time; abstain if unavailable.",
+    "A0_TRAIN_MAJORITY": "Per root/head/horizon majority class computed from TRAIN labels only; class tie-break is lexical.",
+    "A0_TRAIN_TRANSITION_MATRIX": "One-step target-state transition probabilities estimated from TRAIN only with fixed Laplace alpha=1 smoothing; condition on the most recent eligible past label, never a future-overlapping label."
+  },
+  "code_commit": "da5b1db2f9b869c4e83d957dbda76e2ce89d8363",
+  "created_before_model_evaluation": true,
+  "embargo_minutes": 30,
+  "experiment_id": "bot2-phase5c-future-state-esnq-v1",
+  "feature_version": "bot2-feature-registry-v2",
+  "manifest_hashing": "SHA-256 canonical sorted compact JSON excluding manifest_sha256 field",
+  "manifest_sha256": "5a1249607d12dd303b0f72210868e984b5791e8bfc8af5b9535bd6e4079d003b",
+  "metrics": [
+    "log_loss",
+    "brier_score",
+    "balanced_accuracy",
+    "macro_precision",
+    "macro_recall",
+    "macro_f1",
+    "confusion_matrix",
+    "reliability",
+    "coverage_vs_reliability",
+    "latency_p50_p95_p99_max"
+  ],
+  "no_skill_references": [
+    "TRAIN_MAJORITY",
+    "UNIFORM_PROBABILITY"
+  ],
+  "oos_model_scoring_performed": false,
+  "purge_minutes": 30,
+  "random_seeds": [
+    1,
+    2,
+    3
+  ],
+  "requires_separate_architecture_review_before_oos": true,
+  "schema_version": "bot2-phase5c-experiment-manifest-v1",
+  "sequence_lengths": [
+    8
+  ],
+  "source_dataset_manifest_sha256": "e03e02906c8033d825d39844aaf4cf9aa3184b613e5c10974c23722531e92b67",
+  "split_dates_inclusive": {
+    "OOS_TEST": [
+      "2026-03-01",
+      "2026-08-26"
+    ],
+    "TRAIN": [
+      "2025-06-02",
+      "2025-12-31"
+    ],
+    "VALIDATION": [
+      "2026-01-01",
+      "2026-02-27"
+    ]
+  },
+  "target_spec": {
+    "direction": "sign(close[T+H]-close[T]); FLAT iff absolute displacement is less than one instrument tick",
+    "future_window": "strictly future closes T+1 through T+H, exactly one minute apart, within the same session and listed contract; no fill",
+    "horizons_minutes": [
+      5,
+      15,
+      30
+    ],
+    "label_information_interval": "[first close used by trailing reference, final future bar close]; future subinterval starts at T+1",
+    "structure": "efficiency=abs(log(close[T+H]/close[T]))/sum(abs(future 1m log returns)); TREND if efficiency>=0.60 and displacement>=4 ticks; RANGE if efficiency<=0.25; otherwise TRANSITION",
+    "tick_size_points": {
+      "ES": 0.25,
+      "NQ": 0.25
+    },
+    "version": "bot2-future-market-state-v3",
+    "volatility": "future RV=sqrt(mean(square(log returns))) for exactly H future 1m returns; causal reference RV is the prior 30 consecutive 1m returns ending at T; ratio <0.8 LOW, 0.8<=ratio<=1.2 NORMAL, >1.2 HIGH",
+    "volatility_reference_window": "30 consecutive one-minute returns ending at T; same session and exact listed contract; no future observations"
+  },
+  "target_spec_sha256": "4c66debf7805374575451cf5d8a097f16aefed23478cd240e3540bd9943e12c1",
+  "target_version": "bot2-future-market-state-v3",
+  "trading_authority": false,
+  "volatility_reference": "prior 30 consecutive same-session/same-contract 1m returns; ratio thresholds <0.8/0.8-1.2/>1.2"
+}

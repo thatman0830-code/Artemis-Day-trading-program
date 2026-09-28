@@ -1,0 +1,31 @@
+{
+  "schema_version": "first-party-source-snapshot-v1",
+  "retrieved_at": "2026-08-26T21:36:56.4438380Z",
+  "sources": [
+    {
+      "file": "massive_missing_aggregates_20260826.md",
+      "publisher": "Massive.com, Inc.",
+      "canonical_url": "https://massive.com/knowledge-base/article/why-are-there-missing-aggregates-in-massives-data",
+      "sha256": "7dd483e6609d4db7454728a34926f170290e466b322a5915dd24886a7139ddd0"
+    },
+    {
+      "file": "massive_futures_overview_20260826.md",
+      "publisher": "Massive.com, Inc.",
+      "canonical_url": "https://massive.com/docs/rest/futures/overview",
+      "sha256": "1f39c77216e2cbbd28eb6591621cc59e9de5e979e15a8efa32dfd9a98f409cb2"
+    },
+    {
+      "file": "massive_futures_schedules_20260826.md",
+      "publisher": "Massive.com, Inc.",
+      "canonical_url": "https://massive.com/docs/rest/futures/schedules",
+      "sha256": "6ca43468a8547cb6108ac625770b242a785abd40dc68c60cf9b36b1bc19d51d8"
+    },
+    {
+      "file": "cme_trading_hours_retrieval_20260826.md",
+      "publisher": "CME Group",
+      "canonical_url": "https://www.cmegroup.com/trading-hours.html",
+      "sha256": "3d20dd7b0da2e01475276951d538e1bd8166f816b6bb2a61db6567a939bd1bee",
+      "evidence_status": "UNAVAILABLE_HTTP_403"
+    }
+  ]
+}

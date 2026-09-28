@@ -1,0 +1,53 @@
+{
+  "audit_assignment": "AUDIT-V2-PHASE3-CONSERVATIVE-OHLC",
+  "auditor": "Hermes Agent (independent)",
+  "date": "2026-08-27",
+  "branch": "hermes/audit-lane",
+  "head": "b2711098c0f9777e52af63e7d41b313f64cc9dc1",
+  "defects": [
+    {
+      "id": "CODEX-P3-001",
+      "location": "ohlc_execution.py signal-bar eligibility boundary",
+      "description": "activation_at alone could not prove that an order was derived from a different finalized source bar. The frozen D01 rule therefore was not enforceable at the execution boundary.",
+      "severity": "HIGH",
+      "resolution": "Added canonical ExecutionSourceLineageV2 binding source bar, action, order, and exact ledger activation; missing, late, conflicting, or same-source lineage now fails closed."
+    }
+  ],
+  "observations": [
+    {
+      "id": "OBS-001",
+      "location": "ohlc_execution.py:377",
+      "description": "A timestamp equal to bar.open_time is not sufficient. Equality is eligible only when canonical lineage proves a distinct finalized source bar was available by that open and matches the action, order, and ledger activation.",
+      "severity": "CORRECTED",
+      "tested_by": "test_prior_finalized_bar_order_active_at_next_bar_open_is_eligible, test_source_bar_falsely_labeled_active_at_its_open_rejects, test_missing_source_bar_lineage_rejects"
+    },
+    {
+      "id": "OBS-002",
+      "location": "ohlc_execution.py:276-278",
+      "description": "Adverse rounding uses ROUND_CEILING for BUY and ROUND_FLOOR for SELL. Verified with fractional tick slippage (0.5 ticks = 0.125).",
+      "severity": "INFO",
+      "tested_by": "test_buy_rounds_adversely_upward, test_sell_rounds_adversely_downward"
+    },
+    {
+      "id": "OBS-003",
+      "location": "ohlc_execution.py:421-423",
+      "description": "Stop-limit orders are explicitly excluded from fill candidates on the trigger bar (condition: order_type == STOP_LIMIT and trigger == True). This enforces trigger/fill separation.",
+      "severity": "INFO",
+      "tested_by": "test_stop_limit_not_in_fill_candidates_on_trigger_bar, test_no_same_event_trigger_and_fill"
+    },
+    {
+      "id": "OBS-004",
+      "location": "ohlc_execution.py:414-415",
+      "description": "Bar budget is floored to quantity_step: floor(volume * max_participation_rate, quantity_step). This ensures integer-lot allocation.",
+      "severity": "INFO",
+      "tested_by": "test_shared_volume_budget_basic"
+    },
+    {
+      "id": "OBS-005",
+      "location": "ohlc_execution.py:428-455",
+      "description": "Fill candidates are sorted by (int(priority), activation_at, submitted_at, order_id). This is the frozen deterministic priority order. Combined fills never exceed remaining_budget.",
+      "severity": "INFO",
+      "tested_by": "test_stable_tie_break_by_activation_then_submission_then_id, test_combined_fills_never_exceed_budget"
+    }
+  ]
+}

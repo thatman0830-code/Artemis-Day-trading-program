@@ -1,0 +1,27 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-LAUNCH-GATE",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "dcb37600fa98a59db0cb8ea686eaa0e3ee2761e2",
+  "parent_sha": "95695dedcc455b6f4efa5661899808715efc4948",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "supervised_paper_launch_gate_v1.py:1,143-145", "description": "Advisory-only gate. advisory_only=True, live_trading_permitted=False, trading_authority=False. Cannot submit an order.", "tested_by": "TestAdvisoryOnly"},
+    {"id": "OBS-002", "location": "supervised_paper_launch_gate_v1.py:156-172", "description": "Eligibility gates: clean repository, checkpoint match, evidence freshness, watchdog HEALTHY, BTC Running+HEALTHY+heartbeat<=90s+zero gaps, ES/NQ Ready+result 0+no missed, recovery drill RECOVERY_VERIFIED, stale alert STALE_ALERT_AND_RECOVERY_VERIFIED+both delivery facts, clock skew <=2s, owner supervision, stop control.", "tested_by": "TestEligibilityGates, TestBtcHealth, TestEsNqHealth, TestDrillResults, TestClockSkew, TestSupervision"},
+    {"id": "OBS-003", "location": "supervised_paper_launch_gate_v1.py:152-153", "description": "Future evidence rejected (observed_at and btc_heartbeat_at > as_of). Naive timestamps rejected via _utc.", "tested_by": "TestEligibilityGates, TestFactsValidation"},
+    {"id": "OBS-004", "location": "supervised_paper_launch_gate_v1.py:173-174", "description": "Ineligible: no expiry (None), no permitted markets (empty tuple). Reasons unique, sorted, deterministic.", "tested_by": "TestIneligible, TestReasons"},
+    {"id": "OBS-005", "location": "supervised_paper_launch_gate_v1.py:13-16,68-85", "description": "Hard ceilings: session 30m, commands 10, notional $500, gross $800, permit 5m, evidence age 5m, BTC-only markets. All enforced at construction via __post_init__. Cannot be raised.", "tested_by": "TestHardCeilings"},
+    {"id": "OBS-006", "location": "supervised_paper_launch_gate_v1.py:56-145", "description": "Immutable frozen dataclasses. launch_id=sha256(canonical core). Deterministic replay.", "tested_by": "TestImmutable"},
+    {"id": "OBS-007", "location": "supervised_paper_launch_gate_v1.py:1-10", "description": "No network/credential/live/paper-submission/task-mutation imports. Only dataclass, datetime, decimal, enum, hashlib, json used.", "tested_by": "TestNoProhibited"},
+    {"id": "OBS-008", "location": "supervised_paper_launch_gate_v1.py:1", "description": "Module docstring: 'Fail-closed advisory gate'. No profitability, OOS, deployment approval, or unattended-operation claim.", "tested_by": "TestNoFalseClaims"},
+    {"id": "OBS-009", "location": "supervised_paper_launch_gate_v1.py:113-127", "description": "Facts validation: UTC timestamps, SHA-256 identifiers, nonnegative integers, bool rejection, trading_authority rejection.", "tested_by": "TestFactsValidation"},
+    {"id": "OBS-010", "location": "supervised_paper_launch_gate_v1.py:148-180", "description": "Eligible decision: correct fields (markets BTC, session 30m, commands 10, notional 500, gross 800, advisory_only, live_trading_permitted=False, trading_authority=False, expires_at=as_of+5m).", "tested_by": "TestEligibleDecision"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_complete_fresh_evidence_produces_short_advisory_btc_only_permit", "test_every_missing_launch_fact_blocks", "test_multiple_failures_are_unique_sorted_and_deterministic", "test_hard_ceilings_cannot_be_raised", "test_future_evidence_and_authority_reject", "test_module_has_no_execution_provider_or_secret_surface"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial tests overlap with existing on eligibility gates, hard ceilings, future evidence, no network"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

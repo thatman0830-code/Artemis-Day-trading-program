@@ -1,0 +1,13 @@
+{
+  "version": "OWNER_CONTEXT_HEALTH_ADAPTER_V1",
+  "invariants": [
+    {"id": "OCH-001", "rule": "Only explicit btc-recorder and es-nq-recorder identities are accepted", "test": "test_invalid_hash_timestamp_path_and_policy_identity_reject"},
+    {"id": "OCH-002", "rule": "Only authoritative owner-context task visibility is accepted", "test": "test_missing_stale_future_cross_component_or_mismatched_facts_fail_closed"},
+    {"id": "OCH-003", "rule": "Task identity, action, single-instance and restart policy match exactly", "test": "test_missing_stale_future_cross_component_or_mismatched_facts_fail_closed"},
+    {"id": "OCH-004", "rule": "Task state alone never establishes health", "test": "test_ready_is_component_specific_and_task_state_alone_never_suffices"},
+    {"id": "OCH-005", "rule": "Heartbeat, instances, gaps, integrity, storage and clock remain fail closed", "test": "test_sanitized_controls_map_to_existing_fail_closed_reasons"},
+    {"id": "OCH-006", "rule": "Records are immutable, deterministic and content addressed", "test": "test_valid_owner_context_is_deterministic_immutable_and_advisory_only"},
+    {"id": "OCH-007", "rule": "Source hashes and collection times are preserved and validated", "test": "test_source_hashes_are_required_and_content_address_the_report"},
+    {"id": "OCH-008", "rule": "The adapter and readiness result never grant trading authority", "test": "test_valid_owner_context_is_deterministic_immutable_and_advisory_only"}
+  ]
+}

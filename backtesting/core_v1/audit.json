@@ -1,0 +1,33 @@
+{
+  "audit_version": "core-v1-adversarial-audit-1",
+  "date": "2026-08-27",
+  "disposition": "BLOCKED_CORE_V1_ARCHIVE_ADAPTERS",
+  "offline": true,
+  "archive_writes": 0,
+  "tests": {
+    "focused": {"passed": 22, "failed": 0},
+    "backtesting": {"passed": 171, "failed": 0},
+    "repository": {"passed": 1112, "failed": 0}
+  },
+  "archive_readiness": {
+    "BTC": {"ready": false, "reason": "partial retained manifest and no native Core v1 adapter"},
+    "ES": {"ready": false, "reason": "no Pass B manifest/calendar/rollover chain adapter"},
+    "NQ": {"ready": false, "reason": "no Pass B manifest/calendar/rollover chain adapter"}
+  },
+  "source_sha256": {
+    "models.py": "efd4f4eb43cf7a8cd81b40d22aa516bf429a9c946e67a0035adf0154b4fea259",
+    "engine.py": "53b90ea828e5135ca87a657e1490a7a2875b26336d6354c2c8e248481b41344b",
+    "capabilities.py": "14fc73a5ea427ebafb257dd325fc22728cf3d9a66bf2a92fceaae46c4f43e22f",
+    "adapters.py": "966b16c961c6f4ec07c27e1efe399c0171ad83d462335de84fb3cfb74623e250",
+    "event.schema.json": "80d120d439e7f2dbf87e7ef691b04a799115d447e2967258fd8d469e3129f290",
+    "result.schema.json": "7369400a6633ddae6c2c9827aa325ea3cac3bcf140725133af03751946701f74"
+  },
+  "retained_evidence_sha256": {
+    "es_nq_pass_b_plan_manifest": "ac4606816f9b20bfe159eb5f9bf6f86ffa9cd798d3be99707947e49691c8e899",
+    "es_nq_final_archive_audit": "a1a122c3c09aa4d9e09047014c89a9cfd4b47abcc3fba06c6bb193e27dc75485",
+    "btc_partial_manifest": "3165b81a8ff14870162c03b43a70bb8f4a1909defb3ed9900b3a959468cfc16c"
+  },
+  "network_calls": 0,
+  "credential_access": false,
+  "recorder_or_task_control": false
+}

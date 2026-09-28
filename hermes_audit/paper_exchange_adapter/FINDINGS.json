@@ -1,0 +1,29 @@
+{
+  "audit_assignment": "AUDIT-PAPER-EXCHANGE-ADAPTER",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "62ba57cfc22add9de59d4fc29087a990081cdfdd",
+  "parent_sha": "ee5b24a3342928bf74af30fde3264566d9d08da5",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_exchange_adapter_v1.py:1-22", "description": "No network/credential/live/scheduler imports. Only dataclass, datetime, decimal, enum, hashlib, json, paper_gateway_v2 used. trading_authority=False in adapter, receipts, commands.", "tested_by": "TestOfflinePaperOnly"},
+    {"id": "OBS-002", "location": "paper_exchange_adapter_v1.py:58-76", "description": "Command construction: exactly one of submission or event required (XOR), both reject, neither reject. command_id and expected_gateway_snapshot_id must be lowercase SHA-256. trading_authority=True rejects.", "tested_by": "TestCommandConstruction"},
+    {"id": "OBS-003", "location": "paper_exchange_adapter_v1.py:149-150", "description": "Snapshot binding: expected_gateway_snapshot_id must match current gateway snapshot_id. Stale/fabricated reject with STALE_GATEWAY_SNAPSHOT. No receipt recorded, no gateway mutation.", "tested_by": "TestSnapshotBinding"},
+    {"id": "OBS-004", "location": "paper_exchange_adapter_v1.py:141-148", "description": "Command idempotency: exact retry returns IDEMPOTENT_REPLAY without creating another order. Reusing command_id with different fingerprint → COMMAND_CONFLICT without mutation. Rejected commands remain idempotent after conditions change.", "tested_by": "TestCommandIdempotency"},
+    {"id": "OBS-005", "location": "paper_exchange_adapter_v1.py:152-158", "description": "Duplicate-order: different command IDs with same V2 order identity → GATEWAY_REJECTED with DUPLICATE_CONFLICT. No exposure or open-order count increase.", "tested_by": "TestDuplicateOrder"},
+    {"id": "OBS-006", "location": "paper_exchange_adapter_v1.py:139-158", "description": "Order events: fill/cancel snapshot-bound, exact event replay idempotent, conflicting event fingerprint → COMMAND_CONFLICT, stale version/overfill/time regression/unknown order/terminal all reject via gateway. Quantity conservation preserved.", "tested_by": "TestOrderEvent"},
+    {"id": "OBS-007", "location": "paper_exchange_adapter_v1.py:166-168", "description": "Disconnect: produces connected=false, reconciliation_required=true. Submission blocked while disconnected. Repeated disconnect deterministic. Disconnect cannot clear kill switch.", "tested_by": "TestDisconnect"},
+    {"id": "OBS-008", "location": "paper_exchange_adapter_v1.py:170-179", "description": "Reconciliation: bound to expected_gateway_snapshot_id, exact observation required (paper_order_id, state, filled, remaining, version), mismatch → RECONCILIATION_MISMATCH + kill_switch + disconnected, only exact restores connectivity, cannot clear kill switch, never grants trading authority.", "tested_by": "TestReconciliation"},
+    {"id": "OBS-009", "location": "paper_exchange_adapter_v1.py:79-100", "description": "Receipts: frozen dataclass, all IDs are SHA-256, before/after snapshot lineage exact, gateway reason preserved, ordering deterministic (appended), tampered adapter_id rejects via verify_integrity.", "tested_by": "TestReceipts"},
+    {"id": "OBS-010", "location": "paper_exchange_adapter_v1.py:103-133", "description": "Adapter integrity: adapter_id=canonical(gateway.snapshot_id, receipts, false), tamper rejects, receipt reordering rejects (unique command_ids), duplicate command IDs reject, corrupted gateway rejects (PaperGatewaySnapshotV1.resume), replay identical.", "tested_by": "TestAdapterIntegrity"},
+    {"id": "OBS-011", "location": "paper_exchange_adapter_v1.py:139-140", "description": "Failure injection: command fingerprint failure (ValueError at construction) no partial mutation, integrity failure before execution, no false acceptance on gateway rejection.", "tested_by": "TestFailureInjection"},
+    {"id": "OBS-012", "location": "paper_exchange_adapter_v1.py:16-22", "description": "Implementation coupling: imports only paper_gateway_v2 public contracts. No direct execution_accounting_v2 coupling (contracts re-exported). Adversarial tests use only public API.", "tested_by": "TestImplementationCoupling"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_submission_is_snapshot_bound_and_paper_only", "test_exact_command_replay_is_idempotent", "test_command_identity_conflict_rejects_without_mutation", "test_stale_snapshot_rejects_without_recording_receipt", "test_gateway_rejection_is_durably_idempotent", "test_distinct_command_cannot_duplicate_order", "test_event_application_and_replay", "test_event_is_snapshot_bound", "test_disconnect_blocks_submission_until_exact_reconciliation", "test_reconciliation_mismatch_activates_kill_switch", "test_reconciliation_itself_is_snapshot_bound", "test_adapter_integrity_detects_tampering", "test_command_requires_exactly_one_action_and_no_authority", "test_receipts_are_immutable_and_content_addressed", "test_module_has_no_external_transport_or_credentials"],
+    "accepted_after_correction": ["test_mismatch_keeps_disconnected (corrected: empty adapter with no records → reconcile with empty matches; need a record + wrong observation to trigger mismatch)", "test_command_fingerprint_failure_no_partial_mutation (corrected: replace with invalid command_id raises ValueError at construction, not at execute)"],
+    "redundant": ["Some adversarial tests overlap with existing on idempotency, stale snapshot, duplicate order, event replay, disconnect, reconciliation mismatch, integrity"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

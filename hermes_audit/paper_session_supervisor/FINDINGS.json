@@ -1,0 +1,26 @@
+{
+  "audit_assignment": "AUDIT-V2-PAPER-SESSION-SUPERVISOR",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "e2ad523c66b0d9693dfaa1a4b415a306e09f301d",
+  "parent_sha": "23a643149f2ea47807dc11dde56a6dcd9bea3df0",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_session_supervisor_v1.py:1-14", "description": "No network/credential/live/scheduler imports. Only dataclass, datetime, enum, hashlib, json, os, pathlib, uuid, checkpoint, gateway used. trading_authority=False in lock, health, and heartbeat.", "tested_by": "TestOfflinePaperOnly"},
+    {"id": "OBS-002", "location": "paper_session_supervisor_v1.py:69-79", "description": "Exclusive ownership: O_CREAT|O_EXCL lock, two supervisors cannot own same root, missing root rejects, malformed/foreign lock rejects on cycle and release, failed acquisition no modify, no cross-delete, release only owned, no stale-lock assumption.", "tested_by": "TestExclusiveOwnership"},
+    {"id": "OBS-003", "location": "paper_session_supervisor_v1.py:89-96", "description": "Initialization: requires checkpoint or explicit initial, existing checkpoint forces connected=false + reconciliation_required=true, kill switch preserved on restart, corrupted/missing checkpoint fails closed.", "tested_by": "TestInitialization"},
+    {"id": "OBS-004", "location": "paper_session_supervisor_v1.py:106-126", "description": "Heartbeat: content-addressed (sha256 of core), binds session_id+state+timestamps+snapshot_id+kill_switch+reconciliation+stop+trading_authority, deterministic, atomic (open xb+flush+fsync+os.replace), temp cleaned in finally, no unrelated deletion.", "tested_by": "TestHeartbeat"},
+    {"id": "OBS-005", "location": "paper_session_supervisor_v1.py:106-113", "description": "Stale/future: age at maximum accepted (<=), above maximum halts (HALTED_STALE_INPUT), future by any amount halts (HALTED_FUTURE_INPUT), both activate kill switch + disconnect + reconciliation, halted checkpointed before health, halted cannot recover without reconciliation, naive/non-UTC reject.", "tested_by": "TestStaleFuture"},
+    {"id": "OBS-006", "location": "paper_session_supervisor_v1.py:98-104", "description": "Controlled stop: bound to exact session_id, requires stop=True + trading_authority=False, malformed/foreign/false/extra-field/authority-bearing reject, STOPPED health durably recorded, preserves gateway state, stale stop cannot control future session.", "tested_by": "TestControlledStop"},
+    {"id": "OBS-007", "location": "paper_session_supervisor_v1.py:81-87,106-126", "description": "Ordering: ownership checked before commands (cycle/load), checkpoint saved before heartbeat, context manager releases on exception and success, exceptions don't mask ownership loss.", "tested_by": "TestOrderingFailure"},
+    {"id": "OBS-008", "location": "paper_session_supervisor_v1.py:36-43,60-64", "description": "Policy: positive durations required, session_id must be 32-char lowercase UUID hex, health state is closed enum (4 values), trading_authority cannot be set True (frozen dataclass).", "tested_by": "TestPolicySchema"},
+    {"id": "OBS-009", "location": "paper_session_supervisor_v1.py:13,66", "description": "Integration: uses PaperGatewayCheckpointStoreV1 (not parallel persistence), snapshot_id authoritative, no pickle.", "tested_by": "TestIntegration"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_single_owner_and_release_only_owned_lock", "test_requires_checkpoint_or_explicit_initial_state", "test_healthy_cycle_writes_checkpoint_and_content_addressed_heartbeat", "test_bad_input_halts_disconnects_and_persists_kill_switch", "test_controlled_stop_is_identity_bound_and_preserves_state", "test_malformed_or_foreign_stop_request_fails_closed", "test_lock_tamper_prevents_cycle_and_release", "test_no_network_credentials_provider_or_live_submission", "test_restart_from_existing_checkpoint_forces_reconciliation"],
+    "accepted_after_correction": ["test_no_stale_lock_assumption (fixed: 'stale' appears in HALTED_STALE_INPUT enum — check for stale-lock logic instead)", "test_trading_authority_cannot_become_true (fixed: dataclasses.replace bypasses frozen — use direct assignment to trigger FrozenInstanceError)"],
+    "redundant": ["Some adversarial tests overlap with existing on single owner, lock tamper, bad input, controlled stop, no network"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

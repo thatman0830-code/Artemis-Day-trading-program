@@ -1,0 +1,55 @@
+{
+  "audit_version": "core-v1-production-adapter-audit-1",
+  "archive_tree_before_and_after": "405ff5602600fbe361c7136b85be0b26d46567c1c080dfefab2e506e109a775b",
+  "archive_rows_verified": 877679,
+  "archive_writes": 0,
+  "adapter_source_sha256": "4d475bceb7ec05ff44bd7235e75dcf2d7c20888372ec0a9fec5343b7975517c7",
+  "btc_completed_csv_sha256": "0f6ec05974126f15ca57fdbedd905f8968442193d3a22267f4769a333755193d",
+  "btc_partial_manifest_sha256": "3165b81a8ff14870162c03b43a70bb8f4a1909defb3ed9900b3a959468cfc16c",
+  "BTC": {
+    "classification": "PARTIAL_RESEARCH_ONLY",
+    "coverage_start": "2026-08-19T17:38:00Z",
+    "coverage_end_exclusive": "2026-08-21T00:00:00Z",
+    "data_quality_episode_count": 0,
+    "dataset_id": "7f0f24dd7a6232da58610dfad6d0733e47648cd1c9d96db69b801ec772091c24",
+    "fingerprint": "edb041de2e9495b28765c8db1ebe8e32585e732983a5fc1bfe76aafaace58996",
+    "smoke_replay": true,
+    "training_validation": false,
+    "untouched_oos": false,
+    "final_acceptance": false
+  },
+  "ES": {
+    "classification": "VERIFIED_RESEARCH_ARCHIVE",
+    "coverage_start": "2025-06-01T22:00:00Z",
+    "coverage_end_exclusive": "2026-08-26T20:09:00Z",
+    "data_quality_episode_count": 53,
+    "dataset_id": "bc3dc017c7e871942873e63bd8e552860fb6b8e835e341ad7441dca5274f6464",
+    "fingerprint": "857fbdcfe324db45b88a364ac3923a5f23ae12017851d93140be3e23a6bd13d4",
+    "smoke_replay": true,
+    "training_validation": true,
+    "untouched_oos": true,
+    "final_acceptance": false
+  },
+  "NQ": {
+    "classification": "VERIFIED_RESEARCH_ARCHIVE",
+    "coverage_start": "2025-06-01T22:00:00Z",
+    "coverage_end_exclusive": "2026-08-26T20:42:00Z",
+    "data_quality_episode_count": 101,
+    "dataset_id": "831ba675ee5fb1aeb00a8b4cb43f19064d3487bd50a6c743ce8acc68e1fb7d7e",
+    "fingerprint": "8cc8cb7f803e2de7f7d63f3652feafe8162d16106fd05f11f60cba5dcf7fc323",
+    "smoke_replay": true,
+    "training_validation": true,
+    "untouched_oos": true,
+    "final_acceptance": false
+  },
+  "network_calls": 0,
+  "tests": {
+    "focused_core_and_adapters": {"passed": 36, "failed": 0},
+    "backtesting": {"passed": 185, "failed": 0},
+    "repository": {"passed": 1126, "failed": 0}
+  },
+  "credential_access": false,
+  "strategy_runs": 0,
+  "collector_or_recorder_mutation": false,
+  "scheduled_task_observed_owner_status": "TaskState: Ready; Health: HEALTHY; not queried or mutated by audit"
+}

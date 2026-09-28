@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "capabilities_version": "core-v1-capabilities-1",
+  "issues": [
+    {"code": "UNSUPPORTED_ORDER_TYPE", "detail": "LIMIT"},
+    {"code": "MISSING_FUNDING", "detail": "BTC funding facts are required"},
+    {"code": "MISSING_ROLLOVER", "detail": "futures rollover facts are required"}
+  ],
+  "simulation_only": true
+}

@@ -1,0 +1,14 @@
+{
+  "audit_assignment": "AUDIT-V2-PAPER-SESSION-SUPERVISOR",
+  "date": "2026-08-31",
+  "checkpoint": "e2ad523c66b0d9693dfaa1a4b415a306e09f301d",
+  "filesystem_sha256": {
+    "execution/paper_session_supervisor_v1.py": "65ddfd285494bc3f1f25418fc81e2568d35d0c0f3aa27bf7d9e81aae8ec54492",
+    "execution/test_paper_session_supervisor_v1.py": "27b5c4f7a4ebc6fa66bd33e3fe8fbfefefb6fa21c7f840a7c5615317fe900d63"
+  },
+  "canonical_git_object_hashes": {
+    "execution/paper_session_supervisor_v1.py": "b2f04c7caeb03da9128109b4ece0c8e84a15f173",
+    "execution/test_paper_session_supervisor_v1.py": "523ce762de8eb1277d3de9ccb2974988678a0d14"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files; canonical Git-object hashes are blob SHA-1 hashes provided by the assignment. Distinguished per audit requirements."
+}

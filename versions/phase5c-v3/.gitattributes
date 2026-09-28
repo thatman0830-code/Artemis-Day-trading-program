@@ -1,0 +1,3 @@
+# Checksum-pinned reproducibility evidence must retain canonical LF bytes.
+backtesting/execution_accounting_v2/evidence_snapshots/*.md text eol=lf
+futures_data/pinned_sources/*.md text eol=lf

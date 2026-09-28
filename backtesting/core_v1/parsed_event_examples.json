@@ -1,0 +1,26 @@
+{
+  "BTC": {
+    "bar_id": "1089544a83b197171cd1c2fe1d42e70b5d661c614f38a7e544315020d11182c3",
+    "dataset_fingerprint": "edb041de2e9495b28765c8db1ebe8e32585e732983a5fc1bfe76aafaace58996",
+    "event_id": "bbaecb991aad524cf7171e7cf03753e940d931bf5e764b8ef6ad3e07d485d607",
+    "instrument": "BTC",
+    "open_time": "2026-08-19T17:38:00Z",
+    "classification": "PARTIAL_RESEARCH_ONLY"
+  },
+  "ES": {
+    "bar_id": "87b5fe76238f6c58b65e5bf8156935cf9d8e2b21c19f19e462b1e977e4e601e7",
+    "contract_id": "fb5fae1e9aaf570cd93b66d4c1da2fec2dd7e0defd506b21241fc0dacb46ab96",
+    "dataset_fingerprint": "857fbdcfe324db45b88a364ac3923a5f23ae12017851d93140be3e23a6bd13d4",
+    "event_id": "8f3d71a718e8adb38eef398d57364675827fe53a1fa921eb953d404fdaf74234",
+    "instrument": "ESM5",
+    "open_time": "2025-06-01T22:00:00Z"
+  },
+  "NQ": {
+    "bar_id": "7b3c1729361b18a7d4e61abafcc83397913d07802299189eb7e25a9c59df376d",
+    "contract_id": "6df5e8051bcd71083e210010ca96989bccf193199cdce681d314081c284848cf",
+    "dataset_fingerprint": "8cc8cb7f803e2de7f7d63f3652feafe8162d16106fd05f11f60cba5dcf7fc323",
+    "event_id": "dc371eedbc19ae7ce143b3a90c201529ddfec788c9f807efd4d6743e760589c4",
+    "instrument": "NQM5",
+    "open_time": "2025-06-01T22:00:00Z"
+  }
+}

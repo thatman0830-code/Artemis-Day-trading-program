@@ -1,0 +1,41 @@
+# Local secrets and environments
+.env
+.env.*
+.envt
+!.env.example
+!.env.example.txt
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+wallet*.json
+seed*.txt
+.venv/
+venv/
+node_modules/
+
+# Generated files and recorded data are distributed in the release archive.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+outputs/
+data/
+logs/
+reports/
+*.log
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.zip
+*.bundle
+
+# Machine/editor files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

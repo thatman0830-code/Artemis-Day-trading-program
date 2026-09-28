@@ -1,0 +1,132 @@
+# R15 — GPU / ML systems independent first pass
+
+Status: COMPLETE — independent first pass frozen on 2026-09-24.
+Author: fresh R15 specialist agent /root/r15, R0-B recovery batch 1.
+Scope: public-source research and a FUTURE isolated environment recommendation only.
+Source count: 23 unique primary-source documents, R15-S01 through R15-S23.
+
+## Independence, scope and evidence standard
+
+I read the user's recovery request and independently researched official public documentation. I did not read the previous R15 coordinator draft, any R13-R19 report, a master synthesis, or another specialist's new report. No R1-R12 report or repository audit was necessary for this first pass. Machine specifications are user-supplied observations, not independently measured: Windows, Python 3.11.9, RTX 5060 Ti with approximately 16 GB VRAM, 32 logical CPU processors, and substantial disk capacity. System RAM, Windows build, driver version, available VRAM under display load, and installed package state remain unknown.
+
+The old report was copied byte-for-byte without displaying its contents to R15_PRE_RECOVERY_COORDINATOR_DRAFT.md before replacement. Its SHA-256 is C54EB1E676B401014006D2F360FB4DA49ADD3CB19E923AA0C859E74B508A976D. Only these two research-document paths were written by this specialist. No source code, datasets, manifests, protected output or OOS material was accessed. No model, inference, experiment, backtest, test, trading, broker connection, package installation, environment modification or Git mutation occurred. Future checks described below were NOT performed.
+
+This is systems evidence, not evidence of an ES/NQ trading edge. Official documentation establishes supported interfaces and platform conditions; it does not prove workload performance or numerically acceptable financial decisions. Recommendations marked as judgment require subsequent authorization and measurement.
+
+## Main finding and remaining uncertainty
+
+The strongest finding is that native-Windows PyTorch CUDA execution is a credible official route for this GPU, but Windows CUDA support, Blackwell kernel coverage, mixed-precision suitability, and NVIDIA torch.compile support are four separate claims. RTX 5060 Ti is compute capability 12.0; data-center Blackwell capabilities must not be substituted for it [R15-S01]. A GPU appearing in a management utility would not establish that a particular framework wheel contains compatible kernels [R15-S03].
+
+The largest uncertainty is the exact host driver/framework/operator combination and its numerical and latency behavior. This research did not execute anything. It therefore cannot certify a wheel, measure useful batch size, promise BF16 speedups, or establish deterministic end-to-end behavior on the actual machine.
+
+## Current official support through September 2026
+
+PyTorch's September 2, 2026 release announcement identifies 2.14, CUDA build families 12.6/13.0/13.2, a CUDA 13.0 default wheel, and cuDNN 9.24 [R15-S04]. Its January 2026 2.10 announcement documents determinism and numerical-debugging improvements and TorchScript deprecation [R15-S05]. Earlier 2.7 introduced Blackwell and CUDA 12.8 support; that launch evidence is historical, not proof that every 2026 backend is fully mature [R15-S06].
+
+There is an official-page freshness discrepancy: the retrieved Start Locally selector still displays Stable 2.7.0 and CUDA 12.8, while dated release documentation establishes 2.14. Its Windows prose lists Python 3.10-3.14; the newer release page describes a wider range. Python 3.11.9 falls within both, so no Python major/minor migration is justified by this evidence [R15-S02, R15-S04]. Record precise wheel metadata at future provisioning rather than copying a stale selector or treating a moving /stable URL as an immutable specification. The previous-versions page independently lists Linux/Windows CUDA 13.0 builds for recent releases and CUDA 12.8 for 2.11 [R15-S07].
+
+| Layer | Supported conclusion | What remains conditional |
+|---|---|---|
+| Hardware | RTX 5060 Ti maps to SM/CC 12.0 | Board memory and free memory were not measured |
+| PyTorch | Official Windows CUDA distribution and Python 3.11 compatibility | Exact downloaded wheel, driver and all required operations |
+| CUDA | Blackwell requires appropriate native code or compatible PTX; architecture-specific code has constraints | An older CUDA label alone cannot certify all component kernels |
+| cuDNN | Official matrix covers Windows and Blackwell with version conditions | Framework-bundled version and actual selected operation algorithm |
+| Native NVIDIA compilation | CUDA eager support does not imply equivalent Inductor/Triton support | Retrieved official Windows tutorial expressly addresses CPU/XPU |
+| WSL2 | NVIDIA documents CUDA access through the Windows host driver | WSL installation, filesystem placement and actual runtime compatibility |
+
+NVIDIA's current cuDNN support matrix specifically footnotes Blackwell in its CUDA 12.x table: CUDA >=12.8, Linux driver >=570.26, Windows driver >=570.65 [R15-S08]. These are that matrix's library constraints, NOT a recommendation that driver 570.65 supports every RTX 5060 Ti board or CUDA 13 package. A device-support requirement and the selected CUDA-runtime driver floor can be higher. Do not confuse the driver capability reported by management tools, a local compiler toolkit, and the CUDA runtime packaged for the framework.
+
+The latest cuDNN matrix itself evolves and shows different conditions across CUDA families. Its newest library is not automatically the correct replacement for PyTorch's bundled library. Prefer the framework's coherent dependency set; independently upgrading cuDNN can invalidate the tested combination. The Windows CUDA installation guide is authoritative for a future local toolkit/compiler build, not evidence that a toolkit must be installed for ordinary prebuilt-framework use [R15-S09].
+
+## Precision and numerical policy
+
+FP32 eager execution is the recommended future numerical reference. BF16, FP16 and TF32 should be explicit, separately recorded policy choices, not implicit performance defaults.
+
+| Mode | Meaning and advantage | Principal concern for BOT 2.1 |
+|---|---|---|
+| FP32 | Reference arithmetic and straightforward debugging | Higher activation memory and potentially lower tensor throughput |
+| BF16 autocast | Wide exponent range; selected operations use lower precision | Coarse significand can perturb small differences and near-threshold probabilities |
+| FP16 autocast | Lower storage and eligible Tensor Core work | Narrow range, overflow/underflow; gradient scaling often needed |
+| TF32-enabled FP32 operations | Faster eligible matrix/convolution internals with FP32 tensors | Reduced multiplication precision; no FP16-like tensor storage reduction |
+
+Compute capability documentation supports hardware capability assessment [R15-S23], while operator-level AMP and CUDA documentation determine actual dispatch [R15-S10, R15-S11]. Prefer BF16 as the first *future precision comparison* where supported, not as a claim it is universally more accurate than FP16. Its range advantage does not imply fine relative precision. Retain sensitive normalization, reductions, losses and final probability calculations in suitable higher precision when evidence requires it; do not indiscriminately cast all input features or model state.
+
+Use current torch.amp/autocast and GradScaler interfaces for eventual work; the older torch.cuda.amp interfaces are deprecated. AMP chooses operation-specific dtypes; some operations remain FP32. Scaling does not repair arbitrary invalid inputs or guarantee finite gradients [R15-S10]. BF16 usually does not require FP16-style loss scaling, but still requires finite-value and numerical checks.
+
+Current CUDA semantics expose backend-specific FP32 precision controls and warn about reduced-precision reductions. Pin TF32 settings and reduction policy, including cuDNN versus matrix multiplication, rather than relying on defaults that can change across releases [R15-S11]. Future acceptance should compare probabilities, loss, calibration and decision-boundary flips under identical inputs; throughput alone is insufficient. This is a systems recommendation, not a new trading threshold or a permission to inspect protected data.
+
+## Compilation, debugging and deployment
+
+Begin any later research in eager mode. Compilation is an optional optimization after a trusted reference exists. Graph breaks, shape changes, cold-start compilation and specialization can dominate short sequences or batch-one workloads. PyTorch's official tuning guide supports measuring the actual bottleneck before optimizing [R15-S12].
+
+The retrieved official Windows Inductor tutorial covers CPU and Intel XPU, not a blanket NVIDIA GPU guarantee [R15-S13]. A maintained triton-windows project documents a separate Windows route, but it is not interchangeable evidence for the standard PyTorch install matrix [R15-S14]. Native Windows NVIDIA compilation therefore remains conditional in this recommendation. Do not prescribe patching the current Python installation or installing that project during R0-B. If compiler research later becomes necessary, an independently isolated WSL2/Linux environment is the more straightforward documentation-aligned candidate; WSL still needs its own qualification.
+
+NVIDIA's WSL guide requires use of the host Windows GPU driver and warns against installing a Linux display driver inside WSL [R15-S15]. WSL is an operating-environment change requiring separate authorization, not merely another venv. Keep it optional. Export or serving artifacts require separate parity, preprocessing and latency validation. PyTorch 2.10 deprecates TorchScript in favor of torch.export [R15-S05]; this does not establish that any chosen model is exportable. Eager research success does not authorize deployment.
+
+## Reproducibility and checkpointing
+
+Three targets should be separated: replaying the same run on the same frozen environment; obtaining statistically comparable results across seeds; and portability across machines or library versions. PyTorch explicitly does not promise identical results across releases, platforms, or CPU/GPU [R15-S16].
+
+Future run provenance should capture code revision, immutable data/split references, transformation configuration, seeds and RNG states, Python/framework/CUDA/cuDNN/driver versions, GPU, precision, chosen kernels, compiler configuration, worker settings and hardware thread settings. This is a proposed record, not an instruction to modify current manifests. Enable deterministic algorithms with errors rather than merely warnings for an audit reference. Disabling cuDNN benchmarking alone does not make the chosen algorithm deterministic. Determinism may impose overhead and does not prevent time-series leakage [R15-S16].
+
+A training-recovery checkpoint differs from an inference weight file. Recovery needs weights, optimizer, scheduler, scaler where used, progress, RNG states and data traversal state; weights alone cannot recreate the training trajectory. PyTorch recommends state_dict-based persistence and saving optimizer state for general checkpoints [R15-S17]. Judgment: atomic completion markers, content hashes and a last-complete-checkpoint pointer would make future recovery safer. Stateful shuffled loaders can make mid-epoch replay difficult; epoch boundaries are a simpler initial recovery boundary.
+
+Activation checkpointing is a different mechanism: it trades recomputation for lower activation memory. PyTorch recommends explicitly choosing the non-reentrant variant and documents RNG preservation and recomputation caveats [R15-S18]. It should be considered only after memory profiling; it is not a disk backup and need not accelerate execution. No checkpoint was opened or created here.
+
+## DataLoader architecture, memory and profiling
+
+Windows DataLoader workers use spawn: top-level pickleable dataset/collation/initialization functions and a guarded main entry are required. CPU workers should supply CPU batches; the main process owns GPU transfer. Pinning can help transfers, while nonblocking transfer only creates useful overlap under appropriate conditions [R15-S19, R15-S12].
+
+Thirty-two logical processors are not an appropriate automatic worker count. Future profiling should start with a simple zero-worker reference and compare a small bounded worker set. Excess workers can duplicate Python object memory, compete with numerical-library threads, and spend more time serializing than preparing small time-series batches. Worker RNGs, persistent workers, prefetch queues and iterable-dataset sharding need explicit treatment; duplicated streams can silently duplicate observations. Keep order meaningful where sequence state depends on chronology [R15-S19].
+
+For 16 GB VRAM, the budget includes parameters, gradients, optimizer state, activations, temporary workspaces, allocator reserve, compiler workspaces and display usage. Available disk cannot replace device bandwidth. There is no justified maximum model size without tensor shapes. As a rough systems estimate, FP32 Adam parameters plus gradients plus two moment buffers alone take approximately 16 bytes per parameter, before activations and implementation extras. Mixed precision does not necessarily halve that total. Gradient accumulation can reduce microbatch memory but changes timing and can interact with stateful layers; it is not universally equivalent to a large batch.
+
+Future profiling should distinguish data preparation, host-to-device transfers, forward/backward kernels, optimizer time, synchronization and persistence. Record warm and cold behavior, p50/p95/p99 end-to-end latency, examples/second, and peak allocated/reserved device memory. GPU work is asynchronous, so naive wall timing around an enqueue is misleading. PyTorch profiler supports CPU/CUDA activities and memory/shape recording; missing CUPTI can leave CUDA time in tables while kernel JSON traces are absent [R15-S20]. Profile briefly because instrumentation adds overhead. No such measurements were run.
+
+## Framework comparison
+
+| Dimension | PyTorch | JAX | TensorFlow |
+|---|---|---|---|
+| Windows NVIDIA GPU | Official native CUDA path | Native Windows NVIDIA GPU unsupported; WSL2 experimental in official matrix | Native GPU stopped after 2.10; contemporary GPU route uses WSL2/Linux |
+| Debugging and flexibility | Eager Python is a strong starting point; compile optional | Functional transformations and explicit state are powerful, but tracing adds concepts | Eager/Keras accessible; graph conversion adds a second execution model |
+| Time-series ecosystem | Flexible tensor/autograd primitives for custom time-series research | Flexible numerical research substrate; task-specific engineering may be greater | Mature general ML/Keras tools; Windows GPU route imposes migration |
+| Reproducibility | Explicit controls, no cross-platform equality guarantee | Explicit RNG/state useful; compiler and hardware still matter | Determinism still requires environment and operation controls |
+| Deployment implication | Exportability is model/runtime dependent | Compilation and device/runtime coupling need qualification | Established serving ecosystem does not eliminate conversion checks |
+
+Platform facts are directly supported by [R15-S02, R15-S21, R15-S22]; ergonomic comparisons are specialist judgment, not measured rankings. JAX's official installer recommends CUDA packages via pip and currently documents CUDA 13 and Linux-only GPU wheels. TensorFlow's installation page is clear on native Windows GPU retirement, but retrieved version examples are older; they must not be treated as a current Blackwell certification. No comparative benchmark of time-series library breadth or predictive accuracy was performed; the ecosystem assessment is deliberately qualitative.
+
+## Future isolated environment recommendation
+
+Recommendation: a new, separately named 64-bit Python 3.11 virtual environment, no inheritance of global site packages, with an official pinned PyTorch CUDA build, initially native Windows eager mode. A concrete current candidate family is PyTorch 2.14 / CUDA 13.0 with its framework-matched cuDNN dependencies. The dated release supports this candidate; the actual cp311 Windows wheel, driver floor and SM 12.0 kernel coverage must be verified when provisioning is separately authorized. This is not an installation command or a certification. A documented CUDA 12.8 build such as the 2.11 family is a compatibility fallback to investigate only if the current family has a demonstrated dependency issue, not an automatic downgrade [R15-S04, R15-S07].
+
+Keep the current global Python untouched. Avoid optional vision/audio, compiler forks, distributed tooling and time-series wrapper dependencies until required. Record exact resolved package versions and artifact hashes in the future environment. Use FP32 and deterministic eager behavior as the reference; evaluate BF16 and then optional compilation as independently controlled changes. A new WSL2/Linux environment is an alternative for compiler or JAX/TensorFlow research, not a prerequisite for initial native PyTorch exploration. This selects no neural architecture, ensemble, prototype shortlist or trading configuration.
+
+Well-supported: isolated environments, official CUDA packages with matching libraries, eager reference, explicit precision/provenance, meaningful checkpoint state, and profiling before tuning. Promising but workload-dependent: BF16 AMP, pinned transfers, bounded worker parallelism, activation checkpointing and compilation. Experimental/conditional here: native Windows NVIDIA compiler extensions and backend-specific Blackwell optimizations. Insufficiently supported: generic CUDA availability as certification, universal speedup claims, automatic 32-worker loading, bitwise portability across environments, or deployment based only on training success.
+
+## Sources
+
+All URLs were researched on 2026-09-24. Living documentation is identified by retrieval year rather than invented publication dates. These are 23 unique primary-source documents; no peer-reviewed study is needed to establish an operating-system wheel support matrix. Conclusions about market performance are deliberately absent.
+
+- **R15-S01 — CUDA GPU Compute Capability.** NVIDIA; living documentation, 2026 retrieval; NVIDIA Developer. URL: https://developer.nvidia.com/cuda/gpus . Type: official hardware table. Limitation: capability is not framework/operator certification. Relevance: identifies RTX 5060 Ti as CC 12.0.
+- **R15-S02 — Get Started / Start Locally.** PyTorch Foundation; living documentation, 2026 retrieval; pytorch.org. URL: https://pytorch.org/get-started/locally/ . Type: official installation guide. Limitation: retrieved selector is stale relative to dated releases. Relevance: Windows CUDA and Python compatibility.
+- **R15-S03 — Blackwell Architecture Compatibility.** NVIDIA; living guide, 2026 retrieval; CUDA Blackwell Compatibility Guide. URL: https://docs.nvidia.com/cuda/blackwell-compatibility-guide/index.html . Type: official compatibility specification. Limitation: runtime libraries and framework packages require separate checks. Relevance: cubin/PTX and architecture compatibility.
+- **R15-S04 — PyTorch 2.14 Release Blog.** PyTorch Foundation; 2026; PyTorch official release announcement, September 2 (updated September 17). URL: https://pytorch.org/blog/pytorch-2-14-release-blog/ . Type: dated release evidence. Limitation: release-wide features do not certify the user's driver or workload. Relevance: current version and CUDA/cuDNN build families.
+- **R15-S05 — PyTorch 2.10 Release Blog.** PyTorch Foundation; 2026; official release announcement, January 21. URL: https://pytorch.org/blog/pytorch-2-10-release-blog/ . Type: dated release evidence. Limitation: performance improvements are workload-dependent. Relevance: determinism, numerical debugging and TorchScript deprecation.
+- **R15-S06 — PyTorch 2.7 Release.** PyTorch Team; 2025; official release announcement, April 23. URL: https://pytorch.org/blog/pytorch-2-7/ . Type: historical release evidence. Limitation: initial Blackwell support labeled prototype and not a 2026 platform guarantee. Relevance: CUDA 12.8/Blackwell support origin.
+- **R15-S07 — Previous PyTorch Versions.** PyTorch Foundation; living documentation, 2026 retrieval; pytorch.org. URL: https://pytorch.org/get-started/previous-versions/ . Type: official binary distribution instructions. Limitation: availability does not establish numerical acceptance. Relevance: version-specific Windows/Linux CUDA families.
+- **R15-S08 — Support Matrix.** NVIDIA; living documentation, 2026 retrieval; cuDNN Backend documentation. URL: https://docs.nvidia.com/deeplearning/cudnn/backend/latest/reference/support-matrix.html . Type: official library support matrix. Limitation: moving latest page; generic driver minima may not cover device introduction. Relevance: Blackwell CUDA and Windows conditions.
+- **R15-S09 — CUDA Installation Guide for Microsoft Windows.** NVIDIA; living documentation, 2026 retrieval; CUDA Toolkit documentation. URL: https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html . Type: official toolkit installation reference. Limitation: toolkit/compiler prerequisites differ from prebuilt wheel dependencies. Relevance: separates host tooling from packaged runtime.
+- **R15-S10 — Automatic Mixed Precision package, torch.amp.** PyTorch contributors; 2026 retrieval; PyTorch 2.14 API documentation. URL: https://docs.pytorch.org/docs/2.14/amp.html . Type: official API/numerical guidance. Limitation: operation coverage and numerical suitability vary. Relevance: autocast, FP16/BF16 and GradScaler.
+- **R15-S11 — CUDA semantics.** PyTorch contributors; 2026 retrieval; PyTorch 2.14 developer notes. URL: https://docs.pytorch.org/docs/2.14/notes/cuda.html . Type: official semantics. Limitation: controls are version-specific and do not establish trading decision stability. Relevance: TF32, reductions, asynchronous execution and memory.
+- **R15-S12 — Performance Tuning Guide.** PyTorch tutorial contributors; 2026 retrieval; PyTorch Tutorials. URL: https://docs.pytorch.org/tutorials/recipes/recipes/tuning_guide.html . Type: official engineering guidance. Limitation: recommendations require workload measurement. Relevance: transfer, loader and compiler tradeoffs.
+- **R15-S13 — How to use torch.compile on Windows CPU/XPU.** PyTorch tutorial contributors; 2026 retrieval; PyTorch Tutorials, unstable tutorial collection. URL: https://docs.pytorch.org/tutorials/unstable/inductor_windows.html . Type: official platform tutorial. Limitation: CPU/XPU scope does not prove NVIDIA support or impossibility. Relevance: prevents conflating Windows CUDA and Inductor support.
+- **R15-S14 — triton-windows README.** triton-windows maintainers; living repository, 2026 retrieval; triton-lang GitHub project. URL: https://github.com/triton-lang/triton-windows/blob/readme/README.md . Type: project-maintainer primary documentation. Limitation: separate packaging/support path, no host verification. Relevance: identifies a conditional native Windows compiler route without prescribing installation.
+- **R15-S15 — CUDA on WSL User Guide.** NVIDIA; living documentation, 2026 retrieval; CUDA documentation. URL: https://docs.nvidia.com/cuda/wsl-user-guide/index.html . Type: official platform guide. Limitation: WSL adds environmental and tooling constraints. Relevance: host driver usage and future Linux alternative.
+- **R15-S16 — Reproducibility.** PyTorch contributors; 2026; PyTorch 2.14 developer notes, page updated May 14. URL: https://docs.pytorch.org/docs/2.14/notes/randomness.html . Type: official reproducibility guidance. Limitation: no cross-release/platform bitwise guarantee. Relevance: seeds, deterministic operations and cuDNN controls.
+- **R15-S17 — Saving and Loading Models.** PyTorch tutorial contributors; 2026 retrieval; PyTorch Tutorials. URL: https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html . Type: official persistence tutorial. Limitation: full application/data traversal recovery needs additional state. Relevance: state_dict and optimizer checkpoint distinction.
+- **R15-S18 — torch.utils.checkpoint.** PyTorch contributors; 2026 retrieval; PyTorch 2.14 API documentation. URL: https://docs.pytorch.org/docs/2.14/checkpoint.html . Type: official API specification. Limitation: recomputation and RNG caveats; no measured benefit here. Relevance: activation-memory tradeoffs.
+- **R15-S19 — torch.utils.data.** PyTorch contributors; 2026 retrieval; PyTorch 2.14 API documentation. URL: https://docs.pytorch.org/docs/2.14/data.html . Type: official data-loading specification. Limitation: dataset-specific throughput and memory unknown. Relevance: Windows spawn, seeds, worker duplication and ordering.
+- **R15-S20 — torch.profiler.** PyTorch contributors; 2026 retrieval; PyTorch 2.14 API documentation. URL: https://docs.pytorch.org/docs/2.14/profiler.html . Type: official instrumentation specification. Limitation: overhead and CUPTI/platform coverage affect traces. Relevance: CPU/GPU timing and memory diagnosis.
+- **R15-S21 — Installation.** JAX authors; living documentation, 2026 retrieval; JAX documentation. URL: https://docs.jax.dev/en/latest/installation.html . Type: official platform/package matrix. Limitation: WSL2 NVIDIA path experimental; no actual-machine verification. Relevance: native Windows NVIDIA unsupported and CUDA package choices.
+- **R15-S22 — Install TensorFlow with pip.** TensorFlow authors/Google; living documentation, 2026 retrieval; TensorFlow installation guide. URL: https://www.tensorflow.org/install/pip . Type: official installation matrix. Limitation: some version examples retrieved are older, not a Blackwell certification. Relevance: native Windows GPU cutoff and WSL2 route.
+- **R15-S23 — Compute Capabilities.** NVIDIA; living documentation, 2026 retrieval; CUDA Programming Guide, appendix 5.1. URL: https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html . Type: official architecture feature reference. Limitation: hardware instructions do not guarantee framework dispatch/performance. Relevance: precision hardware context.

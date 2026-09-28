@@ -1,0 +1,32 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-LAUNCH-EVIDENCE-COLLECTOR",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "595d6afde82d4d86c4df1af73d6b078e77b5e4fb",
+  "parent_sha": "ff22ef56b700541babc23b3a13e003764d52e738",
+  "defects": [
+    {"id":"DEF-001","severity":"operational","description":"The elevated Windows owner rejected Git because the repository is owned by the audit sandbox identity.","resolution":"Scoped safe.directory to the repository on both read-only Git calls; no global Git configuration was changed."},
+    {"id":"DEF-002","severity":"contract","description":"Repository checkpoints were incorrectly restricted to 64-character SHA-256 although this repository uses 40-character SHA-1 object IDs.","resolution":"Checkpoint fields now accept lowercase 40-character SHA-1 or 64-character SHA-256 object IDs; report and evidence identifiers remain SHA-256-only."}
+  ],
+  "observations": [
+    {"id": "OBS-001", "location": "supervised_paper_launch_evidence_collector_v1.py:54-122", "description": "Deterministic evidence: collect_launch_evidence creates content-addressed evidence_id=SHA-256(canonical body). Deterministic replay. Source hashes sorted and bound to actual file bytes.", "tested_by": "TestDeterministicEvidence, TestSourceHashBinding"},
+    {"id": "OBS-002", "location": "supervised_paper_launch_evidence_collector_v1.py:125-130", "description": "Atomic output: write_launch_evidence uses temp+os.replace, read-back via read_launch_evidence. No temp remaining after write.", "tested_by": "TestAtomicOutput"},
+    {"id": "OBS-003", "location": "supervised_paper_launch_evidence_collector_v1.py:24-33", "description": "Bad sources: missing, malformed JSON, non-object, authority=true all reject. trading_authority must be False in all sources.", "tested_by": "TestBadSources"},
+    {"id": "OBS-004", "location": "supervised_paper_launch_evidence_collector_v1.py:71-96", "description": "Watchdog validation: adapter_version must match, readiness.state must be HEALTHY, report_id SHA-256, observations must be list of 2 with exact component set {btc-recorder, es-nq-recorder}, BTC task_running=True, trading_authority=False, heartbeat UTC, gap_count/skew integers (reject bool), gap_count nonnegative.", "tested_by": "TestWatchdogValidation"},
+    {"id": "OBS-005", "location": "supervised_paper_launch_evidence_collector_v1.py:76-79", "description": "Recovery drill: schema_version and result must be RECOVERY_VERIFIED. Authority must be False. Report_id SHA-256.", "tested_by": "TestRecoveryDrill"},
+    {"id": "OBS-006", "location": "supervised_paper_launch_evidence_collector_v1.py:78-82", "description": "Stale alert drill: schema_version, result, all four booleans (stale_observed, unhealthy_alert_delivered, recovery_observed, healthy_alert_delivered) must be True. Authority False. Report_id SHA-256.", "tested_by": "TestStaleAlertDrill"},
+    {"id": "OBS-007", "location": "supervised_paper_launch_evidence_collector_v1.py:58-66", "description": "Repository and task facts: repository must be clean (True), checkpoint SHA-256, es_nq_missed_runs nonnegative integer (reject bool), es_nq_last_result integer (reject bool), collected_at UTC.", "tested_by": "TestRepositoryAndTaskFacts"},
+    {"id": "OBS-008", "location": "scripts/collect_supervised_paper_launch_evidence.ps1:1-20", "description": "PowerShell wrapper: requires 5.1, CmdletBinding, ErrorActionPreference=Stop. Uses git rev-parse HEAD + git status --porcelain. Uses Get-ScheduledTask + Get-ScheduledTaskInfo (read-only). No Start/Stop/Enable/Disable/Register/Unregister/Set/New-ScheduledTask. Python runtime existence checked.", "tested_by": "TestPowerShellWrapper"},
+    {"id": "OBS-009", "location": "supervised_paper_launch_evidence_collector_v1.py:1-11", "description": "No network/credential/live/task-mutation imports in collector. Only argparse, datetime, hashlib, json, os, pathlib, evidence_v1 used.", "tested_by": "TestNoProhibitedPython"},
+    {"id": "OBS-010", "location": "supervised_paper_launch_evidence_collector_v1.py:120,133-153", "description": "trading_authority=False hardcoded in evidence body. CLI main() uses datetime.now(UTC). No input can grant trading authority.", "tested_by": "TestTradingAuthorityFalse"},
+    {"id": "OBS-011", "location": "supervised_paper_launch_evidence_collector_v1.py:1", "description": "Module docstring: 'Fail-closed, read-only assembly'. No owner-approval/profitability/OOS/deployment/unattended-readiness/live-readiness claim.", "tested_by": "TestNoFalseClaims"},
+    {"id": "OBS-012", "location": "supervised_paper_launch_evidence_collector_v1.py:58-66", "description": "Direct construction fails closed: bad checkpoint, dirty repository, naive timestamp all reject via direct function call.", "tested_by": "TestDirectConstruction"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_collects_content_addressed_read_only_evidence", "test_repository_and_task_facts_fail_closed", "test_tampered_sources_fail_closed", "test_windows_wrapper_is_read_only_and_has_no_submission_surface"],
+    "accepted_after_correction": ["TestWatchdogValidation (corrected: _collect re-creates files, overwriting modifications — added _collect_with_paths to use pre-modified paths)", "TestRecoveryDrill (same correction)", "TestStaleAlertDrill (same correction)"],
+    "redundant": ["Some adversarial tests overlap with existing on content addressing, tampered sources, repository facts, PowerShell wrapper"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

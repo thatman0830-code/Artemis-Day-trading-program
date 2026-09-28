@@ -1,0 +1,10 @@
+{
+  "audit_assignment": "AUDIT-CONTROLLED-BTC-RECORDER-RECOVERY-DRILL",
+  "date": "2026-09-01",
+  "checkpoint": "4344877eb5b972bb1279f23e58dafd1a7f359b54",
+  "filesystem_sha256": {
+    "scripts/invoke_controlled_btc_recorder_recovery_drill.ps1": "98c96609b5efe2b4fffa96319a7d37edebdbe09e75de5e1e53bd5d4de052b5ad",
+    "monitoring/test_controlled_btc_recorder_recovery_drill.py": "e67ada2d9acce1cd0809f699f6c1820ef7d26424a493b695499fb49105bf8cd8"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files on 2026-09-01."
+}

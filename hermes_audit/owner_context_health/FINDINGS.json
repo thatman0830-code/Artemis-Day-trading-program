@@ -1,0 +1,27 @@
+{
+  "audit_assignment": "AUDIT-OWNER-CONTEXT-HEALTH-ADAPTER",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-30",
+  "checkpoint": "999f48fe57e1e6761fa2f56c60ef8aaea2250209",
+  "parent_sha": "c0dbfbaa29eb4090fbd7f1e28922e73921770c11",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "owner_context_health_adapter.py:180-184", "description": "Component identities must exactly match policy required_components and OWNER_CONTEXT_COMPONENTS. Swap, duplicate, omit, blend, and extra all reject.", "tested_by": "TestIdentitySwapDuplicateOmitBlend"},
+    {"id": "OBS-002", "location": "owner_context_health_adapter.py:205-216", "description": "Task name, path, executable, script, single-instance policy, restart policy count, restart interval, and instance count must all match exactly.", "tested_by": "TestTaskIdentityValidation"},
+    {"id": "OBS-003", "location": "owner_context_health_adapter.py:217-218", "description": "Task state alone is insufficient — task_running requires installed + state in permitted + last_result in permitted. Disabled, Unknown, and wrong states produce TASK_NOT_RUNNING.", "tested_by": "TestTaskStates, TestTaskStateAloneInsufficient"},
+    {"id": "OBS-004", "location": "owner_context_health_adapter.py:199-200", "description": "Sandbox-context visibility is rejected with 'owner-context visibility' error — never interpreted as NOT_INSTALLED or healthy.", "tested_by": "TestSandboxInvisibility"},
+    {"id": "OBS-005", "location": "owner_context_health_adapter.py:203-204", "description": "Stale collection (collected_at older than RPO) rejects at adapter level. Future collection rejects.", "tested_by": "TestExactBoundaries"},
+    {"id": "OBS-006", "location": "owner_context_health_adapter.py:134-135", "description": "Heartbeat cannot follow collection — future or post-collection heartbeat rejects in SanitizedComponentFactsV1.__post_init__.", "tested_by": "TestHeartbeats"},
+    {"id": "OBS-007", "location": "owner_context_health_adapter.py:227", "description": "trading_authority is hardcoded False in every ComponentObservationV1 produced. AdaptedOwnerContextHealthV1.trading_authority defaults to False.", "tested_by": "TestImmutabilityDeterminism"},
+    {"id": "OBS-008", "location": "owner_context_health_adapter.py:46-52", "description": "Windows path validation: PureWindowsPath, casefold, is_absolute, no '..' traversal. Forward slashes normalized.", "tested_by": "TestWindowsPaths"},
+    {"id": "OBS-009", "location": "owner_context_health_adapter.py:1-4", "description": "No os/subprocess/socket/requests/ctypes/win32com imports. No task control functions. Read-only by design.", "tested_by": "TestNoOperationalCapability"},
+    {"id": "OBS-010", "location": "owner_context_health_adapter.py:191-196", "description": "Dependency-injected reader exceptions are wrapped as OwnerContextAdapterError. Wrong type, None, and cross-component returns all reject.", "tested_by": "TestReaderBoundary"}
+  ],
+  "test_classification": {
+    "accepted": ["27 existing focused tests pass", "All adversarial edge cases pass", "RPO/RTO/storage/clock-skew/restart boundaries are exact half-open", "All records are frozen and deterministic", "trading_authority is always False"],
+    "corrected": ["collection_at_rpo_boundary needed latest_heartbeat_at shifted too (heartbeat cannot follow collection)", "Path references to monitoring/ files needed parent.parent.parent not parent.parent (test lives in backtesting/execution_accounting_v2/)"],
+    "redundant": ["Some adversarial tests overlap with existing test_ready_is_component_specific_and_task_state_alone_never_suffices"],
+    "implementation_coupled": [],
+    "rejected": []
+  }
+}

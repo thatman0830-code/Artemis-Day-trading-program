@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "risk-sessions-v2.schema.json",
+  "title": "Execution and Accounting v2 Phase 5 public records",
+  "type": "object",
+  "required": ["schema_version", "record_type", "record_id", "run_id"],
+  "properties": {
+    "schema_version": {"enum": ["verified-session-v2-1", "risk-limits-v2-1", "portfolio-risk-context-v2-1", "pretrade-risk-request-v2-1", "risk-decision-record-v2-1", "session-risk-state-v2-1", "forced-flatten-instruction-v2-1", "margin-call-fact-v2-1", "liquidation-required-fact-v2-1", "post-accounting-risk-evaluation-v2-1", "risk-session-ledger-v2-1", "risk-session-checkpoint-v2-1"]},
+    "record_type": {"type": "string"},
+    "record_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "run_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": true,
+  "x-economic-number-type": "Decimal string only",
+  "x-chronology": "UTC aware; sessions are [open_time, close_time)",
+  "x-authority": "advisory simulation facts only; no order submission"
+}

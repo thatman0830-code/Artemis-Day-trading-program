@@ -1,0 +1,9 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"execution-assumption-v2.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","assumption_id","effective_from","effective_to","slippage_mode","entry_slippage_ticks","ordinary_exit_slippage_ticks","forced_exit_slippage_ticks","rollover_slippage_ticks","entry_participation","ordinary_exit_participation","forced_exit_participation","rollover_participation","scenario_set","owner_approved","synthetic_test_only"],
+  "properties":{
+    "schema_version":{"const":"execution-assumption-v2-1"},"assumption_id":{"type":"string","minLength":1},"effective_from":{"type":"string","format":"date-time","pattern":"Z$"},"effective_to":{"type":["string","null"],"format":"date-time"},"slippage_mode":{"enum":["ZERO","FIXED","SCENARIO_SET"]},"entry_slippage_ticks":{"$ref":"#/$defs/nonnegativeDecimal"},"ordinary_exit_slippage_ticks":{"$ref":"#/$defs/nonnegativeDecimal"},"forced_exit_slippage_ticks":{"$ref":"#/$defs/nonnegativeDecimal"},"rollover_slippage_ticks":{"$ref":"#/$defs/nonnegativeDecimal"},"entry_participation":{"$ref":"#/$defs/rate"},"ordinary_exit_participation":{"$ref":"#/$defs/rate"},"forced_exit_participation":{"$ref":"#/$defs/rate"},"rollover_participation":{"$ref":"#/$defs/rate"},"scenario_set":{"type":"array","items":{"type":"string"},"uniqueItems":true},"owner_approved":{"type":"boolean"},"synthetic_test_only":{"type":"boolean"}
+  },
+  "$defs":{"nonnegativeDecimal":{"type":"string","pattern":"^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},"rate":{"type":"string","pattern":"^(0(\\.[0-9]+)?|1(\\.0+)?)$"}}
+}

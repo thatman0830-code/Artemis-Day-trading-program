@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hyperliquid-trading-bot:reporting-validation-v2-phase7-1",
+  "title": "Execution and Accounting V2 Phase 7 reporting records",
+  "x-promotion-floor": "at least 200 finalized UNTOUCHED_OOS trades per market; cannot be lowered",
+  "x-partition-isolation": "source relabeling and cross-partition chronological overlap reject",
+  "x-required-stress-evidence": "explicitly required stress kinds and probability-of-ruin evidence fail closed when absent",
+  "type": "object",
+  "oneOf": [
+    {"$ref": "#/$defs/finalizedTrade"},
+    {"$ref": "#/$defs/metricSnapshot"},
+    {"$ref": "#/$defs/backtestResult"}
+  ],
+  "$defs": {
+    "sha256": {"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "decimal": {"type":"string","pattern":"^-?[0-9]+(?:\\.[0-9]+)?$"},
+    "finalizedTrade": {
+      "type":"object","required":["schema_version","trade_id","run_id","market","opened_at","closed_at","partition","net_pnl","source_ids"],
+      "properties":{"schema_version":{"const":"finalized-trade-v2-1"},"trade_id":{"$ref":"#/$defs/sha256"},"run_id":{"$ref":"#/$defs/sha256"},"market":{"type":"string"},"opened_at":{"type":"string","format":"date-time"},"closed_at":{"type":"string","format":"date-time"},"partition":{"enum":["TRAINING","VALIDATION","UNTOUCHED_OOS","FORWARD_RECORDED","PAPER","LIVE"]},"net_pnl":{"$ref":"#/$defs/decimal"},"source_ids":{"type":"array","items":{"$ref":"#/$defs/sha256"},"minItems":1,"uniqueItems":true}},
+      "additionalProperties":true
+    },
+    "metricSnapshot": {
+      "type":"object","required":["schema_version","snapshot_id","run_id","market","partition","trade_ids","net_pnl","reporting_version"],
+      "properties":{"schema_version":{"const":"metric-snapshot-v2-1"},"snapshot_id":{"$ref":"#/$defs/sha256"},"run_id":{"$ref":"#/$defs/sha256"},"market":{"type":"string"},"partition":{"type":"string"},"trade_ids":{"type":"array","items":{"$ref":"#/$defs/sha256"},"uniqueItems":true},"net_pnl":{"$ref":"#/$defs/decimal"},"reporting_version":{"const":"REPORTING_VALIDATION_V2_PHASE7_1"}},
+      "additionalProperties":true
+    },
+    "backtestResult": {
+      "type":"object","required":["schema_version","result_id","run_id","reconciliation_id","reporting_version"],
+      "properties":{"schema_version":{"const":"backtest-result-v2-1"},"result_id":{"$ref":"#/$defs/sha256"},"run_id":{"$ref":"#/$defs/sha256"},"reconciliation_id":{"$ref":"#/$defs/sha256"},"reporting_version":{"const":"REPORTING_VALIDATION_V2_PHASE7_1"}},
+      "additionalProperties":true
+    }
+  }
+}

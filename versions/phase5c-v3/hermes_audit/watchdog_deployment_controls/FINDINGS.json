@@ -1,0 +1,27 @@
+{
+  "audit_assignment": "AUDIT-WATCHDOG-DEPLOYMENT-CONTROLS",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "be824f5747a3e09f8d4c443ece457515ceb9783d",
+  "parent_sha": "39880f59d3a348a0acc114908ef5bd2151af7512",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "scripts/audit_owner_context_health_watchdog_task.ps1:7-29", "description": "Audit script is strictly read-only: Get-ScheduledTask + Get-ScheduledTaskInfo only. No Register/Unregister/Enable/Disable/Start/Stop-ScheduledTask or Start/Stop-Process. Validates single action+trigger, exact executable, arguments with -NoLogo/-NoProfile/-NonInteractive/-ExecutionPolicy/-File, working directory, owner (UserId), logon type (Interactive), run level (Limited), IgnoreNew, PT4M, PT5M, StartWhenAvailable, runner existence, Python existence.", "tested_by": "TestAuditReadOnly"},
+    {"id": "OBS-002", "location": "scripts/enable_and_verify_owner_context_health_watchdog_task.ps1:8-11", "description": "Enablement requires audit to return state==Disabled and trading_authority==false before proceeding. Rejects anything except the exact audited disabled task.", "tested_by": "TestEnablementGuard"},
+    {"id": "OBS-003", "location": "scripts/enable_and_verify_owner_context_health_watchdog_task.ps1:24-30", "description": "Enablement requires: trading_authority==false, ready_for_unattended_operation==true, state==HEALTHY, observed_at >= startedAt (fresh), task State != Disabled, LastTaskResult == 0. All conditions must be met simultaneously.", "tested_by": "TestEnablementHealthGate"},
+    {"id": "OBS-004", "location": "scripts/enable_and_verify_owner_context_health_watchdog_task.ps1:33-35", "description": "Every failure path (catch block) disables the task with SilentlyContinue and rethrows. Timeout throw triggers catch → Disable-ScheduledTask.", "tested_by": "TestFailureDisables"},
+    {"id": "OBS-005", "location": "scripts/enable_and_verify_owner_context_health_watchdog_task.ps1:16-32", "description": "Stale status (observed_at < startedAt), unhealthy state, authority escalation (trading_authority!=false), task failure (LastTaskResult!=0), missing status file, and malformed JSON all fail the if condition → loop → timeout → disable. Identity mismatch rejected by audit before enablement.", "tested_by": "TestFailClosedAttacks"},
+    {"id": "OBS-006", "location": "scripts/remove_owner_context_health_watchdog_task.ps1:7-14", "description": "Removal requires action_verified==true and trading_authority==false from audit. Disable → Stop → Unregister (safe order). SilentlyContinue on Disable/Stop. No Remove-Item, no recursive delete. Evidence preserved (EVIDENCE_PRESERVED message).", "tested_by": "TestRemovalSafety"},
+    {"id": "OBS-007", "location": "scripts/*", "description": "No script references either recorder by name. No Register in audit/remove, no Unregister in enable/audit. Trading authority always false.", "tested_by": "TestNoRecorderOrTradingControl"},
+    {"id": "OBS-008", "location": "monitoring/OWNER_CONTEXT_WATCHDOG_IMPLEMENTATION.md:28-41", "description": "Documentation disclaims off-host notification, institutional readiness, and 24/7 operational-readiness. Describes deployment controls, rollback to disabled, evidence preservation, and gated enablement.", "tested_by": "TestDocumentationClaims"},
+    {"id": "OBS-009", "location": "scripts/*", "description": "All scripts require PowerShell 5.1, use CmdletBinding, ErrorActionPreference=Stop. Audit uses ConvertTo-Json -Compress. Installer quotes -File path with backtick-escaped quotes.", "tested_by": "TestPowerShellSyntax"},
+    {"id": "OBS-010", "location": "scripts/enable_and_verify_*", "description": "Enable wraps Enable+Start+poll in try/catch with Disable in catch. Poll loop checks Get-ScheduledTask State, Get-ScheduledTaskInfo LastTaskResult, and status JSON every 3 seconds. Removal ordering: Disable → Stop → Unregister with SilentlyContinue. No race condition or rollback gap.", "tested_by": "TestSafetyGaps"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_runner_is_read_only_fail_closed_and_records_sanitized_failures", "test_installer_is_single_instance_bounded_and_disabled_by_default", "test_audit_requires_exact_identity_and_is_read_only", "test_enablement_is_guarded_verified_and_rolls_back_to_disabled", "test_removal_requires_identity_and_preserves_evidence"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial source-text assertions overlap with existing task tests on audit/enablement/removal source checks"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

@@ -1,0 +1,2 @@
+# Preserve the bytes of the imported snapshots, including Windows encodings.
+* -text

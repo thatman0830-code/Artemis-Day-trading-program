@@ -1,0 +1,20 @@
+{
+  "schema_version": "bot2-feature-registry-v1",
+  "feature_schema": "bot2-feature-row-v1",
+  "label_schema": "bot2-label-row-v1",
+  "normalization": "NONE_CAUSAL",
+  "feature_count": 24,
+  "features": [
+    "price", "log_return_1", "log_return_3", "log_return_5",
+    "rolling_price_range_3", "rolling_price_range_5", "realized_volatility_3", "realized_volatility_5",
+    "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session",
+    "relative_volume", "volume_acceleration", "session_vwap", "price_to_session_vwap",
+    "seconds_since_session_open", "session_phase", "time_sin", "time_cos",
+    "cross_market_log_return_1", "cross_market_relative_return_1", "cross_market_rolling_correlation_5",
+    "cross_market_divergence_1"
+  ],
+  "labels": ["forward_return", "direction", "mfe", "mae", "future_realized_volatility", "barrier_outcome"],
+  "future_observations_allowed": {"features": false, "labels": true},
+  "orderbook_microstructure": "NOT_IMPLEMENTED_PHASE_1_DATA_UNAVAILABLE",
+  "trading_authority": false
+}

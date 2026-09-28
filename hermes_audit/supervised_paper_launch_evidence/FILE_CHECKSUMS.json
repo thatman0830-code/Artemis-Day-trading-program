@@ -1,0 +1,11 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-LAUNCH-EVIDENCE",
+  "date": "2026-09-01",
+  "checkpoint": "4cc0e4c18a1f32d8d9e729cb24b0555301c008a2",
+  "filesystem_sha256": {
+    "execution/supervised_paper_launch_evidence_v1.py": "f14f01e2318a38b1b26c16c375b1cd559cbb97eb2c1dc45f258004ee0a869c62",
+    "execution/test_supervised_paper_launch_evidence_v1.py": "8568408aa9c486e9555c03775b0e72b0e7f0733ee667807e84a43dde60fc571c",
+    "execution/test_hermes_supervised_paper_launch_evidence_adversarial.py": "4213219cd85a82c8dfff42077bbb30bd4a8cee3155f97983211ade02f9a51a2f"
+  },
+  "verification": "Filesystem SHA-256 recomputed after Codex reconciliation and DEF-001 correction on 2026-09-01."
+}

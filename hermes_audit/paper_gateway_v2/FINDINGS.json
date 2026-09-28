@@ -1,0 +1,27 @@
+{
+  "audit_assignment": "AUDIT-V2-PAPER-GATEWAY-FOUNDATION",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "0999a22291aee900ba33b8a756facd4ad9a0925c",
+  "parent_sha": "14620bb51922bc5ba0e555265d63dad0777b8491",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_gateway_v2.py:1,99,108-109,175,203,214,226-229", "description": "trading_authority always False: submission rejects True, event rejects True, snapshot has False, decision has False. No live-order capability in docstring.", "tested_by": "TestOfflinePaperOnly"},
+    {"id": "OBS-002", "location": "paper_gateway_v2.py:231-238", "description": "Submission idempotency: exact retry returns original record (IDEMPOTENT_REPLAY), same key with different fingerprint → DUPLICATE_CONFLICT, duplicate order_id → DUPLICATE_CONFLICT. Idempotency checked before safety gates.", "tested_by": "TestSubmissionIdempotency"},
+    {"id": "OBS-003", "location": "paper_gateway_v2.py:239-246", "description": "Market/auth gates: kill switch, disconnected, reconciliation, unauthorized, stale market data, future market data. Boundary equality: market_data_age exactly at maximum accepted.", "tested_by": "TestMarketAuthGates"},
+    {"id": "OBS-004", "location": "paper_gateway_v2.py:249-254", "description": "Exposure controls: per-order notional > max rejects, aggregate notional + new > max_total rejects, open count >= max_open_orders rejects. Terminal orders excluded from open exposure. Boundary equality at exact limit accepted.", "tested_by": "TestExposureControls"},
+    {"id": "OBS-005", "location": "paper_gateway_v2.py:279-295", "description": "Strict lifecycle: partial fills conserve quantity, final fill requires exact equality (filled==quantity), overfill rejects, cancel preserves filled quantity, terminal state rejects further events, stale version rejects, time regression rejects, events before acceptance reject.", "tested_by": "TestStrictLifecycle"},
+    {"id": "OBS-006", "location": "paper_gateway_v2.py:269-272", "description": "Event idempotency: exact event replay is no-op (EVENT_REPLAY), same event_id with changed fingerprint → EVENT_CONFLICT. Idempotency checked before terminal state — replay of completed event on terminal order returns EVENT_REPLAY, new event on terminal returns TERMINAL_ORDER.", "tested_by": "TestEventIdempotency"},
+    {"id": "OBS-007", "location": "paper_gateway_v2.py:297-316", "description": "Restart/reconciliation: snapshot_id binds policy+connected+kill_switch+reconciliation+records. Disconnect sets connected=False, reconciliation_required=True. Mismatch → kill_switch=True, connected=False, reconciliation=True. Exact observation → connected=True, reconciliation=False. Resume detects tampered snapshot_id and trading_authority=True.", "tested_by": "TestRestartReconciliation"},
+    {"id": "OBS-008", "location": "paper_gateway_v2.py:11,255-257", "description": "Integration: imports only OrderIntentV2 from contracts. Order identity (order_id, market) preserved in record. No LiveOrder/live_order/submit_live. No parallel live authority.", "tested_by": "TestIntegrationBoundaries"},
+    {"id": "OBS-009", "location": "paper_gateway_v2.py:79-87", "description": "Policy validation: per-order cannot exceed total, max_open_orders>=1, market_data_age>0, positive notional. All reject with ValueError.", "tested_by": "TestPolicyValidation"},
+    {"id": "OBS-010", "location": "paper_gateway_v2.py:1-12", "description": "No network/credential/live imports. Only dataclass, datetime, decimal, enum, hashlib, json, contracts used.", "tested_by": "TestOfflinePaperOnly"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_accepts_paper_request_and_never_grants_trading_authority", "test_exact_retry_is_idempotent_without_second_order", "test_conflicting_idempotency_key_and_duplicate_order_reject", "test_gateway_state_gates_fail_closed", "test_authorization_and_stale_data_reject", "test_order_and_total_exposure_limits_and_open_order_limit", "test_disconnect_requires_exact_reconciliation_before_recovery", "test_snapshot_resume_detects_tampering", "test_paper_submission_rejects_trading_authority", "test_partial_and_final_fill_conserve_quantity", "test_exact_event_replay_is_idempotent_and_conflict_rejects", "test_overfill_stale_version_and_time_regression_reject", "test_cancel_is_terminal_and_preserves_partial_fill", "test_reconciliation_checks_quantities_and_version", "test_record_rejects_quantity_and_version_tampering", "test_module_has_no_provider_network_credential_or_live_order_capability"],
+    "accepted_after_correction": ["test_conflict_cannot_bypass_terminal (corrected: idempotency check at line 269 comes before terminal check at line 273; exact replay returns EVENT_REPLAY, new event on terminal returns TERMINAL_ORDER)", "test_no_parallel_live_authority (corrected: 'live' appears in docstring 'no live-order capability' which is correct; changed to check for LiveOrder/live_order/submit_live identifiers)"],
+    "redundant": ["Some adversarial tests overlap with existing on idempotency, gates, lifecycle, reconciliation"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

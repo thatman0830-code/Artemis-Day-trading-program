@@ -1,0 +1,350 @@
+{
+  "audit_id": "AUDIT-V2-PHASE1-PHASE2",
+  "audit_date": "2026-08-27",
+  "contracts": [
+    {
+      "name": "InstrumentSpecificationV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "94-131",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "instrument-spec-v2-1",
+      "invariants": [
+        "schema_version must be 'instrument-spec-v2-1'",
+        "specification_id must be lowercase SHA-256 (64 hex chars)",
+        "market, instrument_id, currency must be non-empty strings",
+        "contract_id if present must be non-empty string",
+        "profile must be InstrumentProfile enum",
+        "tick_size, quantity_step, contract_multiplier must be positive finite Decimal",
+        "point_value if present must be positive finite Decimal",
+        "effective_from must be timezone-aware UTC",
+        "effective_to if present must be timezone-aware UTC and > effective_from",
+        "evidence_ids must be non-empty and unique"
+      ],
+      "decimal_fields": ["tick_size", "quantity_step", "contract_multiplier", "point_value"],
+      "datetime_fields": ["effective_from", "effective_to"],
+      "verified": true
+    },
+    {
+      "name": "OwnerAssumptionV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "133-165",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "owner-assumption-v2-1",
+      "invariants": [
+        "schema_version must be 'owner-assumption-v2-1'",
+        "assumption_id must be lowercase SHA-256",
+        "assumption_type, market, instrument_id, decision_reference must be non-empty strings",
+        "effective_from must be timezone-aware UTC",
+        "effective_to if present must be UTC and > effective_from",
+        "decimal_values must be non-empty, uniquely named, lexically ordered",
+        "each decimal value must be finite Decimal",
+        "synthetic_test_only and owner_approved cannot both be true"
+      ],
+      "decimal_fields": ["decimal_values[*][1]"],
+      "datetime_fields": ["effective_from", "effective_to"],
+      "verified": true
+    },
+    {
+      "name": "CapabilityDeclarationV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "168-197",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "capability-declaration-v2-1",
+      "invariants": [
+        "schema_version must be 'capability-declaration-v2-1'",
+        "declaration_id must be lowercase SHA-256",
+        "market, instrument_id must be non-empty strings",
+        "supported_order_types, required_data_fields, specification_ids, reason_codes must be unique",
+        "profile must be InstrumentProfile enum",
+        "supported_order_types must contain OrderType values",
+        "production_eligible and reason_codes cannot both be present"
+      ],
+      "verified": true
+    },
+    {
+      "name": "OrderIntentV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "200-258",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "order-intent-v2-1",
+      "invariants": [
+        "schema_version must be 'order-intent-v2-1'",
+        "order_id, run_id, action_id must be lowercase SHA-256",
+        "market, instrument_id, configuration_version, execution_policy_version must be non-empty strings",
+        "contract_id if present must be non-empty string",
+        "quantity must be positive finite Decimal",
+        "side must be OrderSide enum",
+        "order_type must be OrderType enum",
+        "time_in_force must be TimeInForce enum",
+        "limit_price if present must be positive finite Decimal",
+        "stop_price if present must be positive finite Decimal",
+        "LIMIT and STOP_LIMIT require limit_price",
+        "STOP_MARKET and STOP_LIMIT require stop_price",
+        "MARKET cannot have limit_price or stop_price",
+        "submitted_at must be UTC",
+        "activation_at must be UTC and >= submitted_at",
+        "expires_at if present must be UTC and > activation_at",
+        "parent_order_id and replaces_order_id if present must be SHA-256 and not self-reference"
+      ],
+      "decimal_fields": ["quantity", "limit_price", "stop_price"],
+      "datetime_fields": ["submitted_at", "activation_at", "expires_at"],
+      "verified": true
+    },
+    {
+      "name": "OrderTransitionV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "261-284",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "order-transition-v2-1",
+      "invariants": [
+        "schema_version must be 'order-transition-v2-1'",
+        "transition_id, order_id must be lowercase SHA-256",
+        "event_time must be UTC",
+        "from_state and to_state must be OrderState enums",
+        "from_state != to_state (transition must change state)",
+        "source_event_ids must be unique"
+      ],
+      "datetime_fields": ["event_time"],
+      "verified": true
+    },
+    {
+      "name": "FillV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "287-322",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "fill-v2-1",
+      "invariants": [
+        "schema_version must be 'fill-v2-1'",
+        "fill_id, order_id, market_event_id must be lowercase SHA-256",
+        "market, instrument_id, currency, execution_rule_code, execution_policy_version must be non-empty strings",
+        "contract_id if present must be non-empty string",
+        "fill_time must be UTC",
+        "side must be OrderSide enum",
+        "quantity, economic_price, reference_price must be positive finite Decimal",
+        "friction must be finite Decimal",
+        "fee_total must be nonnegative finite Decimal"
+      ],
+      "decimal_fields": ["quantity", "economic_price", "reference_price", "friction", "fee_total"],
+      "datetime_fields": ["fill_time"],
+      "verified": true
+    },
+    {
+      "name": "AccountingSnapshotV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "325-359",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "accounting-snapshot-v2-1",
+      "invariants": [
+        "schema_version must be 'accounting-snapshot-v2-1'",
+        "snapshot_id, run_id must be lowercase SHA-256",
+        "as_of must be UTC",
+        "currency must be non-empty string",
+        "accounting_version must be non-empty string",
+        "cash, realized_pnl, unrealized_pnl, fees, funding, equity, initial_margin, maintenance_margin, available_funds must be finite Decimal",
+        "fees, initial_margin, maintenance_margin must be nonnegative",
+        "source_event_ids must be unique"
+      ],
+      "decimal_fields": ["cash", "realized_pnl", "unrealized_pnl", "fees", "funding", "equity", "initial_margin", "maintenance_margin", "available_funds"],
+      "datetime_fields": ["as_of"],
+      "verified": true
+    },
+    {
+      "name": "RiskEventV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "362-389",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "risk-event-v2-1",
+      "invariants": [
+        "schema_version must be 'risk-event-v2-1'",
+        "risk_event_id, run_id must be lowercase SHA-256",
+        "event_time must be UTC",
+        "phase must be RiskPhase enum",
+        "decision must be RiskDecision enum",
+        "market, instrument_id, risk_policy_version must be non-empty strings",
+        "reason_codes must be non-empty and unique",
+        "source_event_ids must be unique"
+      ],
+      "datetime_fields": ["event_time"],
+      "verified": true
+    },
+    {
+      "name": "BacktestResultIdentityV2",
+      "file": "backtesting/execution_accounting_v2/contracts.py",
+      "lines": "392-425",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "backtest-result-v2-1",
+      "invariants": [
+        "schema_version must be 'backtest-result-v2-1'",
+        "result_id, run_id, configuration_fingerprint, dataset_fingerprint, economic_fingerprint must be lowercase SHA-256",
+        "strategy_version, execution_policy_version, accounting_version, risk_policy_version must be non-empty strings",
+        "started_at and ended_at must be UTC",
+        "ended_at >= started_at",
+        "simulation_only must be True (v2 Phase 1 results are simulation only)",
+        "source_record_ids must be unique"
+      ],
+      "datetime_fields": ["started_at", "ended_at"],
+      "verified": true
+    },
+    {
+      "name": "EvidenceRecord",
+      "file": "backtesting/execution_accounting_v2/specifications.py",
+      "lines": "94-127",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "evidence-record-v2-1",
+      "invariants": [
+        "schema_version must be 'evidence-record-v2-1'",
+        "evidence_id, source_organization, document_identity, local_snapshot_path, market, instrument_id must be non-empty strings",
+        "snapshot_sha256 must be 64-char lowercase hex",
+        "retrieved_at, effective_from must be UTC",
+        "effective_to if present must be UTC and > effective_from",
+        "fact_names must be non-empty"
+      ],
+      "datetime_fields": ["retrieved_at", "effective_from", "effective_to"],
+      "verified": true
+    },
+    {
+      "name": "SpecificationRecord",
+      "file": "backtesting/execution_accounting_v2/specifications.py",
+      "lines": "129-161",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "economic-specification-v2-1",
+      "invariants": [
+        "schema_version must be 'economic-specification-v2-1'",
+        "specification_id, market, instrument_id must be non-empty strings",
+        "effective_from must be UTC",
+        "effective_to if present must be UTC and > effective_from",
+        "values must be non-empty, uniquely named, lexically ordered, with non-empty string values",
+        "production specifications require evidence lineage (unless synthetic_test_only)",
+        "synthetic_test_only and owner_approved cannot both be true"
+      ],
+      "datetime_fields": ["effective_from", "effective_to"],
+      "verified": true
+    },
+    {
+      "name": "SpecificationRepository",
+      "file": "backtesting/execution_accounting_v2/specifications.py",
+      "lines": "197-220",
+      "frozen": true,
+      "slots": true,
+      "invariants": [
+        "evidence_ids must be unique",
+        "specification_ids must be unique",
+        "all specification evidence_ids must be subset of known evidence_ids"
+      ],
+      "verified": true
+    },
+    {
+      "name": "OrderLedgerEventV2",
+      "file": "backtesting/execution_accounting_v2/order_ledger.py",
+      "lines": "82-119",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "order-ledger-event-v2-1",
+      "invariants": [
+        "schema_version must be 'order-ledger-event-v2-1'",
+        "event_id, order_id, source_event_id must be lowercase SHA-256",
+        "kind must be LedgerEventKind",
+        "event_time must be UTC",
+        "sequence_number must be positive integer (not bool)",
+        "expected_order_version must be nonnegative integer (not bool)",
+        "market, instrument_id, reason_code must be non-empty strings",
+        "contract_id if present must be non-empty string",
+        "fill_quantity if present must be finite Decimal"
+      ],
+      "datetime_fields": ["event_time"],
+      "verified": true
+    },
+    {
+      "name": "OrderLedgerTransitionV2",
+      "file": "backtesting/execution_accounting_v2/order_ledger.py",
+      "lines": "122-168",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "order-ledger-transition-v2-1",
+      "ledger_version": "order-ledger-v2-1",
+      "invariants": [
+        "schema_version must be 'order-ledger-transition-v2-1'",
+        "ledger_version must be 'order-ledger-v2-1'",
+        "transition_id, order_id, source_event_id, event_id, event_fingerprint must be lowercase SHA-256",
+        "parent_order_id, child_order_id if present must be SHA-256",
+        "market, instrument_id, reason_code must be non-empty strings",
+        "event_time must be UTC",
+        "sequence_number and transition_ordinal must be positive integers",
+        "previous_state and resulting_state must be OrderState enums",
+        "accepted_quantity, filled_quantity, remaining_quantity must be nonnegative finite Decimal",
+        "accepted_quantity == filled_quantity + remaining_quantity (quantity conservation)"
+      ],
+      "decimal_fields": ["accepted_quantity", "filled_quantity", "remaining_quantity"],
+      "datetime_fields": ["event_time"],
+      "verified": true
+    },
+    {
+      "name": "OrderLedgerSnapshotV2",
+      "file": "backtesting/execution_accounting_v2/order_ledger.py",
+      "lines": "171-208",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "order-ledger-snapshot-v2-1",
+      "invariants": [
+        "schema_version must be 'order-ledger-snapshot-v2-1'",
+        "intent must be OrderIntentV2",
+        "state must be OrderState",
+        "order_version and last_sequence_number must be nonnegative integers (not bool)",
+        "last_event_time if present must be UTC",
+        "accepted_quantity, filled_quantity, remaining_quantity must be nonnegative finite Decimal",
+        "accepted_quantity == filled_quantity + remaining_quantity (quantity conservation)",
+        "transition_ids must each be SHA-256",
+        "replacement_child_order_id if present must be SHA-256"
+      ],
+      "decimal_fields": ["accepted_quantity", "filled_quantity", "remaining_quantity"],
+      "datetime_fields": ["last_event_time"],
+      "verified": true
+    },
+    {
+      "name": "OrderLedgerV2",
+      "file": "backtesting/execution_accounting_v2/order_ledger.py",
+      "lines": "259-440",
+      "frozen": true,
+      "slots": true,
+      "schema_version": "order-ledger-v2-1",
+      "ledger_version": "order-ledger-v2-1",
+      "invariants": [
+        "schema_version must be 'order-ledger-v2-1'",
+        "ledger_version must be 'order-ledger-v2-1'",
+        "ledger_fingerprint if non-empty must be lowercase SHA-256",
+        "order_ids must be unique",
+        "event_ids must be unique",
+        "apply() returns new ledger (immutable)",
+        "exact duplicate event returns same ledger (idempotent)",
+        "conflicting event_id reuse raises DUPLICATE_EVENT_CONFLICT",
+        "sequence_number must equal len(events)+1",
+        "event_time must not regress",
+        "equal-timestamp events ordered by priority then event_id",
+        "expected_order_version must match snapshot.order_version",
+        "terminal states reject all events",
+        "invalid transitions reject with specific reason codes",
+        "GTC fill/trigger/execution requires contract_eligibility_verified",
+        "DAY expire requires session_boundary_verified",
+        "GTC expire requires contract_eligibility_verified",
+        "stop orders require trigger before fill",
+        "stop-limit fill must follow trigger event",
+        "fill_quantity must be positive and <= remaining",
+        "IOC partial fill cancels residual",
+        "IOC double evaluation rejected",
+        "replace creates linked child and parent REPLACED"
+      ],
+      "verified": true
+    }
+  ]
+}

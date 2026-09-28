@@ -1,0 +1,34 @@
+{
+  "source_disk": "C:\\Users\\fjone\\AppData\\Local\\Docker\\wsl\\disk\\docker_data.vhdx",
+  "source_disk_bytes": 17270046720,
+  "method": "VHDX and ext filesystem read directly with read-only file handle; no container or Docker engine started.",
+  "filesystem_state": 1,
+  "directories": {
+    "/data/docker/volumes": [
+      {
+        "name": "backingFsBlockDev",
+        "type": 24576,
+        "size": 0
+      },
+      {
+        "name": "metadata.db",
+        "type": 32768,
+        "size": 32768
+      }
+    ],
+    "/data/docker/containers": [],
+    "/data/docker/rootfs/overlayfs": [],
+    "/data/containerd": [],
+    "/data/desktop-containerd/daemon/io.containerd.runtime.v2.task": [
+      {
+        "name": "moby",
+        "type": 16384,
+        "size": 4096
+      }
+    ]
+  },
+  "result": "No named volume directories, Docker container records, or Docker writable rootfs entries were present in the inspected data disk. volumes/metadata.db is Docker metadata, not a trading database.",
+  "export": "Docker deployment files are included under project-main/deploy and project-main/hermes_worker. No project volume was available to export. The 17.27 GB Docker virtual disk, operating system, cached image layers and build caches are not included.",
+  "limits": "Offline directory inspection of the supplied local Docker data disk. Does not establish whether any remote deployment or previously removed container stored additional data.",
+  "reader_documentation": "https://docs.dissect.tools/en/stable/projects/dissect.hypervisor/index.html"
+}

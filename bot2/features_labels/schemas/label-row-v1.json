@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bot2-label-row-v1",
+  "type": "object",
+  "required": ["instrument", "observation_time", "cutoff_time", "label_version", "source_dataset_id", "source_dataset_sha256", "session_id", "horizon_events", "validity", "reason_codes", "uses_future_observations", "trading_authority"],
+  "properties": {
+    "instrument": {"type": "string"}, "observation_time": {"type": "string"}, "cutoff_time": {"type": "string"},
+    "label_version": {"type": "string"}, "source_dataset_id": {"type": "string"}, "source_dataset_sha256": {"type": "string"},
+    "session_id": {"type": "string"}, "horizon_events": {"type": "integer", "minimum": 1}, "validity": {"type": "string"},
+    "reason_codes": {"type": "array", "items": {"type": "string"}}, "uses_future_observations": {"const": true}, "trading_authority": {"const": false}
+  }
+}

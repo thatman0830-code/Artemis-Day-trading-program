@@ -1,0 +1,29 @@
+{
+  "audit_assignment": "AUDIT-OWNER-CONTEXT-LIVE-EVIDENCE-BRIDGE",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-30",
+  "checkpoint": "b4b73d1f9986a2727e03fc2eec040536336efcd6",
+  "parent_sha": "e404c492fd3e061d4fb714efe45f05f48a2f6f8a",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "owner_context_health_adapter.py:76-102", "description": "Per-component heartbeat_rpo_seconds on ComponentIdentityV1: None=use policy default, positive int=component-specific, zero/negative/bool=reject. Propagated to ComponentObservationV1.", "tested_by": "TestHeartbeatSLA"},
+    {"id": "OBS-002", "location": "operational_resilience.py:187-188", "description": "evaluate_operational_readiness uses per-observation heartbeat_rpo_seconds if supplied, else policy default. BTC 90s SLA independent of ES/NQ 93600s SLA.", "tested_by": "TestBtcSlaNotWeakened"},
+    {"id": "OBS-003", "location": "scripts/collect_owner_context_health_facts.ps1:1-120", "description": "No Register/Unregister/Enable/Disable/Start/Stop-ScheduledTask, Start/Stop-Process, Set-ScheduledTask, New-ScheduledTask, Invoke-WebRequest/RestMethod/Expression/Command. Read-only collection only.", "tested_by": "TestCollectorNoMutation, TestNoTaskControl"},
+    {"id": "OBS-004", "location": "scripts/collect_owner_context_health_facts.ps1:31-48", "description": "Get-TaskFacts: exact task name, single action, Get-ActionScript -File parsing (case-insensitive, quoted/unquoted), executable, state, last_result, MultipleInstances, RestartCount, RestartInterval, instance_count.", "tested_by": "TestTaskIdentityValidation, TestCommandLineParsing"},
+    {"id": "OBS-005", "location": "scripts/collect_owner_context_health_facts.ps1:8-11", "description": "Get-Sha256 uses Get-FileHash with SHA256 algorithm. Source hashes derived from actual evidence files (btcEvent, btcManifest, latestEsRun).", "tested_by": "TestSourceHashes"},
+    {"id": "OBS-006", "location": "scripts/collect_owner_context_health_facts.ps1:49-60", "description": "Test-BtcIntegrity: missing manifest returns False, state==RECORDING checked, each checksum verified via Get-Sha256 comparison. Join-Path with Split-Path parent prevents traversal.", "tested_by": "TestBtcArchiveChecksum"},
+    {"id": "OBS-007", "location": "scripts/collect_owner_context_health_facts.ps1:80-81", "description": "clock_skew_seconds = [int]::MaxValue — absent clock authority deliberately fails closed. No unauthenticated override possible.", "tested_by": "TestClockAuthority"},
+    {"id": "OBS-008", "location": "scripts/collect_owner_context_health_facts.ps1:110", "description": "ES/NQ archive_integrity_verified hardcoded $false until separately verified. Cannot be overridden through the collector.", "tested_by": "TestEsNqIntegrity"},
+    {"id": "OBS-009", "location": "owner_context_health_report.py:48-58", "description": "Sanitized JSON: exact key set enforced (set(row) != required → reject). trading_authority must be False. incident_facts must be empty. Extra/missing fields reject.", "tested_by": "TestSanitizedJson, TestComponentFieldValidation"},
+    {"id": "OBS-010", "location": "scripts/collect_owner_context_health_facts.ps1:115-119", "description": "Output is atomic (WriteAllText to temp + Move-Item), UTF-8 ([Text.UTF8Encoding]::new($false)), ConvertTo-Json. No credentials in source.", "tested_by": "TestOutputFormat"},
+    {"id": "OBS-011", "location": "owner_context_health_report.py:74-91", "description": "evaluate_sanitized_owner_facts: deterministic, trading_authority=False always, report_json sorted-keys canonical JSON with trailing newline.", "tested_by": "TestDeterminism"},
+    {"id": "OBS-012", "location": "owner_context_health_report.py:1-13", "description": "No os/subprocess/socket/requests/httpx/win32com/ctypes imports. Pure read-only translation boundary.", "tested_by": "TestNoProviderNetwork"}
+  ],
+  "test_classification": {
+    "accepted": ["5 collector tests pass", "8 report tests pass", "58 monitoring tests pass", "All adversarial edge cases pass", "Per-component SLA propagation correct", "BTC/ES/NQ SLA independence", "PowerShell collector read-only", "Atomic UTF-8 output", "trading_authority always False"],
+    "corrected": ["heartbeat_rpo_seconds=None in identity propagates as None to observation (not policy default); policy default used only in staleness check", "Lambda with assignment is invalid Python syntax → replaced with named function"],
+    "redundant": ["Some PowerShell source assertions overlap with existing collector tests"],
+    "implementation_coupled": [],
+    "rejected": []
+  }
+}

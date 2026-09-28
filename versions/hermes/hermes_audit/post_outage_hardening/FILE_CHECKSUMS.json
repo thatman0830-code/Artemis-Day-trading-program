@@ -1,0 +1,12 @@
+{
+  "audit_assignment": "AUDIT-POST-OUTAGE-OPERATIONAL-HARDENING",
+  "date": "2026-08-31",
+  "checkpoint": "14e40b39c5cb97d75956d9722848531d70cbfff3",
+  "files": {
+    "futures_data/test_forward_collector.py": "f80fbbcbc57fbcfa7f98127e22da5d18e543fd32fb0a94b5dd06b5379c668948",
+    "monitoring/test_owner_context_collector.py": "87586dfc03e768203108a258a52845ed7bc44db714193535e636c865fb1025fd",
+    "scripts/collect_owner_context_health_facts.ps1": "95106d31d39a3ebaf292ed1374da4a3dfc865f3d0680de3f00f37d78594f8fb4",
+    "scripts/install_es_nq_delayed_forward_task.ps1": "bcd9118bd61dcbb2fffe6561954c4c319b7daa036f011055c4cbcf55f909e779"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-31."
+}

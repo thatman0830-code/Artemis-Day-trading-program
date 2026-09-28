@@ -1,0 +1,32 @@
+{
+  "audit_assignment": "AUDIT-PAPER-DASHBOARD",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "a671a1615a3c041202a58fc17d8f39499a6fd1a3",
+  "parent_sha": "a62a5b853c5c4cc37698079e6c11be6f1bce1c85",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_dashboard_v1.py:1-6,137-138", "description": "Read-only advisory-only dashboard. No execution imports, no outbound client imports (urllib.request not present; urllib.parse used for URL parsing only). trading_authority=False, live_trading_permitted=False, advisory_only=True.", "tested_by": "TestReadOnlyAdvisory"},
+    {"id": "OBS-002", "location": "paper_dashboard_v1.py:24,196-205", "description": "Cannot bind outside loopback: LOOPBACK_HOSTS = {127.0.0.1, ::1, localhost}. Non-loopback host rejects with PaperDashboardError. Port validated 1-65535.", "tested_by": "TestLoopbackBinding"},
+    {"id": "OBS-003", "location": "paper_dashboard_v1.py:187-188", "description": "POST rejects with 405 method not allowed. PUT/DELETE not implemented (501). Only GET and HEAD serve content.", "tested_by": "TestHttpBehavior"},
+    {"id": "OBS-004", "location": "paper_dashboard_v1.py:93-117", "description": "Adapter checkpoint checksums verified: payload_sha256 matches, trading_authority=False at payload and gateway level, wrong schema rejects, tampered checksum rejects.", "tested_by": "TestAdapterCheckpoint"},
+    {"id": "OBS-005", "location": "paper_dashboard_v1.py:36-59,62-90", "description": "Malformed/oversized/symlinked/unsupported evidence fails closed. Symlinks reject as unsafe. Oversized rejects. Missing required rejects. Empty rejects.", "tested_by": "TestBadEvidence"},
+    {"id": "OBS-006", "location": "paper_dashboard_v1.py:77-80", "description": "Only closed BTC 15-minute candles accepted: symbol must be BTC, timeframe must be 15m, is_closed must be true. Non-BTC, wrong timeframe, not closed all reject. Chronology must be strictly increasing.", "tested_by": "TestCandleValidation"},
+    {"id": "OBS-007", "location": "paper_dashboard_v1.py:93-96,134-136", "description": "Missing paper-session evidence displayed honestly: paper.available=False, orders=[], receipts=[]. No fabricated equity, balance, positions, or P&L.", "tested_by": "TestHonestMissingEvidence"},
+    {"id": "OBS-008", "location": "paper_dashboard_v1.py:135-136", "description": "P&L unavailable without authoritative fill-price and mark-to-market ledger: performance.available=False, reason='AUTHORITATIVE_FILL_PRICE_AND_MARK_TO_MARKET_LEDGER_UNAVAILABLE'.", "tested_by": "TestPnlUnavailable"},
+    {"id": "OBS-009", "location": "paper_dashboard_v1.py:140", "description": "Snapshot IDs deterministic and content-addressed: SHA-256 of canonical core. Identical inputs produce identical snapshots.", "tested_by": "TestSnapshotIdentity"},
+    {"id": "OBS-010", "location": "paper_dashboard_v1.py:149-151", "description": "HTML escaping: JavaScript esc() function escapes &, <, >, \", ' to prevent XSS. Order fields (order_id, state, quantity, filled_quantity, notional) use esc().", "tested_by": "TestHtmlEscaping"},
+    {"id": "OBS-011", "location": "paper_dashboard_v1.py:159-166", "description": "Security headers: Cache-Control=no-store, X-Content-Type-Options=nosniff, Content-Security-Policy with default-src 'self', object-src 'none', frame-ancestors 'none'. Verified via actual HTTP response.", "tested_by": "TestSecurityHeaders"},
+    {"id": "OBS-012", "location": "paper_dashboard_v1.py:7-18", "description": "No outbound network clients (requests, httpx, aiohttp, socketio, paramiko, smtplib not imported). No execution-module imports. http.server is inbound server only. urllib.parse is URL parsing utility, not outbound client.", "tested_by": "TestNoExecutionImports"},
+    {"id": "OBS-013", "location": "scripts/run_paper_dashboard.ps1:1-18", "description": "PowerShell wrapper: binds 127.0.0.1, uses monitoring.paper_dashboard_v1 module, Python runtime checked, ErrorActionPreference=Stop, no mutation cmdlets, no credentials.", "tested_by": "TestPowerShellWrapper"},
+    {"id": "OBS-014", "location": "paper_dashboard_v1.py:120-140", "description": "Actual localhost HTTP behavior tested: GET / returns HTML, GET /api/snapshot returns JSON with trading_authority=false, HEAD works, POST returns 405, unknown routes return 404, security headers present on both HTML and JSON responses.", "tested_by": "TestHttpBehavior"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_snapshot_is_explicitly_read_only_and_does_not_invent_performance", "test_snapshot_id_is_deterministic", "test_adapter_checksum_and_authority_are_verified", "test_unsupported_candle_evidence_fails_closed", "test_symlinked_evidence_rejects", "test_non_loopback_binding_rejects", "test_module_has_no_execution_or_outbound_client_imports"],
+    "accepted_after_correction": ["test_no_outbound_client_imports (corrected: urllib.parse is URL parsing utility, not outbound client — removed from forbidden set, separately verified urllib.request not imported)", "test_snapshot_has_security_headers (corrected: CSP header value contains policy directives, not the header name — check 'default-src' in CSP value)", "test_html_has_security_headers (same correction)"],
+    "redundant": ["Some adversarial tests overlap with existing on trading_authority=false, snapshot determinism, adapter checksum, unsupported candles, symlink, loopback binding, no execution imports"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}
+

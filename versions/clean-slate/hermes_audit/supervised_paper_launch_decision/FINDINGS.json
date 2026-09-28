@@ -1,0 +1,29 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-LAUNCH-DECISION",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "da0d484efb015ffb63818962d0571e94b7f36c5f",
+  "parent_sha": "ddf2b016afb2f3927aaebdf0e6d6751a443c2ffe",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "supervised_paper_launch_decision_v1.py:28-33", "description": "Explicit supervision and stop-control acknowledgements mandatory. Missing/false/non-boolean/int all reject with 'explicit owner'.", "tested_by": "TestAcknowledgements"},
+    {"id": "OBS-002", "location": "supervised_paper_launch_decision_v1.py:34", "description": "Evidence parsed through audited read_launch_evidence contract. Exact evidence_id and Git checkpoint preserved.", "tested_by": "TestEvidenceParsing"},
+    {"id": "OBS-003", "location": "supervised_paper_launch_decision_v1.py:38-42", "description": "Confirmation created via OwnerSupervisionConfirmationV1.create: content-addressed (SHA-256), checkpoint-bound (evidence.repository_checkpoint), limit-bound (session 900s, commands 5, notional $100, gross $200), expires within 5 minutes.", "tested_by": "TestConfirmation"},
+    {"id": "OBS-004", "location": "supervised_paper_launch_decision_v1.py:43-57", "description": "Decision deterministic for identical evidence and as_of. Envelope identity=SHA-256(canonical body). Tamper-evident.", "tested_by": "TestDeterminism, TestEnvelopeIdentity"},
+    {"id": "OBS-005", "location": "supervised_paper_launch_decision_v1.py:60-64", "description": "Atomic output via temp+os.replace. No temp files remaining after write.", "tested_by": "TestAtomicOutput"},
+    {"id": "OBS-006", "location": "supervised_paper_launch_decision_v1.py:34,43-44", "description": "Stale/unhealthy/dirty/not-running/gaps/unverified-drill/authority/future evidence all produce ineligible or reject. No unhealthy evidence can produce eligibility.", "tested_by": "TestIneligibleEvidence"},
+    {"id": "OBS-007", "location": "supervised_paper_launch_decision_v1.py:18-21,35-37", "description": "Hard limits: 15 minutes (900s), 5 commands, $100 notional, $200 gross. Constants enforced. Cannot be increased/bypassed/inferred.", "tested_by": "TestLimits"},
+    {"id": "OBS-008", "location": "supervised_paper_launch_decision_v1.py:57,55,56", "description": "Eligible: BTC-only, advisory_only=true, live_trading_permitted=false, trading_authority=false. No reasons when eligible. Has expires_at. Ineligible: no expires, no markets.", "tested_by": "TestEligibleDecision"},
+    {"id": "OBS-009", "location": "supervised_paper_launch_decision_v1.py:1-15", "description": "No network/credential/live/task-mutation/workflow-acquisition/gateway-execution imports. Only argparse, datetime, decimal, hashlib, json, os, pathlib, evidence_v1, gate_v1 used.", "tested_by": "TestNoProhibited"},
+    {"id": "OBS-010", "location": "supervised_paper_launch_decision_v1.py:1", "description": "No owner-approval/profitability/OOS/deployment/unattended-readiness/live-readiness claim. 'Advisory' in docstring.", "tested_by": "TestNoFalseClaims"},
+    {"id": "OBS-011", "location": "supervised_paper_launch_decision_v1.py:28-33", "description": "Direct function calls fail closed: naive as_of, non-UTC as_of, no supervision, malformed evidence all reject.", "tested_by": "TestDirectConstruction"},
+    {"id": "OBS-012", "location": "supervised_paper_launch_decision_v1.py:17,57", "description": "Envelope schema: DECISION_ENVELOPE_VERSION, decision_envelope_id SHA-256, launch_id SHA-256, confirmation_id SHA-256.", "tested_by": "TestEnvelopeSchema"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_explicit_acknowledgements_create_bounded_advisory_decision", "test_missing_owner_acknowledgement_rejects", "test_stale_evidence_produces_ineligible_decision", "test_output_is_atomic_and_content_addressed", "test_module_has_no_session_start_or_submission_surface"],
+    "accepted_after_correction": ["TestIneligibleEvidence tests (corrected: _decision helper called _evidence in default args, overwriting modified evidence — fixed to only create evidence if evidence_path not provided)"],
+    "redundant": ["Some adversarial tests overlap with existing on acknowledgements, stale evidence, atomic output, no submission surface"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

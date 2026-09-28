@@ -1,0 +1,11 @@
+{
+  "audit_assignment": "PERSISTENCE_REAUDIT",
+  "date": "2026-09-01",
+  "checkpoint": "bc4dae95f120dd49d91c66c19de49eaf40c5d65c",
+  "filesystem_sha256": {
+    "execution/supervised_paper_performance_v1.py": "2906f6fe7149ec8adeea49da4b4cee4093682442bb2d3e815f32c8ce0d0bc69ec",
+    "execution/test_supervised_paper_performance_v1.py": "3b961e4f1bf037faebbe0caa884c491ca5a5614e2d8e823fe6534dfc055b8371",
+    "execution/supervised_paper_workflow_v1.py": "8781c8494eabf7b5d6e5d0834ef6bbb7b70e5678364a0cf98c3191ca039306a5"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted (corrected) files on 2026-09-01. These are working-tree bytes, not canonical Git-blob hashes."
+}

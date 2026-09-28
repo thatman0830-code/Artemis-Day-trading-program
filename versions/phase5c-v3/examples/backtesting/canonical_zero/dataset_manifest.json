@@ -1,0 +1,19 @@
+{
+  "candle_schema_version": "historical-candle-v1",
+  "dataset_id": "phase7b-canonical_zero-v1",
+  "exchange": "none",
+  "files": [
+    {
+      "path": "candles_1m.csv",
+      "timeframe": "1m"
+    },
+    {
+      "path": "candles_5m.csv",
+      "timeframe": "5m"
+    }
+  ],
+  "gap_policy": "REJECT",
+  "schema_version": "backtesting-data-manifest-v1",
+  "source": "synthetic-local-fixture",
+  "validation_time": "2026-01-07T00:30:00.000001Z"
+}

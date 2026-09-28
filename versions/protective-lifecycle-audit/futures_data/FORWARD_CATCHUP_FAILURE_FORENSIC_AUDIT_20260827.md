@@ -1,0 +1,13 @@
+# First delayed-forward catch-up forensic audit
+
+Attempt `25b33fe6bc5d65160362bcb3fda979a4e6326a6978fcadc52c451c6d1686184d` began at `2026-08-27T16:43:46.2434284Z`. The Python process did not emit its sanitized diagnostic because the PowerShell 5.1 wrapper converted native stderr into a terminating wrapper error and discarded the worker stream. The retained raw-first reference transaction nevertheless provides sufficient evidence.
+
+All four reference responses (ES schedules, ES contracts, NQ schedules, NQ contracts) are HTTP 200 and match their manifest SHA-256 values. Total retained raw bytes are 83,866. No pagination, retry, aggregate request, normalized aggregate row, aggregate manifest, checkpoint, configuration publication, or promotion occurred. The filesystem lock was released.
+
+DPAPI decryption and credential transfer succeeded, inferred solely from four authenticated successful responses; no credential content was read during this audit. Schedule responses contained 95 outright and 95 calendar-spread events per market. The local parser grouped both products together and raised `ForwardCollectorError: reference schedule duplicate open`. This is a local schedules identity/filtering defect, not authentication, entitlement, or provider failure.
+
+The correction filters only the two retained and previously verified outright product names for each root, retains excluded schedule products in raw evidence, and keeps exact root and XCME validation. The four verified responses were reconciled offline—without a provider call—into content-addressed configuration `1d90981dd9203250b32c3cdc81eb843b4a525029b8b4faded838b53f510f536e`, verified through 2026-09-18 with a 2026-09-19 exclusive boundary. Therefore the next run does not repeat the four verified reference calls. It can request only an eligible, uncheckpointed aggregate fact from the corrected configuration.
+
+The wrapper now uses `ProcessStartInfo`, anonymous stdin, explicit repository working directory, captured bounded/discarded worker stderr, and one concise sanitized console failure. The credential remains absent from arguments and logs.
+
+Correction to the initial task lookup: that query ran as the isolated `frank\codexsandboxoffline` account, which could not see the owner-registered task. An owner-context audit using the exact installer identity confirms `\ES-NQ Delayed Daily Research Collector` is registered and disabled. The BTC archive independently reports `RECORDING`; all five stream checksums validate, every stream has zero gaps and `stale: false`, and its two long-running Python processes remain responsive. No BTC control action occurred.

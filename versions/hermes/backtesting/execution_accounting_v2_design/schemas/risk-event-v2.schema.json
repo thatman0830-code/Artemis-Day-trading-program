@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"risk-event-v2.schema.json","type":"object","additionalProperties":false,
+  "required":["schema_version","risk_event_id","run_id","event_time","phase","decision","reason_codes","source_event_ids","risk_policy_version"],
+  "properties":{"schema_version":{"const":"risk-event-v2-1"},"risk_event_id":{"$ref":"common-defs-v2.schema.json#/$defs/id"},"run_id":{"$ref":"common-defs-v2.schema.json#/$defs/id"},"event_time":{"$ref":"common-defs-v2.schema.json#/$defs/utc"},"phase":{"enum":["PRE_TRADE","POST_TRADE","SESSION","DATA_QUALITY","ROLLOVER"]},"decision":{"enum":["ALLOW","REJECT","HALT","FORCE_REDUCE","FORCE_FLATTEN"]},"reason_codes":{"type":"array","items":{"type":"string"},"minItems":1,"uniqueItems":true},"source_event_ids":{"type":"array","items":{"$ref":"common-defs-v2.schema.json#/$defs/id"},"uniqueItems":true},"risk_policy_version":{"$ref":"common-defs-v2.schema.json#/$defs/version"}}
+}

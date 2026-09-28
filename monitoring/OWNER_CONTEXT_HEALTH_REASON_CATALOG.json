@@ -1,0 +1,22 @@
+{
+  "version": "OWNER_CONTEXT_HEALTH_ADAPTER_V1",
+  "adapter_rejections": [
+    "component identities must exactly match policy",
+    "cross-component incident",
+    "duplicate incident identity",
+    "future-dated collection",
+    "future-dated incident",
+    "heartbeat cannot follow collection",
+    "missing or cross-component facts",
+    "stale owner-context collection",
+    "task identity or policy mismatch",
+    "task installation requires owner-context visibility"
+  ],
+  "readiness_reasons": [
+    "CLOCK_SKEW", "DATA_GAP", "DUPLICATE_INSTANCE", "INCIDENT_OPEN",
+    "INTEGRITY_FAILURE", "MISSING_COMPONENT", "OBSERVATION_FROM_FUTURE",
+    "RECOVERY_RTO_BREACH", "RESTART_BUDGET_EXHAUSTED", "STALE_HEARTBEAT",
+    "STORAGE_LOW", "TASK_NOT_RUNNING", "UNAUTHORIZED_TRADING_AUTHORITY"
+  ],
+  "authority": {"trading_authority": false}
+}

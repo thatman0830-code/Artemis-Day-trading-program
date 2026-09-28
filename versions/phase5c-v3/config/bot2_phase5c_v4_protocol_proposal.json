@@ -1,0 +1,165 @@
+{
+  "protocol_id": "BOT2-PHASE5C-V4",
+  "protocol_version": "4.0.0-proposal.1",
+  "status": "PROPOSED_NOT_ADOPTED",
+  "executable": false,
+  "scoring_authorized": false,
+  "protected_oos_authorized": false,
+  "trading_authority": "NONE",
+  "relationship": {
+    "original_protocol_id": "BOT2-PHASE5C-V3",
+    "original_protocol_disposition": "NON_EXECUTABLE_AS_WRITTEN_DUE_TO_PROTOCOL_AMBIGUITY",
+    "original_protocol_file": "docs/BOT2_PHASE5C_V3_PROTOCOL.md",
+    "original_protocol_sha256": "23905DBD4215669477645313B931243A644E83755577C4ABF7AC57A0ADC62667",
+    "original_manifest_file": "config/bot2_phase5c_experiment_manifest_v3.json",
+    "original_manifest_canonical_sha256": "c9ae6da9f8d73708c3ca17a28788c80722c5852c48ca658f8ffad75ecb56dc19",
+    "original_manifest_file_sha256": "FB12989A0E4062EA63B0A335D62B718BA02AD3082C42E63372CABC2F035A1FA5",
+    "dataset_identity": "BIND_EXISTING_FROZEN_V3_DATASET_IDENTITY_UNCHANGED",
+    "new_protocol_is_not_retroactive": true
+  },
+  "disclosure": {
+    "discovered_after_structural_no_score_preflight": true,
+    "expected_cells": 5184,
+    "structurally_ready": 5112,
+    "structurally_blocked": 72,
+    "observed_pattern_used_to_select_rules": false,
+    "protected_inference": 0,
+    "protected_predictions": 0,
+    "protected_probabilities": 0,
+    "protected_metrics": 0,
+    "protected_pnl": 0,
+    "protected_scores": 0,
+    "protected_trades": 0
+  },
+  "fixed_dimensions": {
+    "instruments": ["ES", "NQ"],
+    "cadence_seconds": 60,
+    "sequence_length": 8,
+    "feature_count": 24,
+    "horizons_minutes": [5, 15, 30],
+    "walk_forward_windows": ["WF1", "WF2", "WF3", "WF4"],
+    "seeds": [1, 2, 3],
+    "a2_input_shape": [8, 24],
+    "a2_parameter_count": 7417,
+    "features_targets_architecture_training_ablations_unchanged": true
+  },
+  "a0": {
+    "scope_key": ["instrument", "exact_contract", "session", "root", "head", "horizon", "target_version"],
+    "reset_on_session_or_contract_boundary": true,
+    "prior_availability": {
+      "anchor_strictly_before_decision_time": true,
+      "full_target_information_interval_end_at_or_before_decision_time": true,
+      "cross_session_or_contract": false,
+      "forward_fill": false,
+      "future_or_unmatured_label": false,
+      "earlier_matured_evaluation_label_for_later_decisions": true,
+      "note": "Prospective V4 choice, not claimed to be frozen V3 behavior."
+    },
+    "majority": {
+      "fit_partition": "TRAIN_ONLY",
+      "group_by": ["root", "head", "horizon"],
+      "class_probability": "(train_class_count + 1) / (eligible_train_count + class_count)",
+      "predicted_class": "largest_train_class_count",
+      "class_tie_break": "lexicographically_smallest_frozen_class_label",
+      "empty_train_labels": "STRUCTURAL_BLOCKED_A0_TRAIN_EMPTY"
+    },
+    "persistence": {
+      "prediction": "one_hot_latest_matured_prior_label",
+      "no_prior": "A0_UNAVAILABLE_NO_MATURED_PRIOR",
+      "fallback": "NONE"
+    },
+    "transition": {
+      "transition_counts_partition": "TRAIN_ONLY",
+      "transition_order": 1,
+      "laplace_alpha": 1,
+      "edge_requires_adjacent_valid_one_minute_anchors": true,
+      "edge_may_cross_gap_session_contract_or_partition": false,
+      "conditioning_state": "latest_matured_prior_under_common_a0_scope",
+      "no_prior": "A0_UNAVAILABLE_NO_MATURED_PRIOR",
+      "fallback": "NONE"
+    },
+    "temperature_calibration": "SAME_FROZEN_METHOD_PER_CANDIDATE_WHERE_PROBABILITY_EXISTS"
+  },
+  "eligibility": {
+    "structural_universe": "U",
+    "structural_fields": ["source_identity", "schema", "instrument", "contract", "session", "exchange_timestamp", "sequence_completeness", "feature_interval_metadata", "target_interval_metadata", "partition", "purge", "embargo"],
+    "prohibited_membership_inputs": ["target_class_or_value", "prediction", "confidence", "correctness", "loss", "calibration_output", "abstention_output", "pnl", "returns", "sharpe", "metric", "ranking", "runtime_success"],
+    "row_universe_frozen_before_inference": true,
+    "canonical_row_sort_and_hash_required": true,
+    "all_source_rows_reconciled_to_U_or_reason": true,
+    "derive_U_as_union_of_model_outputs": false
+  },
+  "comparison": {
+    "eligibility_frozen_before": ["A0_inference", "A1_inference", "A2_inference", "calibration_transform", "prediction_inspection", "metric_calculation", "pnl_calculation"],
+    "primary_confirmatory_pairs": ["A1_VS_VALIDATION_SELECTED_A0", "A2_VS_VALIDATION_SELECTED_A0"],
+    "secondary_predeclared_pairs": ["A2_VS_A0_TRAIN_MAJORITY", "A2_VS_A0_PERSISTENCE", "A2_VS_A0_TRANSITION", "A1_VS_A2"],
+    "a0_selection_validation_participants": ["A0_TRAIN_MAJORITY", "A0_PREVIOUS_LABEL_PERSISTENCE", "A0_TRAIN_TRANSITION_MATRIX"],
+    "pair_set_formula": "PAIR_SET(pair) = U intersect pre_inference_availability_mask(each_required_model_and_seed_in_pair)",
+    "a0_unavailability_effect": "exclude_only_from_pairs_containing_that_a0; retain_in_U_and_all_other_pair_sets",
+    "three_way_intersection": "SENSITIVITY_ONLY_NOT_PRIMARY",
+    "metric_denominator": "EXACT_HASHED_PAIR_SET_FOR_BOTH_PARTICIPANTS",
+    "runtime_or_output_failure_shrinks_denominator": false,
+    "all_required_seeds_required_per_row": true,
+    "original_confirmatory_family_preserved": 32,
+    "secondary_comparisons_are_confirmatory": false
+  },
+  "calibration": {
+    "method": "FROZEN_SCALAR_TEMPERATURE_SCALING",
+    "fit_partition": "VALIDATION_AND_CALIBRATION_ONLY",
+    "grid_start": 0.05,
+    "grid_stop": 10.0,
+    "grid_step": 0.01,
+    "objective": "MEAN_CATEGORICAL_LOG_LOSS",
+    "temperature_tie_break": "SMALLEST_TEMPERATURE",
+    "fit_row_ids_hash_count_required": true,
+    "calibration_changes_comparison_eligibility": false,
+    "oos_fit_or_tuning": false
+  },
+  "abstention": {
+    "entropy_method": "FROZEN_NORMALIZED_PREDICTIVE_ENTROPY",
+    "nominal_coverages": [1.0, 0.9, 0.75, 0.5],
+    "threshold_fit_partition": "VALIDATION_ONLY",
+    "cutoff_ties": "RETAIN_FULL_TIE_GROUP_AND_REPORT_REALIZED_COVERAGE",
+    "primary_pair_membership_changes_after_inference": false,
+    "primary_metrics_score_available_probabilities_even_if_selective_abstain": true,
+    "selective_analysis": "SEPARATE_SECONDARY_CONDITIONAL_ANALYSIS_WITH_PREDECLARED_PAIRWISE_RETAINED_SET",
+    "oos_or_pnl_threshold_selection": false
+  },
+  "time_integrity": {
+    "feature_information_cutoff": "T",
+    "maximum_feature_lookback_minutes": 30,
+    "sequence_offset_minutes": 7,
+    "full_raw_dependency_minutes": 37,
+    "evaluation_partition_start_embargo_minutes": 37,
+    "purge_uses_full_target_information_interval": true,
+    "cross_market_alignment": "EXACT_SESSION_AND_TIMESTAMP_NO_FORWARD_FILL",
+    "same_rule_for_all_wf_windows_roots_instruments_and_horizons": true
+  },
+  "metrics": {
+    "primary": ["macro_f1", "categorical_log_loss"],
+    "other_frozen_metrics_preserved": true,
+    "primary_denominator": "PAIR_SET",
+    "selective_denominator": "PREDECLARED_PAIRWISE_RETAINED_INTERSECTION",
+    "session_cluster_bootstrap_replicates": 2000,
+    "bootstrap_seed": 20260921,
+    "minimum_session_clusters_per_root_window": 20,
+    "minimum_sessions_per_class_per_cell": 2,
+    "support_failure": "INCONCLUSIVE_NO_ROW_REMOVAL"
+  },
+  "states": {
+    "row": ["STRUCTURALLY_ELIGIBLE", "STRUCTURALLY_INELIGIBLE", "PAIR_ELIGIBLE", "PAIR_INELIGIBLE_MODEL_UNAVAILABLE", "INFERENCE_ATTEMPTED", "PREDICTION_AVAILABLE", "CALIBRATION_AVAILABLE", "ABSTAINED_NO_MATURED_PRIOR", "ABSTAINED_ENTROPY", "SCOREABLE_PRIMARY", "SCOREABLE_SELECTIVE", "SCORED"],
+    "cell": ["EXPECTED", "STRUCTURAL_BLOCKED", "READY_FOR_INFERENCE", "INFERENCE_ERROR", "COMPLETED", "COMPLETED_INCONCLUSIVE"],
+    "one_terminal_disposition_per_expected_identity": true,
+    "missing_invalid_output": "FAIL_CLOSED_NO_DENOMINATOR_SHRINK"
+  },
+  "reason_codes": ["SOURCE_ID_INVALID", "CONTRACT_SESSION_MISMATCH", "FEATURE_SEQUENCE_INCOMPLETE", "FEATURE_LOOKBACK_UNAVAILABLE", "TARGET_INTERVAL_INVALID", "PARTITION_PURGE", "PARTITION_EMBARGO_37M", "CROSS_MARKET_TIMESTAMP_MISMATCH", "A0_TRAIN_LABEL_SET_EMPTY", "A0_UNAVAILABLE_NO_MATURED_PRIOR", "A0_TRANSITION_TRAIN_PAIR_SET_EMPTY", "A0_PRIOR_SCOPE_OR_DUPLICATE_INVALID", "INFERENCE_RUNTIME_ERROR", "PREDICTION_OUTPUT_MISSING", "PREDICTION_OUTPUT_INVALID", "CALIBRATION_ARTIFACT_MISSING", "CALIBRATION_PROVENANCE_MISMATCH", "ABSTENTION_ARTIFACT_INVALID", "PAIR_SET_EMPTY", "FROZEN_SUPPORT_INSUFFICIENT", "MATRIX_IDENTITY_MISSING", "MATRIX_IDENTITY_DUPLICATE", "MATRIX_IDENTITY_UNKNOWN"],
+  "provenance": {
+    "bind_original_protocol_manifest_and_dataset_hashes": true,
+    "bind_v4_protocol_and_companion_hashes": true,
+    "bind_code_commit_environment_and_schema": true,
+    "bind_source_universe_U_pair_participants_availability_masks_pair_rows": true,
+    "row_pair_calibration_abstention_and_metric_hashes_required": true,
+    "detached_sha256_required": true
+  },
+  "prohibited": ["posthoc_row_selection", "performance_based_eligibility", "fallback_a0", "future_or_unmatured_prior", "cross_session_or_contract_prior", "forward_fill", "denominator_shrink_on_error", "drop_expected_identity", "oos_calibration", "oos_threshold_tuning", "pnl_based_selection", "trading_authority"]
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bot2-feature-row-v1",
+  "type": "object",
+  "required": ["instrument", "observation_time", "cutoff_time", "feature_version", "source_dataset_id", "source_dataset_sha256", "session_id", "validity", "reason_codes", "values", "configuration_sha256", "code_commit", "generated_at", "trading_authority"],
+  "properties": {
+    "instrument": {"type": "string"}, "observation_time": {"type": "string"}, "cutoff_time": {"type": "string"},
+    "feature_version": {"const": "bot2-feature-registry-v1"}, "source_dataset_id": {"type": "string"}, "source_dataset_sha256": {"type": "string"},
+    "session_id": {"type": "string"}, "validity": {"type": "string"}, "reason_codes": {"type": "array", "items": {"type": "string"}},
+    "values": {"type": "object"}, "configuration_sha256": {"type": "string"}, "code_commit": {"type": "string"}, "generated_at": {"type": "string"},
+    "trading_authority": {"const": false}
+  }
+}

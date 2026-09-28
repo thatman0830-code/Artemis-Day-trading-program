@@ -1,0 +1,12 @@
+{
+  "audit_assignment": "AUDIT-VERIFIED-PERFORMANCE-DASHBOARD",
+  "date": "2026-09-01",
+  "checkpoint": "296e008c5bb4df8117222d966f95a64657ecb4b9",
+  "filesystem_sha256": {
+    "monitoring/paper_performance_view_v1.py": "d56481d829ff164252bdbc69ef6f089dfec7893f3d54f9e8e9a9178e12a95c89",
+    "monitoring/paper_dashboard_v1.py": "432f7504ef0667aedcf67bea3a38943b0057cbe8e75c6e1e258cadcd14944e0a",
+    "monitoring/test_paper_dashboard_v1.py": "d9afa1acc04aab250388496c87c6745486dcb135d8e422a736ab2f1ed16672b3"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files on 2026-09-01."
+}
+

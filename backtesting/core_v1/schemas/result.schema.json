@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "backtest-engine-core-v1-result",
+  "type": "object",
+  "required": ["id", "result_version", "run_id", "dataset_fingerprints", "strategy_identity", "configuration_identity", "events", "orders", "fills", "accounting", "advisory_acceptance"]
+}

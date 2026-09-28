@@ -1,0 +1,15 @@
+{
+  "schema_version":"execution-accounting-v2-design-audit-1",
+  "design_version":"execution-accounting-v2-design-1",
+  "status":"PASS_READY_FOR_IMPLEMENTATION_DECISION",
+  "implementation_authorized":false,
+  "core_v1_modified":false,
+  "network_accessed":false,
+  "credentials_accessed":false,
+  "archives_modified":false,
+  "recorders_modified":false,
+  "trading_path_added":false,
+  "gates":{"order_model":"PASS","ohlc_policy":"PASS","accounting":"PASS","risk":"PASS","capabilities":"PASS","rollover":"PASS","btc_profiles":"PASS","determinism":"PASS","security_separation":"PASS","adversarial_plan":"PASS"},
+  "json_artifacts_parsed":12,
+  "owner_inputs_required":["ES_NQ_EFFECTIVE_INSTRUMENT_AND_FEE_SPECS","MARGIN_SCHEDULES","PARTICIPATION_AND_FRICTION","SESSION_AND_ROLLOVER_LIMITS","BTC_INSTRUMENT_PROFILE_AND_FUNDING_MARK_FACTS","NUMERICAL_RISK_LIMITS","OPTIONAL_END_OF_DATA_POLICY"]
+}

@@ -1,0 +1,50 @@
+{
+  "account_timezone": "UTC",
+  "calculation_version": "phase7b-calculation-v1",
+  "canonical_timeframe_roles": {
+    "execution": "1m",
+    "structure": "5m"
+  },
+  "contract_multiplier": "1",
+  "costs": {
+    "commission_model": "ZERO",
+    "commission_rate": "0",
+    "id": "phase7b-zero-cost-v1",
+    "slippage_model": "NONE",
+    "slippage_value": "0",
+    "spread_model": "NONE",
+    "spread_value": "0",
+    "transaction_fee_model": "ZERO",
+    "transaction_fee_rate": "0"
+  },
+  "displacement_policy_id": "OWNER_MECHANICAL_V1",
+  "enabled_prior_period_reference_types": [
+    "PDH",
+    "PDL"
+  ],
+  "historical_version": "phase7b-history-v1",
+  "input_version": "phase7b-input-v1",
+  "maximum_quantity": "1000",
+  "mechanical_swing": {
+    "left_bars": 2,
+    "right_bars": 2
+  },
+  "minimum_quantity": "0.01",
+  "minimum_tick": "0.25",
+  "model_configuration_version": "phase7b-model-v1",
+  "prior_period_policy_id": "OWNER_PRIOR_PERIOD_V1",
+  "risk_reward_policy_id": "OWNER_MIN_RR_V1",
+  "performance_objective_id": "OWNER_WIN_RATE_OBJECTIVE_V1",
+  "quantity_increment": "0.01",
+  "random_seed": 0,
+  "replay_end_exclusive": "2026-01-06T02:25:00.000001Z",
+  "replay_start_inclusive": "2026-01-06T00:00:00Z",
+  "risk_percent": "1",
+  "schema_version": "backtesting-config-v1",
+  "setup_request_mode": "CANONICAL_TRADING_BRAIN",
+  "simulation_only": true,
+  "starting_equity": "10000",
+  "strategy_configuration_version": "phase7b-continuation-v1",
+  "tick_value": "1",
+  "warmup_start_inclusive": "2026-01-05T00:00:00Z"
+}

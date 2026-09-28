@@ -1,0 +1,32 @@
+{
+  "audit_commit": "2b54c6b423c1b6bd92df60692800e76951e056db",
+  "audited_parent": "6edb0390311d6564878cf99cb667165351e310a4",
+  "production_defects": [],
+  "production_corrections": [],
+  "submitted_tests": 129,
+  "accepted_unchanged": 123,
+  "accepted_after_correction": 0,
+  "rejected_redundant": 4,
+  "rejected_implementation_coupled": 2,
+  "rejected_incorrect_or_misleading": 0,
+  "groups": [
+    {"name":"verified_session","accepted":13},
+    {"name":"risk_limits","accepted":12},
+    {"name":"pre_trade_risk","accepted":17,"rejected_redundant":["test_pretrade_is_advisory_only"]},
+    {"name":"post_accounting_risk","accepted":20},
+    {"name":"session_flatten","accepted":4},
+    {"name":"forced_flatten_bar_eligibility","accepted":6},
+    {"name":"margin_call_facts","accepted":5},
+    {"name":"residual_position","accepted":4},
+    {"name":"duplicate_and_replay","accepted":10,"rejected_redundant":["test_duplicate_decision_conflict_rejects"]},
+    {"name":"pipeline_priority","accepted":3,"rejected_redundant":["test_pipeline_priority_order"]},
+    {"name":"reason_codes","accepted":3,"rejected_redundant":["test_all_reason_codes_unique"]},
+    {"name":"isolation","accepted":10},
+    {"name":"tamper_and_fingerprints","accepted":6},
+    {"name":"pre_trade_post_accounting_separation","accepted":6,"rejected_implementation_coupled":["test_pre_trade_does_not_evaluate_session_loss"]},
+    {"name":"forced_flatten_instruction","accepted":4},
+    {"name":"source_text_import_isolation","accepted":0,"rejected_implementation_coupled":["test_no_strategy_or_provider_imports"]}
+  ],
+  "checksum_correction": "canonical Git-object bytes replace Windows working-tree byte claims",
+  "runtime_access": false
+}

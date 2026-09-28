@@ -1,0 +1,8 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"specification-record-v2.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["specification_id","schema_version","specification_type","market","instrument_id","effective_from","effective_to","values","evidence_ids","owner_approved","synthetic_test_only"],
+  "properties":{
+    "specification_id":{"type":"string","minLength":1},"schema_version":{"const":"economic-specification-v2-1"},"specification_type":{"enum":["INSTRUMENT","SESSION","SETTLEMENT","CLEARING_MARGIN","EXCHANGE_FEE","OWNER_BROKER_COMMISSION","SLIPPAGE","PARTICIPATION","RISK_LIMITS","MARK_PRICE","ORACLE_PRICE","FUNDING","MARGIN_TIER","FEE_TIER"]},"market":{"type":"string","minLength":1},"instrument_id":{"type":"string","minLength":1},"effective_from":{"type":"string","format":"date-time","pattern":"Z$"},"effective_to":{"type":["string","null"],"format":"date-time"},"values":{"type":"array","minItems":1,"items":{"type":"array","prefixItems":[{"type":"string","minLength":1},{"type":"string","minLength":1}],"items":false}},"evidence_ids":{"type":"array","uniqueItems":true,"items":{"type":"string","minLength":1}},"owner_approved":{"type":"boolean"},"synthetic_test_only":{"type":"boolean"}
+  }
+}

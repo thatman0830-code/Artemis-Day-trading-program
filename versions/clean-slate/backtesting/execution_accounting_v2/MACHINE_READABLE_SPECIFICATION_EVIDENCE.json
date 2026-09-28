@@ -1,0 +1,13 @@
+{
+  "schema_version":"authoritative-specification-evidence-v2-1",
+  "audit_as_of":"2026-08-27T20:10:11.526177Z",
+  "owner_decisions":{"intrabar_collision_policy":"ADVERSE_THRESHOLD_WINS_OR_AMBIGUOUS_INTRABAR_REJECTED","end_of_data_policy":"FAIL_UNRESOLVED_NO_TERMINAL_FILL","accounting_only_liquidation":false},
+  "instruments":{
+    "ES":{"profile":"ES_FUTURE","exchange":"CME","rulebook_chapter":"358","currency":"USD","point_value":"50","minimum_price_increment":"0.25","tick_value":"12.50","quantity_step":"1","facts_status":"CURRENT_AUTHORITATIVE_TERMS","production_eligible":false},
+    "NQ":{"profile":"NQ_FUTURE","exchange":"CME","rulebook_chapter":"359","currency":"USD","point_value":"20","minimum_price_increment":"0.25","tick_value":"5.00","quantity_step":"1","facts_status":"CURRENT_AUTHORITATIVE_TERMS","production_eligible":false},
+    "BTC":{"profile":"BTC_UNKNOWN_UNSUPPORTED","manifest_source":"hyperliquid-public-mainnet","manifest_symbol":"BTC","instrument_class_proven":false,"production_eligible":false}
+  },
+  "unavailable_effective_dated_facts":["ES_CLEARING_INITIAL_AND_MAINTENANCE_MARGIN_HISTORY","NQ_CLEARING_INITIAL_AND_MAINTENANCE_MARGIN_HISTORY","ES_NQ_COMPLETE_EXCHANGE_CLEARING_REGULATORY_FEE_HISTORY","OWNER_BROKER_COMMISSION","OWNER_EXECUTION_ASSUMPTIONS","OWNER_RISK_LIMITS","BTC_PERPETUAL_UNIVERSE_IDENTITY_HISTORY","BTC_MARK_HISTORY","BTC_ORACLE_HISTORY","BTC_FUNDING_HISTORY","BTC_MARGIN_TIER_HISTORY","BTC_FEE_TIER_HISTORY"],
+  "production_policy":"FAIL_CLOSED",
+  "economic_values_are_defaults":false
+}

@@ -1,0 +1,18 @@
+{
+  "audit_assignment": "AUDIT-ONEDRIVE-ALERT-DELIVERY-TASK",
+  "date": "2026-08-31",
+  "checkpoint": "fef8020f71f7afc4a61640a1cce679f99e09c108",
+  "files": {
+    "monitoring/off_host_alert_delivery.py": "39a43211d1b74b942dd51bee1d5837100e9da46d7e4d6bd1d61cfa51aef2adbc",
+    "monitoring/test_off_host_alert_delivery.py": "72fdab0ae41406e0c39bfe8c8a7e009a4c1b22ea234647bea255cb840603a4a7",
+    "monitoring/OFF_HOST_ALERT_DELIVERY_FOUNDATION.md": "21af0d2d564b269b30f89e86ec27eaea35399da32840ef9577215c759d74f7a1",
+    "monitoring/onedrive_delivery_verifier.py": "b5fc7c9858b760b1529de80e8debe74e1d9df13a7c9aac1f63c7c2f20214e897",
+    "monitoring/test_onedrive_alert_delivery_task.py": "86b202f33717171a22de328be361d67de6a93930ce0086f3c41957e358a98b43",
+    "monitoring/test_hermes_onedrive_alert_connector_adversarial.py": "50a052b87a2eaa69ac2a8f0dfe35b4994ce756a4f13fc9edd2481ffcbdd9db82",
+    "scripts/install_onedrive_alert_delivery_task.ps1": "9ee81d8a039769ce7288797e84d5ce7e9fd39b8705f844b5171ba83e608ae471",
+    "scripts/audit_onedrive_alert_delivery_task.ps1": "3b1c9aadd4ee6b12c167cf7fa70338d5269e45902d935b976dd6bcaf3664cc9c",
+    "scripts/enable_and_verify_onedrive_alert_delivery_task.ps1": "cda5a983fac65409c12429de2f2c953b6d1ae96006188650bcc7b938c5a08e15",
+    "scripts/remove_onedrive_alert_delivery_task.ps1": "d8f843c733b93c32de869f619cf0b916c0394d9ad6463ef678b1ba80f241d5ef"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-31."
+}

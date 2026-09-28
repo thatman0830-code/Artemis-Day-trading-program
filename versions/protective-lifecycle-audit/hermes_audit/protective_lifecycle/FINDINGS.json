@@ -1,0 +1,31 @@
+{
+  "audit_assignment": "AUDIT-PROTECTIVE-LIFECYCLE",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "c287ee4f66a00a7bf60e614885304034cdeff1b9",
+  "parent_sha": "c287ee4f66a00a7bf60e614885304034cdeff1b9",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_oco_execution_v1.py:35-153", "description": "Shared-position stop/target coordinator: BTC spot long only, exactly one SELL pair, both active/unfilled, parent-order bound, stop<entry<target geometry, both-touched collision (stop wins), partial/zero/full fills, reconciliation-gated accounting, replay/gap/chronology latch, deterministic result, trading_authority=false.", "tested_by": "TestExecution"},
+    {"id": "OBS-002", "location": "paper_oco_execution_v1.py:122-153", "description": "Cancellation: requests alone don't establish, full exits require sibling, partial exits require both old orders cancelled, foreign bindings rejected, stale versions rejected, duplicate events rejected, backdated evidence rejected, fill_quantity in cancellation rejected, no silent rearm.", "tested_by": "TestCancellation"},
+    {"id": "OBS-003", "location": "paper_oco_checkpoint_v1.py:27-172", "description": "Persistence: exclusive writer lock (O_EXCL), CAS, deterministic replay, duplicate keys rejected, unsupported types rejected, non-finite values rejected, size limit, IN_FLIGHT/COMMITTED status, atomic temp+replace+fsync, corrupt checkpoint rejected.", "tested_by": "TestCheckpoint, TestEvidence"},
+    {"id": "OBS-004", "location": "paper_oco_initial_v1.py:98-134", "description": "Initial file: create-only persistence, reopen from directory, writer lock presence blocks open, already-exists rejects, initial-file/journal consistency, round-trip verification, unsafe path rejection.", "tested_by": "TestInitialFile"},
+    {"id": "OBS-005", "location": "paper_oco_replacement_v1.py:36-102", "description": "Replacement: requires CANCELLED_REQUIRES_REARM state, exact remaining quantity, fresh identities, predecessor mapping, price grids, unchanged risk/execution terms, stale/future/ineligible source rejected, rearm_authorized=false, requires_gap_review=true, trading_authority=false.", "tested_by": "TestReplacement"},
+    {"id": "OBS-006", "location": "paper_oco_evidence_v1.py:145-170", "description": "Integration: full offline sequence (initialize→evaluate→ack→cancel_ack→reopen) and full-exit sequence through durable journal with disk reload.", "tested_by": "TestIntegration"},
+    {"id": "OBS-007", "location": "paper_oco_*_v1.py", "description": "No network/credential/broker/exchange/wallet/signing/submission imports. trading_authority=false throughout. os imported for atomic file operations only.", "tested_by": "TestNoProhibited"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["77 existing focused tests across 6 test modules"],
+    "accepted_after_correction": ["test_full_exit_cancellation (corrected: use prepared() helper from existing test for valid cancel events)", "test_partial_exit_cancellation (corrected: use prepared() helper)", "test_integration tests (corrected: use prepared() helper through durable journal)", "test_foreign_binding_rejected (corrected: use valid order_id from ledger, then replace source_event_id)"],
+    "redundant": ["Some adversarial tests overlap with existing on execution, cancellation, checkpoint, evidence"],
+    "implementation_coupled": ["prepared() helper from test_paper_oco_cancellation_v1 used for valid cancel event construction — needed because OrderLedgerEventV2 requires 18 fields including correct sequence_number and expected_order_version"],
+    "incorrect_or_misleading": []
+  },
+  "baseline_comparison": {
+    "reported_primary_focused": "77 passed",
+    "hermes_focused": "77 passed",
+    "reported_primary_full": "4,769 passed, 8 skipped",
+    "hermes_full": "4,742 passed, 26 failed (pre-existing futures_data), 9 skipped",
+    "difference": "26 pre-existing futures_data failures (missing archive data) + 1 additional skip (symlink test)"
+  }
+}

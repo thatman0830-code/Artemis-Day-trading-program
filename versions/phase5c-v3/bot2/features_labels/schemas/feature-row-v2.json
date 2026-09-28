@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bot2-feature-row-v2",
+  "title": "BOT2 causal feature row v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "instrument", "observation_time", "cutoff_time", "feature_version", "source_dataset_id", "source_dataset_sha256", "session_id", "validity", "reason_codes", "values", "configuration_sha256", "code_commit", "generated_at", "trading_authority"],
+  "properties": {
+    "schema_version": {"const": "bot2-feature-row-v2"},
+    "instrument": {"type": "string"},
+    "observation_time": {"type": "string", "format": "date-time"},
+    "cutoff_time": {"type": "string", "format": "date-time"},
+    "feature_version": {"const": "bot2-feature-registry-v2"},
+    "source_dataset_id": {"type": "string"},
+    "source_dataset_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "session_id": {"type": "string"},
+    "validity": {"enum": ["VALID", "UNAVAILABLE", "INSUFFICIENT_HISTORY", "SYNCHRONIZATION_UNAVAILABLE", "INVALID_SOURCE_DATA"]},
+    "reason_codes": {"type": "array", "items": {"type": "string"}},
+    "values": {"type": "object"},
+    "configuration_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "code_commit": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "trading_authority": {"const": false}
+  }
+}

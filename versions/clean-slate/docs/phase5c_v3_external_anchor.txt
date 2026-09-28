@@ -1,0 +1,20 @@
+{
+  "anchor_type": "bot2-phase5c-v3-user-preserved-anchor-v1",
+  "protocol": "BOT2 Phase 5C v3",
+  "protocol_version": "bot2-phase5c-experiment-manifest-v3",
+  "manifest_filename": "bot2_phase5c_experiment_manifest_v3.json",
+  "canonical_manifest_sha256": "c9ae6da9f8d73708c3ca17a28788c80722c5852c48ca658f8ffad75ecb56dc19",
+  "manifest_hashing": "SHA-256 over sorted compact UTF-8 JSON excluding manifest_sha256",
+  "anchor_created_utc": "2026-09-22T04:28:22Z",
+  "frozen_protocol_anchor_commit": "9a1ecfaf08077252049dd187d44f8641da1186aa",
+  "reviewed_implementation_commit": "66caddf995af9c6e78e8852055bae25459b57b18",
+  "phase5c_u_remediation_base_commit": "4f1d70620a230149046ee52565315de8b9166712",
+  "dataset_identity": "bot2-real-research-dataset-manifest-v2",
+  "dataset_manifest_sha256": "e03e02906c8033d825d39844aaf4cf9aa3184b613e5c10974c23722531e92b67",
+  "dataset_date_range": ["2025-06-02", "2026-08-26"],
+  "raw_archive_tree_sha256": "405ff5602600fbe361c7136b85be0b26d46567c1c080dfefab2e506e109a775b",
+  "feature_version": "bot2-feature-row-v3",
+  "target_version": "bot2-future-market-state-v3",
+  "signature_status": "unsigned; trust requires independent preservation/comparison by the user",
+  "trust_note": "A repository copy may be kept for documentation, but THE REPOSITORY COPY IS NOT THE INDEPENDENT TRUST ANCHOR."
+}

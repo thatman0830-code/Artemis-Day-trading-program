@@ -1,0 +1,26 @@
+{
+  "audit_commit":"0ed77a8b366d5a09c40977bbccfa32cf6ef8b74d",
+  "parent":"0c3644b78e7ab3ff163a72bea3c32e63cd9fd41d",
+  "submitted_tests":87,
+  "accepted_unchanged":84,
+  "accepted_after_correction":1,
+  "rejected_redundant":1,
+  "rejected_implementation_coupled":1,
+  "rejected_incorrect_or_misleading":0,
+  "production_corrections":[{"reason":"equal-time/equal-priority classification depended on event-id order","correction":"check semantic priority ambiguity before lexical chronology","stable_reason":"PRIORITY_AMBIGUITY"}],
+  "groups":[
+    {"name":"roll_specification","accepted":9},{"name":"outgoing_before_incoming","accepted":5},
+    {"name":"participation","accepted":5},{"name":"partial_lifecycle","accepted":4},
+    {"name":"temporary_flat","accepted":6},{"name":"same_bar_lookahead","accepted":4},
+    {"name":"identity_isolation","accepted":5},{"name":"roll_spec_validation","accepted":3},
+    {"name":"funding_capability","accepted":8},{"name":"funding_lineage","accepted":9},
+    {"name":"funding_boundary","accepted":3},{"name":"completed_gate","accepted":2},
+    {"name":"phase6_ledger","accepted":8,"accepted_after_correction":["test_same_time_same_priority_rejects"]},
+    {"name":"collision_priority","accepted":4,"rejected_redundant":["test_priority_values"]},
+    {"name":"reconciliation","accepted":3},{"name":"rollover_immutability","accepted":3},
+    {"name":"roll_fill_idempotency","accepted":3},
+    {"name":"source_text_import_isolation","accepted":0,"rejected_implementation_coupled":["test_no_provider_or_submission"]}
+  ],
+  "canonical_checksum_claims":{"submitted":11,"mismatched":10},
+  "runtime_access":false
+}

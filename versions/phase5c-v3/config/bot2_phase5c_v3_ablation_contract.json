@@ -1,0 +1,88 @@
+{
+  "schema_version": "bot2-phase5c-v3-fixed-dimension-ablation-v2",
+  "source_manifest": "config/bot2_phase5c_experiment_manifest_v3.json",
+  "source_manifest_sha256": "c9ae6da9f8d73708c3ca17a28788c80722c5852c48ca658f8ffad75ecb56dc19",
+  "feature_schema_version": "bot2-feature-row-v3",
+  "preprocessing_version": "train-unique-row-population-zscore-v1",
+  "input_channels": 24,
+  "mask_stage": "after training-only standardization; before model input",
+  "masked_value_standardized": 0.0,
+  "neutral_value_interpretation": "training mean in standardized units; not a missing-value marker",
+  "canonical_feature_order": [
+    "price", "log_return_1m", "log_return_3m", "log_return_5m",
+    "rolling_price_range_3m", "rolling_price_range_5m",
+    "realized_volatility_3m", "realized_volatility_5m",
+    "session_open_distance", "session_high_distance", "session_low_distance",
+    "cumulative_volume_session", "relative_volume_3m", "volume_acceleration_1m",
+    "session_vwap", "price_to_session_vwap", "seconds_since_session_open",
+    "session_phase", "time_sin", "time_cos", "cross_market_log_return_1m",
+    "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m",
+    "cross_market_divergence_1m"
+  ],
+  "feature_family_membership": {
+    "price": [],
+    "log_return_1m": [],
+    "log_return_3m": [],
+    "log_return_5m": [],
+    "rolling_price_range_3m": [],
+    "rolling_price_range_5m": [],
+    "realized_volatility_3m": ["MINUS_VOLATILITY"],
+    "realized_volatility_5m": ["MINUS_VOLATILITY"],
+    "session_open_distance": [],
+    "session_high_distance": [],
+    "session_low_distance": [],
+    "cumulative_volume_session": ["MINUS_VOLUME"],
+    "relative_volume_3m": ["MINUS_VOLUME"],
+    "volume_acceleration_1m": ["MINUS_VOLUME"],
+    "session_vwap": ["MINUS_VWAP"],
+    "price_to_session_vwap": ["MINUS_VWAP"],
+    "seconds_since_session_open": ["MINUS_SESSION_TIME"],
+    "session_phase": ["MINUS_SESSION_TIME"],
+    "time_sin": ["MINUS_SESSION_TIME"],
+    "time_cos": ["MINUS_SESSION_TIME"],
+    "cross_market_log_return_1m": ["MINUS_CROSS_MARKET"],
+    "cross_market_relative_return_1m": ["MINUS_CROSS_MARKET"],
+    "cross_market_rolling_correlation_5m": ["MINUS_CROSS_MARKET"],
+    "cross_market_divergence_1m": ["MINUS_CROSS_MARKET"]
+  },
+  "ablations": {
+    "ALL": {
+      "active_features": ["price", "log_return_1m", "log_return_3m", "log_return_5m", "rolling_price_range_3m", "rolling_price_range_5m", "realized_volatility_3m", "realized_volatility_5m", "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session", "relative_volume_3m", "volume_acceleration_1m", "session_vwap", "price_to_session_vwap", "seconds_since_session_open", "session_phase", "time_sin", "time_cos", "cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m", "cross_market_divergence_1m"],
+      "ablated_features": [],
+      "feature_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    },
+    "MINUS_CROSS_MARKET": {
+      "active_features": ["price", "log_return_1m", "log_return_3m", "log_return_5m", "rolling_price_range_3m", "rolling_price_range_5m", "realized_volatility_3m", "realized_volatility_5m", "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session", "relative_volume_3m", "volume_acceleration_1m", "session_vwap", "price_to_session_vwap", "seconds_since_session_open", "session_phase", "time_sin", "time_cos"],
+      "ablated_features": ["cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m", "cross_market_divergence_1m"],
+      "feature_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+    },
+    "MINUS_VWAP": {
+      "active_features": ["price", "log_return_1m", "log_return_3m", "log_return_5m", "rolling_price_range_3m", "rolling_price_range_5m", "realized_volatility_3m", "realized_volatility_5m", "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session", "relative_volume_3m", "volume_acceleration_1m", "seconds_since_session_open", "session_phase", "time_sin", "time_cos", "cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m", "cross_market_divergence_1m"],
+      "ablated_features": ["session_vwap", "price_to_session_vwap"],
+      "feature_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
+    },
+    "MINUS_VOLUME": {
+      "active_features": ["price", "log_return_1m", "log_return_3m", "log_return_5m", "rolling_price_range_3m", "rolling_price_range_5m", "realized_volatility_3m", "realized_volatility_5m", "session_open_distance", "session_high_distance", "session_low_distance", "session_vwap", "price_to_session_vwap", "seconds_since_session_open", "session_phase", "time_sin", "time_cos", "cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m", "cross_market_divergence_1m"],
+      "ablated_features": ["cumulative_volume_session", "relative_volume_3m", "volume_acceleration_1m"],
+      "feature_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    },
+    "MINUS_VOLATILITY": {
+      "active_features": ["price", "log_return_1m", "log_return_3m", "log_return_5m", "rolling_price_range_3m", "rolling_price_range_5m", "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session", "relative_volume_3m", "volume_acceleration_1m", "session_vwap", "price_to_session_vwap", "seconds_since_session_open", "session_phase", "time_sin", "time_cos", "cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m", "cross_market_divergence_1m"],
+      "ablated_features": ["realized_volatility_3m", "realized_volatility_5m"],
+      "feature_mask": [1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    },
+    "MINUS_SESSION_TIME": {
+      "active_features": ["price", "log_return_1m", "log_return_3m", "log_return_5m", "rolling_price_range_3m", "rolling_price_range_5m", "realized_volatility_3m", "realized_volatility_5m", "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session", "relative_volume_3m", "volume_acceleration_1m", "session_vwap", "price_to_session_vwap", "cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m", "cross_market_divergence_1m"],
+      "ablated_features": ["seconds_since_session_open", "session_phase", "time_sin", "time_cos"],
+      "feature_mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1]
+    }
+  },
+  "constraints": {
+    "same_mask_for_partitions": ["TRAIN", "VALIDATION_AND_CALIBRATION", "OOS_TEST"],
+    "feature_order_changes_by_ablation": false,
+    "input_width_changes_by_ablation": false,
+    "architecture_or_parameter_shapes_change_by_ablation": false,
+    "mask_fit_uses_only_training_statistics": true,
+    "missingness_semantics_are_unchanged": true
+  }
+}

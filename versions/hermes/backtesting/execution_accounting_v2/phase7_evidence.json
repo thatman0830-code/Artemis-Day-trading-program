@@ -1,0 +1,30 @@
+{
+  "schema_version": "phase7-evidence-v2-1",
+  "phase_version": "REPORTING_VALIDATION_V2_PHASE7_1",
+  "starting_checkpoint": "0c3644b78e7ab3ff163a72bea3c32e63cd9fd41d",
+  "self_hash_exclusion": "backtesting/execution_accounting_v2/phase7_evidence.json",
+  "tests": {
+    "focused": "53 passed in 1.00s",
+    "complete_v2": "850 passed in 2.24s",
+    "full_offline": "1981 passed in 43.02s",
+    "diff_check": "passed"
+  },
+  "sha256": {
+    "backtesting/execution_accounting_v2/reporting_validation.py": "96b2517ee93f3bb793b8d24d85749e9c1397c7c3884ea894f599fc2a47aec2c5",
+    "backtesting/execution_accounting_v2/__init__.py": "6ef79abdc100ddb405cffad97c364150ec4f71861c754760d921a39f4e0db71f",
+    "backtesting/execution_accounting_v2/PUBLIC_API_SCHEMA_REFERENCE.md": "c8e99cf28bb91f863f75d52137fae3f403c4aadc33ca080dd670f9ffb230e68f",
+    "backtesting/execution_accounting_v2/REASON_CODE_CATALOG.md": "dff707c04fce527e85f1b0bf2aeac89241e01077e81cdf0f24c04a67e2dadce8",
+    "backtesting/execution_accounting_v2/schemas/reporting-validation-v2.schema.json": "bb84c1d2196441ca4c1364338acffc7d942647e55b63054de41519b9ba93abbd",
+    "backtesting/execution_accounting_v2/test_reporting_validation.py": "4f3ba39ac0403c98158dd8904bc02a806d5cc929916039bb8740100b582f739e",
+    "backtesting/execution_accounting_v2/test_specifications.py": "a6031207fbb8fd061050e6f6059e8a89b1df7163ae88ada1e821f7d951818167",
+    "backtesting/execution_accounting_v2/PHASE7_IMPLEMENTATION_REPORT.md": "a356216b7d580dac7ddf911123092efaff6a5b1f85076fe8cc01b8a5c08098cc",
+    "backtesting/execution_accounting_v2/PHASE7_INVARIANT_MATRIX.md": "36b128436c774fce1dd9527d00d889446cfdb67d1c48ba55e4238e282dd8e541",
+    "backtesting/execution_accounting_v2/PHASE7_REASON_CODE_CATALOG.md": "6b447eb6afad94fd5846ac4efdcac12574b84088edf5fe5c1e3a14e78f64ed72",
+    "backtesting/execution_accounting_v2/PHASE7_TEST_INVENTORY.md": "826680e4ffce84794da4a099797eee315fd8d8bdd9bbd6b95280fa5d047d1741",
+    "backtesting/execution_accounting_v2/PHASE7_TEST_RESULTS.md": "5990f0d81131c73f6a1e4cb332dfe044a29c24bb4760aa471901d5900bb09a95",
+    "backtesting/execution_accounting_v2/PHASE7_CHANGED_FILE_INVENTORY.md": "22572c83b6c5a523f289bf624ae889b2fc43d6d9768c15d9de93bb7979630f06"
+  },
+  "operational_access": false,
+  "profitability_guarantee": false,
+  "promotion_authority": false
+}

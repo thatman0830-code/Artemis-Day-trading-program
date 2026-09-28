@@ -1,0 +1,13 @@
+{
+  "audit_assignment": "AUDIT-WATCHDOG-DEPLOYMENT-CONTROLS",
+  "date": "2026-08-31",
+  "checkpoint": "be824f5747a3e09f8d4c443ece457515ceb9783d",
+  "files": {
+    "scripts/audit_owner_context_health_watchdog_task.ps1": "d14e4dbc6eee6236a16f33af6297a7b681f9124d9409067189e5fb5447b296a3",
+    "scripts/enable_and_verify_owner_context_health_watchdog_task.ps1": "7b8ad4ddbd7db65f6a86987cdb91e6673801352a4d26790e5861be91f32a69fa",
+    "scripts/remove_owner_context_health_watchdog_task.ps1": "64a8bc66306348093359d14b47813cef2950f4b3e4b2896d3cb9388849b95fb1",
+    "monitoring/test_owner_context_watchdog_task.py": "7106da412a9068e1d21dfae0adff5ed1f401923d59053f381df465e4f158772c",
+    "monitoring/OWNER_CONTEXT_WATCHDOG_IMPLEMENTATION.md": "ddd89e4b0087d625b9701d4c9b75212a142269c5a180ae66c79b4230d87d6f3e"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-31."
+}

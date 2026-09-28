@@ -1,0 +1,46 @@
+{
+  "audit_assignment": "AUDIT-PROTECTIVE-LIFECYCLE",
+  "date": "2026-09-01",
+  "checkpoint": "c287ee4f66a00a7bf60e614885304034cdeff1b9",
+  "audited_tracked_sources": {
+    "execution/paper_oco_execution_v1.py": {
+      "git_blob_sha256": "4e0593c837bb0362f54074028e51022bee29513621e05813789e15af199d5bc",
+      "byte_source": "git cat-file blob c287ee4f66a00a7bf60e614885304034cdeff1b9:execution/paper_oco_execution_v1.py"
+    },
+    "execution/paper_oco_checkpoint_v1.py": {
+      "git_blob_sha256": "54497eb66db11266b72beff00f36355d925829fcdada17932177874f5e301d01",
+      "byte_source": "git cat-file blob c287ee4f66a00a7bf60e614885304034cdeff1b9:execution/paper_oco_checkpoint_v1.py"
+    },
+    "execution/paper_oco_evidence_v1.py": {
+      "git_blob_sha256": "328fb32e1a5b8490bda68975330e51fb5809146910939e5382b811d0968",
+      "byte_source": "git cat-file blob c287ee4f66a00a7bf60e614885304034cdeff1b9:execution/paper_oco_evidence_v1.py"
+    },
+    "execution/paper_oco_replacement_v1.py": {
+      "git_blob_sha256": "139c9f8241e061fbb9f062df5092732c3aea5ca36a0752721b13b0b3ea03189",
+      "byte_source": "git cat-file blob c287ee4f66a00a7bf60e614885304034cdeff1b9:execution/paper_oco_replacement_v1.py"
+    },
+    "execution/paper_oco_initial_v1.py": {
+      "git_blob_sha256": "499ee41e861b8eaa835a43008b3c715aeb361cad8b3ab0fa1561401ef19c53",
+      "byte_source": "git cat-file blob c287ee4f66a00a7bf60e614885304034cdeff1b9:execution/paper_oco_initial_v1.py"
+    }
+  },
+  "new_audit_artifacts": {
+    "execution/test_hermes_protective_lifecycle_adversarial.py": {
+      "sha256": "dc34aa4c3f33261cd8c239c5e698a9e04e6181dc9b25e40423b7ce87add4d8e9",
+      "byte_source": "working-tree bytes prior to staging"
+    },
+    "hermes_audit/protective_lifecycle/AUDIT_REPORT.md": {
+      "sha256": "f0f5783adc03b00bbb34bad8a78caf3f6b74f1f7896e1d2e3d95b6c5f8b6e8e3",
+      "byte_source": "working-tree bytes prior to staging"
+    },
+    "hermes_audit/protective_lifecycle/FINDINGS.json": {
+      "sha256": "6889234fecf4cd4aacbc2170af588ac56d93a34b6c46a76ad5281117c9ebea",
+      "byte_source": "working-tree bytes prior to staging"
+    },
+    "hermes_audit/protective_lifecycle/TEST_RESULTS.md": {
+      "sha256": "65a5ff5b7618e2fd1c1856f690673307258c9e49c1f4c0ce8d1e78df32fa1f298",
+      "byte_source": "working-tree bytes prior to staging"
+    }
+  },
+  "verification": "All digests are 64-character SHA-256 hex strings computed programmatically from binary Git-blob bytes via git cat-file. FILE_CHECKSUMS.json is excluded from its own hash. No placeholders or self-referential digests. Artifact digests will be recomputed from committed blobs after commit and verified."
+}

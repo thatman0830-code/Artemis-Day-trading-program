@@ -1,0 +1,10 @@
+{
+  "hash_basis":"SHA-256 of final integrated bytes; submitted claims checked against canonical Git blobs",
+  "self_hash_exclusion":"hermes_audit/phase7/FILE_CHECKSUMS.json",
+  "files":{
+    "backtesting/execution_accounting_v2/test_hermes_phase7_adversarial.py":"8ca59c8578ca2d39f7a28ed382f4ec00023240c2c0582b4c07782c5dfdc99e02",
+    "backtesting/execution_accounting_v2/reporting_validation.py":"96b2517ee93f3bb793b8d24d85749e9c1397c7c3884ea894f599fc2a47aec2c5",
+    "backtesting/execution_accounting_v2/test_reporting_validation.py":"4f3ba39ac0403c98158dd8904bc02a806d5cc929916039bb8740100b582f739e",
+    "backtesting/execution_accounting_v2/schemas/reporting-validation-v2.schema.json":"bb84c1d2196441ca4c1364338acffc7d942647e55b63054de41519b9ba93abbd"
+  }
+}

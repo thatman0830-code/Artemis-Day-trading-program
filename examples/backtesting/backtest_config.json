@@ -1,0 +1,33 @@
+{
+  "schema_version": "backtesting-config-v1",
+  "strategy_configuration_version": "synthetic-strategy-v1",
+  "model_configuration_version": "synthetic-model-v1",
+  "setup_request_mode": "NONE",
+  "prior_period_policy_id": "OWNER_PRIOR_PERIOD_V1",
+  "replay_start_inclusive": "2026-08-20T00:00:00Z",
+  "replay_end_exclusive": "2026-08-20T00:15:00.000001Z",
+  "starting_equity": "10000.00",
+  "risk_percent": "1.00",
+  "minimum_tick": "0.25",
+  "tick_value": "1.00",
+  "contract_multiplier": "1.00",
+  "minimum_quantity": "0.01",
+  "quantity_increment": "0.01",
+  "maximum_quantity": "1000.00",
+  "input_version": "synthetic-input-v1",
+  "calculation_version": "synthetic-calculation-v1",
+  "historical_version": "synthetic-history-v1",
+  "account_timezone": "UTC",
+  "random_seed": 0,
+  "costs": {
+    "id": "synthetic-costs-v1",
+    "commission_model": "ZERO",
+    "commission_rate": "0",
+    "transaction_fee_model": "ZERO",
+    "transaction_fee_rate": "0",
+    "spread_model": "NONE",
+    "spread_value": "0",
+    "slippage_model": "NONE",
+    "slippage_value": "0"
+  }
+}

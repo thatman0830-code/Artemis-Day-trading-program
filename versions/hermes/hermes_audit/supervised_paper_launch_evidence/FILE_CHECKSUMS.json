@@ -1,0 +1,10 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-LAUNCH-EVIDENCE",
+  "date": "2026-09-01",
+  "checkpoint": "4cc0e4c18a1f32d8d9e729cb24b0555301c008a2",
+  "filesystem_sha256": {
+    "execution/supervised_paper_launch_evidence_v1.py": "980386eada289cea48b3a65d9f4446e3b519038d385686b407e8094d21e32f1e",
+    "execution/test_supervised_paper_launch_evidence_v1.py": "da97b2587faa924c30abadbc6a18203e493791abaa7a1c171baa9cb6a9e95c92"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files on 2026-09-01."
+}

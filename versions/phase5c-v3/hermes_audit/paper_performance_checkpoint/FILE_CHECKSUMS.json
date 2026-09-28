@@ -1,0 +1,10 @@
+{
+  "audit_assignment": "AUDIT-PAPER-PERFORMANCE-CHECKPOINT",
+  "date": "2026-09-01",
+  "checkpoint": "2e16bf99da8533c8eb2b530535564c1acbfe6965",
+  "filesystem_sha256": {
+    "execution/paper_performance_checkpoint_v1.py": "6271f0f44c5dbb00de0d65990a3c886b2a4a38d5bc023d5b03d939bbdb459d98",
+    "execution/test_paper_performance_checkpoint_v1.py": "f134e8be6caef33752e6d268c6c84e01aa09e40ff33c6fd46f4dfc7963ceb4ba"
+  },
+  "verification": "Corrected filesystem SHA-256 computed after primary reconciliation rejected JSON floats inside $decimal tags on 2026-09-01."
+}

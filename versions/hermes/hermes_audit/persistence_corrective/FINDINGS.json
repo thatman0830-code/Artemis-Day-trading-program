@@ -1,0 +1,50 @@
+{
+  "audit_assignment": "PERSISTENCE_CORRECTIVE_AUDIT",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "bc4dae95f120dd49d91c66c19de49eaf40c5d65c",
+  "parent_sha": "3b7d0eeaa8ab334aa328667b97a2124d8c0af383",
+  "supersedes": "3b7d0eeaa8ab334aa328667b97a2124d8c0af383 (incorrectly reported 0 defects)",
+  "defects": [
+    {
+      "id": "DEFECT-A",
+      "name": "Future-mark acceptance",
+      "severity": "HIGH",
+      "location": "execution/supervised_paper_performance_v1.py:96-100",
+      "description": "cycle() accepts PriceEvidenceV2 marks with observed_at and available_at after cycle.now without validation. The code only checks health.state is HEALTHY but never validates the mark's timestamps against the current cycle time. A mark at T+15min when the cycle is at T is accepted and persisted.",
+      "reproduction": "test_future_observed_at_accepted_by_current_impl: mark with observed_offset=15, available_offset=15 accepted at cycle T. Result: ledger.snapshot.position.mark_price == Decimal('51000') (accepted). Required: should raise.",
+      "required_behavior": "Reject future evidence (observed_at > cycle.now or available_at > cycle.now). Fail closed. Do not persist. Test observed_at and available_at independently including equality boundaries (observed_at == cycle.now accepted).",
+      "regression_tests": ["test_future_observed_at_should_reject (FAILS)", "test_future_available_at_should_reject (FAILS)", "test_observed_at_equal_to_now_accepted (PASSES)"]
+    },
+    {
+      "id": "DEFECT-B",
+      "name": "Startup reconciliation gap",
+      "severity": "HIGH",
+      "location": "execution/supervised_paper_performance_v1.py:55-64",
+      "description": "start() creates empty accounting (PaperPerformanceLedgerV1.create with initial_accounting) when no performance checkpoint exists, even if the adapter checkpoint has retained fills with nonzero filled_quantity. The code does not check whether the adapter's gateway records have fills that are absent from the accounting. It creates empty accounting and returns successfully.",
+      "reproduction": "test_missing_perf_checkpoint_with_retained_fill_accepted_by_current_impl: adapter with retained fill, no performance checkpoint, start() succeeds with empty accounting. Result: ledger.snapshot.position.signed_quantity == Decimal('0'). Required: should reject.",
+      "required_behavior": "Refuse successful startup when adapter has retained fills not reflected in accounting. Preserve retained fill evidence. Activate durable halt when adapter store is writable. Also test existing performance checkpoint missing a retained gateway fill.",
+      "regression_tests": ["test_missing_perf_with_retained_fill_should_reject (FAILS)", "test_existing_perf_missing_retained_gateway_fill_should_reject (PASSES)"]
+    }
+  ],
+  "observations": [
+    {"id": "OBS-001", "description": "Checkpoint files are individually atomically replaced, not committed together as one atomic transaction. The adapter and performance checkpoints are separate stores with independent lock files."},
+    {"id": "OBS-002", "description": "The prior audit's alert test used a broad exception-only check. Corrected to assert specific error, persisted kill-switch/disconnected state, health state, and alert content."},
+    {"id": "OBS-003", "description": "The prior audit included 3 docstring-only classification tests in behavioral test counts. These have been separated from behavioral tests."}
+  ],
+  "corrections_to_prior_audit": [
+    "Prior audit commit 3b7d0ee reported 0 defects — corrected to 2 confirmed defects (DEFECT-A, DEFECT-B).",
+    "Prior audit _initial() returned PaperGatewaySnapshotV1 instead of PaperExchangeAdapterV1 — this was a test fixture correction, not a production defect.",
+    "Prior audit snapshot.mark_price should have been snapshot.position.mark_price — test fixture correction.",
+    "Prior audit alert test used broad Exception-only check — corrected to assert specific error and state.",
+    "Prior audit included 3 docstring-only classification tests in behavioral counts — separated.",
+    "Checkpoint files are individually atomically replaced, not one atomic transaction."
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_start_creates_atomic_performance_checkpoint", "test_verified_fill_and_closed_mark_persist_and_reconcile", "test_accepted_fill_without_evidence_halts_durably", "test_checkpoint_write_conflict_halts_adapter", "test_restart_reconciles_both_checkpoints", "test_module_has_no_network_credentials_or_live_submission"],
+    "accepted_after_correction": ["_initial() returns PaperExchangeAdapterV1 (test fixture)", "snapshot.position.mark_price (test fixture)", "alert test uses specific assertions not broad exception"],
+    "redundant": [],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": ["Prior audit 3b7d0ee incorrectly reported 0 defects. Two confirmed defects exist: future-mark acceptance and startup reconciliation gap."]
+  }
+}

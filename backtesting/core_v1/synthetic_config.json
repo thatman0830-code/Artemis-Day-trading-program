@@ -1,0 +1,9 @@
+{
+  "run_id": "synthetic-core-v1",
+  "configuration_version": "core-v1-example-1",
+  "starting_cash": "100000.00",
+  "execution": {"volume_participation": "0.10", "end_policy": "REJECT_OPEN"},
+  "risk": {"max_gross_exposure": "1000000", "max_margin": "500000", "minimum_planned_rr": "1.0"},
+  "simulation_only": true,
+  "exchange_submission_enabled": false
+}

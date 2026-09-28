@@ -1,0 +1,30 @@
+{
+  "audit_assignment": "AUDIT-VERIFIED-PERFORMANCE-DASHBOARD",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "296e008c5bb4df8117222d966f95a64657ecb4b9",
+  "parent_sha": "2546d0fed7042fe279637fe310a4965a713dc9a6",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_performance_view_v1.py:8-10,17-62", "description": "Performance loaded through strict durable checkpoint decoder (ledger_from_bytes). Browser receives sanitized dict only — no executable ledger objects or mutation methods.", "tested_by": "TestCheckpointDecoder"},
+    {"id": "OBS-002", "location": "paper_performance_view_v1.py:36-62", "description": "Exact values from validated accounting snapshot: cash, equity, realized/unrealized P&L, net result, commissions, exchange fees, slippage, total costs, position, average entry, mark. All as strings (Decimal). No values from order notional.", "tested_by": "TestExactValues"},
+    {"id": "OBS-003", "location": "paper_performance_view_v1.py:19-21", "description": "Missing performance checkpoint: explicitly unavailable with integrity=MISSING and reason=VERIFIED_PAPER_PERFORMANCE_CHECKPOINT_UNAVAILABLE. No fabricated zeros.", "tested_by": "TestMissingPerformance"},
+    {"id": "OBS-004", "location": "paper_performance_view_v1.py:22-35", "description": "Malformed/oversized/symlinked/checksum-invalid/authority-tampered/identity-tampered/unknown-type checkpoints fail closed. Symlinks reject as unsafe. Size validated (0 < size <= 64MB).", "tested_by": "TestBadCheckpoint"},
+    {"id": "OBS-005", "location": "paper_dashboard_v1.py:135-145", "description": "Performance and adapter gateway snapshot IDs must match when both checkpoints exist. Mismatched checkpoints reject with 'do not reconcile'. Match accepted.", "tested_by": "TestCrossCheckpointReconciliation"},
+    {"id": "OBS-006", "location": "paper_performance_view_v1.py:31,48", "description": "Checkpoint age uses filesystem mtime only as operational metadata. checkpoint_modified_at and checkpoint_age_seconds present when available.", "tested_by": "TestCheckpointAge"},
+    {"id": "OBS-007", "location": "paper_performance_view_v1.py:38-41", "description": "Equity history chronologically ordered (snapshots are ordered) and capped at 500 entries.", "tested_by": "TestEquityHistory"},
+    {"id": "OBS-008", "location": "paper_performance_view_v1.py:43-47", "description": "Fill markers use exact fill_id, order_id, time, side, quantity, and economic_price from accounting events.", "tested_by": "TestExactValues"},
+    {"id": "OBS-009", "location": "paper_dashboard_v1.py:137-138,187-188", "description": "Dashboard remains localhost-only, read-only, advisory-only, trading_authority=false, live_trading_permitted=false. POST returns 405.", "tested_by": "TestDashboardReadOnly, TestHttpResponses"},
+    {"id": "OBS-010", "location": "paper_dashboard_v1.py:149,163", "description": "HTML escaping (esc function) and security headers remain effective for all new performance fields.", "tested_by": "TestHtmlEscaping"},
+    {"id": "OBS-011", "location": "paper_performance_view_v1.py:1-10, paper_dashboard_v1.py:1-20", "description": "No credential/provider/broker/exchange/wallet/signing/submission/outbound-network imports. paper_performance_view imports only from execution.paper_performance_checkpoint_v1 (read-only decoder) and backtesting.execution_accounting_v2.accounting.", "tested_by": "TestNoProhibited"},
+    {"id": "OBS-012", "location": "paper_dashboard_v1.py:126-131", "description": "Legacy missing-performance contract remains compatible when no performance path configured (performance_checkpoint_path=None).", "tested_by": "TestLegacyCompatibility"},
+    {"id": "OBS-013", "location": "paper_performance_view_v1.py:49-62", "description": "Performance view returns advisory_only=true, live_trading_permitted=false, trading_authority=false. ledger_id and gateway_snapshot_id present as SHA-256.", "tested_by": "TestPerformanceView"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_snapshot_is_explicitly_read_only_and_does_not_invent_performance", "test_snapshot_id_is_deterministic", "test_adapter_checksum_and_authority_are_verified", "test_unsupported_candle_evidence_fails_closed", "test_symlinked_evidence_rejects", "test_non_loopback_binding_rejects", "test_module_has_no_execution_or_outbound_client_imports", "test_verified_performance_checkpoint_is_projected", "test_tampered_performance_checkpoint_fails_dashboard_closed"],
+    "accepted_after_correction": ["test_legacy_missing_performance (corrected: must write candle file before calling build_snapshot since it's a required argument)", "test_costs (corrected: Decimal('3') str is '3' not '3.0' — accounting uses Decimal('1')+Decimal('2')=Decimal('3'))", "test_no_execution_imports_in_view (corrected: paper_performance_view_v1 does import from execution.paper_performance_checkpoint_v1 which is a read-only decoder, not a gateway — check for gateway/exchange imports specifically, not all execution imports)"],
+    "redundant": ["Some adversarial tests overlap with existing on trading_authority=false, advisory_only, loopback binding, no execution imports"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

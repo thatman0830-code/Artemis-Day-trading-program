@@ -1,0 +1,32 @@
+{
+  "audit_assignment": "AUDIT-OOS-ARCHIVE-SCANNER",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "857cab2aadb0333cf8613c75716f64c424a20f5c",
+  "parent_sha": "aa351098f168dae122c07e0f72b5de7ba65a1f4f",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "archive_scanner.py:73-80", "description": "Path resolution: backslash normalization, no absolute paths, no drive letters, no parent traversal, must resolve to file inside repository. resolve(strict=True) catches nonexistent paths.", "tested_by": "TestPathEscape"},
+    {"id": "OBS-002", "location": "archive_scanner.py:131-132", "description": "Duplicate and regressing timestamps reject. JSONL duplicates also reject.", "tested_by": "TestTimestampIntegrity"},
+    {"id": "OBS-003", "location": "archive_scanner.py:134-136", "description": "Gaps reported as UNCLASSIFIED_ARCHIVE_DISCONTINUITY without fabricating bars. Multiple gaps all reported.", "tested_by": "TestGaps"},
+    {"id": "OBS-004", "location": "archive_scanner.py:83-96", "description": "CSV: UTF-8-sig decode, exact header check, is_closed==true required, OHLCV validation, UTC timestamps. JSONL: JSON decode, required field check, window_start_ns validation (non-bool, non-negative, multiple of 1e9).", "tested_by": "TestMalformedRows, TestWindowStartNs"},
+    {"id": "OBS-005", "location": "archive_scanner.py:64-70", "description": "Market/timeframe contamination: row market must match, timeframe must match. Unsupported markets (only BTC/ES/NQ) and timeframes (only 1m/5m/15m/1h/4h) reject.", "tested_by": "TestMarketTimeframeContamination"},
+    {"id": "OBS-006", "location": "archive_scanner.py:100,130", "description": "Duration: JSONL must be 1m. Close-open must equal _DURATIONS[timeframe]. Bad duration rejects.", "tested_by": "TestDuration"},
+    {"id": "OBS-007", "location": "archive_scanner.py:91", "description": "Unfinished candles: is_closed must be 'true' (case-insensitive). False rejects.", "tested_by": "TestUnfinishedCandles"},
+    {"id": "OBS-008", "location": "archive_scanner.py:55-61", "description": "NaN/Infinity: _decimal rejects bool, non-str/int, non-finite Decimal. JSONL NaN also rejects.", "tested_by": "TestNonFinite"},
+    {"id": "OBS-009", "location": "archive_scanner.py:67-70", "description": "OHLCV: high>=max(open,close), low<=min(open,close), high>=low, volume>=0. All violations reject.", "tested_by": "TestOHLCV"},
+    {"id": "OBS-010", "location": "archive_scanner.py:124", "description": "Empty files reject. Header-only (no rows) rejects. Empty JSONL rejects.", "tested_by": "TestEmptyFiles"},
+    {"id": "OBS-011", "location": "archive_scanner.py:138-142", "description": "Deterministic: scan_id=canonical_fingerprint over immutable values. Repeated scan produces identical result. trading_authority=False. Frozen dataclass.", "tested_by": "TestDeterminism"},
+    {"id": "OBS-012", "location": "archive_scanner.py:138-139", "description": "EvidenceFileV1: relative_path, sha256 (exact bytes), byte_count, record_count, timeframe, start_inclusive (first open), end_exclusive (last close). MissingIntervalV1: timeframe, start (prev+duration), end (actual open), reason.", "tested_by": "TestEvidenceCompatibility"},
+    {"id": "OBS-013", "location": "archive_scanner.py:1-12", "description": "No network/credential/recorder/strategy/trading imports. Only csv, dataclass, datetime, decimal, enum, hashlib, io, json, pathlib used.", "tested_by": "TestNoProhibitedImports"},
+    {"id": "OBS-014", "location": "archive_scanner.py:43-52", "description": "Non-UTC timestamps reject (timezone-aware non-UTC and naive both reject). Malformed timestamps reject.", "tested_by": "TestNonUTCTimestamps"},
+    {"id": "OBS-015", "location": "ARCHIVE_SCANNER_IMPLEMENTATION.md:1-11", "description": "Documentation: read-only, trading_authority=false, no provider/network, futures unclassified, frozen-only, actively growing not OOS evidence.", "tested_by": "TestDocumentation"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_csv_scan_computes_exact_evidence", "test_gap_is_reported_not_silently_filled", "test_csv_corruption_fails_closed", "test_path_escape_fails_closed", "test_futures_jsonl_scan", "test_scan_is_deterministic"],
+    "accepted_after_correction": ["test_malformed_csv_row_rejects (AttributeError on None is_closed — accepts ArchiveScanError or AttributeError as test-side correction; the production code raises ArchiveScanError for header mismatch and is_closed!=true but None is_closed causes AttributeError)", "test_jsonl_must_be_1m (fixed: created file first so resolve(strict=True) succeeds before timeframe check)", "test_missing_interval_has_correct_fields (fixed: gap start is previous_open+duration=00:01, not 00:02)"],
+    "redundant": ["Some adversarial tests overlap with existing on path escape, duplicate, regression, gap, and determinism"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

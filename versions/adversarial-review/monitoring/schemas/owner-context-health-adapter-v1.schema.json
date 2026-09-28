@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "owner-context-health-adapter-v1.schema.json",
+  "title": "Owner Context Health Adapter V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["adapter_version", "report_id", "collected_at", "component_observation_ids", "source_file_sha256", "observations", "readiness", "trading_authority"],
+  "properties": {
+    "adapter_version": {"const": "OWNER_CONTEXT_HEALTH_ADAPTER_V1"},
+    "report_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "collected_at": {"type": "string", "format": "date-time"},
+    "component_observation_ids": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+    "source_file_sha256": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+    "observations": {"type": "array", "minItems": 2, "maxItems": 2},
+    "readiness": {"type": "object"},
+    "trading_authority": {"const": false}
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "phase5-evidence-v2-1",
+  "phase": "V2_PHASE5_RISK_AND_SESSIONS",
+  "starting_checkpoint": "be5e13927f33cefaae69cfd9706f7421764f165e",
+  "self_excluded": true,
+  "simulation_only": true,
+  "network_accessed": false,
+  "operational_controls_accessed": false,
+  "tests": {
+    "focused_phase5": "28 passed in 0.93s",
+    "complete_v2": "396 passed in 1.93s",
+    "full_repository": "1527 passed in 44.55s",
+    "git_diff_check": "passed"
+  },
+  "sha256": {
+    "backtesting/execution_accounting_v2/__init__.py": "097b283f83929d2e38b43c3231284dc8a72e8e62e761571be417bc4b04606646",
+    "backtesting/execution_accounting_v2/PHASE5_CHANGED_FILE_INVENTORY.md": "03c6d63f4ec713aa2a36b9631ba517f6c0acdbdd1b9a36de539ceb1e1af7428b",
+    "backtesting/execution_accounting_v2/PHASE5_IMPLEMENTATION_REPORT.md": "cc0667c9c4f21ee2a71bfbfee93f572967bb48065325ebb61e48b1ede2c361bd",
+    "backtesting/execution_accounting_v2/PHASE5_INVARIANT_MATRIX.md": "de075724caafb4cc7379769551b9047e7d2e78417960dee2531c24ce26bb2f5d",
+    "backtesting/execution_accounting_v2/PHASE5_REASON_CODE_CATALOG.md": "4a331cab78528051ae76b4559631f62c3a38e207c95c5e7a3a013f65d99c16b3",
+    "backtesting/execution_accounting_v2/PHASE5_TEST_INVENTORY.md": "a5354648266be33b85897e1893b9ec674459e80ff7690383672556692dc07844",
+    "backtesting/execution_accounting_v2/PUBLIC_API_SCHEMA_REFERENCE.md": "a606413a55b807a0b43fa8eedf578298ecf5208a776ba2ac69efef6228fd6346",
+    "backtesting/execution_accounting_v2/REASON_CODE_CATALOG.md": "6d317b0d24ec1b9ee05dbb1defc845695302b07947227c74a181def6b9a08bde",
+    "backtesting/execution_accounting_v2/risk_sessions.py": "adf108ab93516dc6ce93eb3039ba10a7b1997c49fe33730dad407aca9e6c6099",
+    "backtesting/execution_accounting_v2/schemas/risk-sessions-v2.schema.json": "899dfb23b9c27e3be2c6e02e8a0d7c137f711e74e073eefba2c4f78bc14a0d3e",
+    "backtesting/execution_accounting_v2/test_risk_sessions.py": "dd38d315f9f1a04fe4e67629cbb614344bd5227a31d6398e8dbbc0b2440e62fa",
+    "backtesting/execution_accounting_v2/test_specifications.py": "d2aeb2f1e231ca0a2202a86daccf6fdb0359ed7a72e2acc39caf64fbab26a094"
+  }
+}

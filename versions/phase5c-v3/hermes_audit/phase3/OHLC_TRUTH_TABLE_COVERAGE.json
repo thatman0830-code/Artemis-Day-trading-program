@@ -1,0 +1,134 @@
+{
+  "source": "backtesting/execution_accounting_v2_design/OHLC_FILL_TRUTH_TABLES.md",
+  "source_sha256": "68733cd9b8285ea219fb57665f818a21c986def5347d87edfc8e95d6246b68ec",
+  "coverage": [
+    {
+      "truth_table_row": "Buy market | any eligible bar | fill | open + slip",
+      "test": "test_market_buy_fills_at_first_eligible_later_bar",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Sell market | any eligible bar | fill | open - slip",
+      "test": "test_market_sell_fills_at_first_eligible_later_bar",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Buy limit | open <= L or low <= L | fill | L; no improvement",
+      "test": "test_buy_limit_exact_touch_at_low, test_buy_limit_touch_at_open",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Buy limit | low > L | no fill | carry/cancel/expire by TIF",
+      "test": "test_buy_limit_no_touch",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Sell limit | open >= L or high >= L | fill | L; no improvement",
+      "test": "test_sell_limit_exact_touch_at_high",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Sell limit | high < L | no fill | carry/cancel/expire by TIF",
+      "test": "test_sell_limit_no_touch",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Buy limit never exceeds L; sell limit never falls below L. A favorable opening gap still records L.",
+      "test": "test_buy_limit_gap_through_still_at_limit, test_sell_limit_gap_through_still_at_limit, test_buy_limit_no_favorable_improvement",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Buy stop-market | open >= S | gap trigger; open + slip",
+      "test": "test_buy_stop_market_gap_trigger",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Buy stop-market | open < S and high >= S | intrabar trigger; S + slip",
+      "test": "test_buy_stop_market_intrabar_trigger",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Buy stop-market | high < S | no trigger",
+      "test": "test_buy_stop_market_no_trigger",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Sell stop-market | open <= S | gap trigger; open - slip",
+      "test": "test_sell_stop_market_gap_trigger",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Sell stop-market | open > S and low <= S | intrabar trigger; S - slip",
+      "test": "test_sell_stop_market_intrabar_trigger",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Sell stop-market | low > S | no trigger",
+      "test": "test_sell_stop_market_no_trigger",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Buy stop-limit | open/high >= S | open/low <= L | fill at L",
+      "test": "test_later_eligible_bar_fills_at_limit, test_stop_limit_buy_symmetry",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Buy stop-limit | open/high >= S | low > L | triggered, unfilled",
+      "test": "test_triggered_unfilled_then_no_touch_remains_unfilled",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Sell stop-limit | open/low <= S | open/high >= L | fill at L",
+      "test": "test_stop_limit_sell_symmetry",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Sell stop-limit | open/low <= S | high < L | triggered, unfilled",
+      "test": "test_triggered_unfilled_state_persists",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "The trigger bar never fills the stop-limit, even if it also touches L.",
+      "test": "test_trigger_bar_never_fills_stop_limit, test_no_same_event_trigger_and_fill",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Long stop and target both touched | adverse long stop wins",
+      "test": "test_adverse_collision_suppresses_favorable",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Short stop and target both touched | adverse short stop wins",
+      "test": "test_adverse_collision_suppresses_favorable",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Two thresholds without declared adverse ownership | reject ambiguity",
+      "test": "test_ambiguous_collision_without_ownership_rejects",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Gap through stop | next observable open plus adverse slip",
+      "test": "test_buy_stop_market_gap_trigger, test_sell_stop_market_gap_trigger",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Gap beyond limit in nonmarketable direction | no limit fill",
+      "test": "test_buy_limit_gap_through_still_at_limit (fills at L, not better)",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Missing/closure/maintenance bar | no trigger and no fill",
+      "test": "test_zero_volume_no_fill, test_missing_volume_rejects",
+      "status": "PASS"
+    },
+    {
+      "truth_table_row": "Signal and threshold on same source bar | ineligible; evaluate later bar only",
+      "test": "test_market_buy_strictly_after_bar_open_rejects",
+      "status": "PASS"
+    }
+  ],
+  "total_rows": 25,
+  "covered_rows": 25,
+  "uncovered_rows": []
+}

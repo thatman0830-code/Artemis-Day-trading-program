@@ -1,0 +1,12 @@
+{
+  "schema_version": "backtesting-data-manifest-v1",
+  "dataset_id": "synthetic-example-v1",
+  "candle_schema_version": "historical-candle-v1",
+  "source": "synthetic-local-fixture",
+  "exchange": "none",
+  "gap_policy": "REJECT",
+  "validation_time": "2026-08-21T00:00:00Z",
+  "files": [
+    {"timeframe": "5m", "path": "candles_5m.csv"}
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "audit_assignment": "AUDIT-V2-PAPER-GATEWAY-CHECKPOINT",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "c4ec8b6dc8b13a969c77777da9ae9ce0e6353148",
+  "parent_sha": "2769f0bea91ef0425149a0e726adeacf22d880e9",
+  "defects": [],
+  "resolved_finding": {
+    "id": "PF-001",
+    "location": "paper_gateway_checkpoint_v1.py:133-136",
+    "description": "Decimal('not-a-decimal') raises decimal.InvalidOperation which inherits from ArithmeticError, not ValueError. The except clause at line 151 catches (ValueError, TypeError, KeyError) but not ArithmeticError. An invalid Decimal in policy fields would propagate uncaught as InvalidOperation rather than being wrapped in PaperCheckpointError.",
+    "severity": "LOW — resolved during primary reconciliation.",
+    "reproduction": "checkpoint with payload.policy.max_order_notional='not-a-decimal' and correct checksum → snapshot_from_bytes raises decimal.InvalidOperation instead of PaperCheckpointError",
+    "expected": "PaperCheckpointError",
+    "actual": "PaperCheckpointError after reconciliation correction",
+    "tested_by": "test_malformed_decimal_is_normalized_to_checkpoint_error"
+  },
+  "observations": [
+    {"id": "OBS-001", "location": "paper_gateway_checkpoint_v1.py:1-10", "description": "No network/credential/pickle/live imports. Only datetime, decimal, hashlib, json, os, pathlib, uuid, contracts, paper_gateway_v2 used.", "tested_by": "TestOfflinePaperOnly"},
+    {"id": "OBS-002", "location": "paper_gateway_checkpoint_v1.py:72-102", "description": "Canonical serialization: byte-identical output, deterministic field ordering (sort_keys), UTF-8, Decimal as strings, UTC timestamps with Z suffix, complete binding of all fields.", "tested_by": "TestCanonicalSerialization"},
+    {"id": "OBS-003", "location": "paper_gateway_checkpoint_v1.py:99-102,114-152", "description": "Integrity: payload SHA-256 covers complete payload. Tamper, snapshot_id tamper with rehash, trading_authority tamper with rehash, malformed hash, duplicate keys, unknown/missing fields, trailing JSON, malformed JSON, invalid UTF-8, empty, truncation, oversized, wrong schema all reject.", "tested_by": "TestIntegrityEnforcement"},
+    {"id": "OBS-004", "location": "paper_gateway_checkpoint_v1.py:155-181", "description": "Atomic durability: os.open(O_CREAT|O_EXCL) for lock, temp file with uuid4, open('xb') exclusive write, flush+fsync, os.replace, finally cleans temp and lock. No unrelated deletion (no Remove-Item, only temp and lock unlinked).", "tested_by": "TestAtomicDurability"},
+    {"id": "OBS-005", "location": "paper_gateway_checkpoint_v1.py:161-166", "description": "Single-writer: O_EXCL lock creation, pre-existing lock (FileExistsError) rejects and preserves checkpoint, symlink lock rejects (is_symlink check), no stale-lock assumption (O_EXCL only).", "tested_by": "TestSingleWriter"},
+    {"id": "OBS-006", "location": "paper_gateway_checkpoint_v1.py:115-116,161,178", "description": "Filesystem safety: missing parent rejects, symlinks reject for load and save, temp name unpredictable (uuid4), size limit (16MB) enforced before deserialization.", "tested_by": "TestFilesystemSafety"},
+    {"id": "OBS-007", "location": "paper_gateway_checkpoint_v1.py:133-152, paper_gateway_v2.py:84,213-227", "description": "Strict reconstruction: loaded policy/records pass constructors. bool-vs-int hardened in policy. Records must be tuple. Non-bool connected/kill_switch/trading_authority reject. snapshot_id must be lowercase SHA-256. Invalid enum rejects.", "tested_by": "TestStrictReconstruction, TestGatewayModification"},
+    {"id": "OBS-008", "location": "paper_gateway_checkpoint_v1.py:155-181", "description": "Restart: round-trip preserves equality, kill switch/disconnected/reconciliation survive restart, corrupted/missing fail closed, prior valid after save failure.", "tested_by": "TestRestartSemantics"},
+    {"id": "OBS-009", "location": "paper_gateway_v2.py:84,213-227", "description": "Gateway modification: bool hardening (isinstance bool check before int), snapshot __post_init__ validates all booleans, trading_authority=True rejected as integrity failure, snapshot_id SHA-256, records must be tuple.", "tested_by": "TestGatewayModification"},
+    {"id": "OBS-010", "location": "paper_gateway_checkpoint_v1.py", "description": "No scheduler, recorder, provider, broker, exchange, wallet, signing, credential, or private_key strings in checkpoint module.", "tested_by": "TestNoProhibited"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_round_trip_is_deterministic_and_preserves_integrity", "test_second_save_atomically_replaces_existing", "test_existing_lock_fails_closed_and_preserves_checkpoint", "test_tamper_truncation_unknown_and_duplicate_fields_reject", "test_snapshot_id_and_trading_authority_tamper_reject_even_with_new_checksum", "test_missing_parent_symlink_and_missing_checkpoint_reject", "test_module_has_no_network_credentials_pickle_or_live_submission", "test_unknown_record_field_and_non_boolean_state_reject_even_when_rehashed", "test_boolean_open_order_limit_rejects"],
+    "accepted_after_correction": ["test_utc_timestamp_preservation (fixed: needed a state with a record to have timestamps in payload)", "test_lock_symlink_rejects (skipped on Windows: os.symlink requires admin)", "test_checkpoint_symlink_rejects_load (skipped on Windows)", "test_checkpoint_symlink_rejects_save (skipped on Windows)", "test_invalid_decimal_in_policy_rejects (accepts any Exception: decimal.InvalidOperation not caught by ValueError clause — potential finding PF-001)", "test_prior_valid_after_save_failure (fixed: test-created lock is not cleaned by save, only save's own lock is cleaned)"],
+    "redundant": ["Some adversarial tests overlap with existing on tamper, truncation, duplicate fields, missing parent, boolean open order limit"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

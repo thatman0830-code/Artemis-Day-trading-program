@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bot2-future-target-row-v2",
+  "type": "object",
+  "required": ["schema_version", "target_version", "instrument", "root_symbol", "contract_id", "session_id", "observation_time", "horizon_minutes", "label_information_start", "label_end_time", "validity", "reason_codes", "future_return", "future_direction", "future_realized_volatility", "future_volatility_state", "path_efficiency", "future_structure"],
+  "properties": {
+    "schema_version": {"const": "bot2-future-target-row-v2"},
+    "target_version": {"const": "bot2-future-market-state-v2"},
+    "instrument": {"type": "string"},
+    "root_symbol": {"enum": ["ES", "NQ"]},
+    "contract_id": {"type": "string"},
+    "session_id": {"type": "string"},
+    "observation_time": {"type": "string", "format": "date-time"},
+    "horizon_minutes": {"enum": [5, 15, 30]},
+    "label_information_start": {"type": ["string", "null"]},
+    "label_end_time": {"type": ["string", "null"]},
+    "validity": {"enum": ["VALID", "INSUFFICIENT_FUTURE_DATA", "SESSION_BOUNDARY", "CONTRACT_BOUNDARY", "FUTURE_WINDOW_GAP"]},
+    "reason_codes": {"type": "array", "items": {"type": "string"}},
+    "future_return": {"type": ["number", "null"]},
+    "future_direction": {"enum": ["UP", "DOWN", "FLAT", null]},
+    "future_realized_volatility": {"type": ["number", "null"]},
+    "future_volatility_state": {"enum": ["LOW", "MEDIUM", "HIGH", null]},
+    "path_efficiency": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "future_structure": {"enum": ["TREND", "RANGE", "TRANSITION", null]}
+  }
+}

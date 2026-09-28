@@ -1,0 +1,30 @@
+{
+  "audit_assignment": "AUDIT-ONEDRIVE-ALERT-CONNECTOR",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "e99539963371eb976b50faee1d6887c09c972ab7",
+  "parent_sha": "f37bdff0078e151ef8ae7c6e1c911faaa2ac311d",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "off_host_alert_delivery.py:196-222", "description": "CLI exposes exactly two subcommands: 'deliver' and 'import-acknowledgements'. No other operations. Missing/unknown subcommand exits with error.", "tested_by": "TestCLIScope"},
+    {"id": "OBS-002", "location": "off_host_alert_delivery.py:212-213,219-220", "description": "CLI output for both deliver and import-acknowledgements always includes trading_authority=False. Deliver output: state=DELIVERED, receipt_count. Ack output: state=ACKNOWLEDGEMENTS_IMPORTED, count.", "tested_by": "TestCLIOutputAuthority"},
+    {"id": "OBS-003", "location": "scripts/run_onedrive_alert_delivery.ps1:13", "description": "PowerShell runner targets only OneDrive\\TradingSystem\\AlertEvidence. No other OneDrive or unrelated paths.", "tested_by": "TestPS1Target"},
+    {"id": "OBS-004", "location": "scripts/run_onedrive_alert_delivery.ps1:6,16", "description": "Reads only alerts.jsonl (watchdog spool) and sink-manifest.json. Validates manifest existence. Does not read other OneDrive content.", "tested_by": "TestPS1Reads"},
+    {"id": "OBS-005", "location": "scripts/run_onedrive_alert_delivery.ps1:7,19", "description": "Writes via Python CLI (monitoring.off_host_alert_delivery deliver). Receipts path is local (outputs\\operational_health\\alert-delivery-receipts). No direct file writes in PS1.", "tested_by": "TestPS1Writes"},
+    {"id": "OBS-006", "location": "scripts/run_onedrive_alert_delivery.ps1:1-20", "description": "No credential access (Get-Credential, SecureString, password, api_key). No strategy/trading data. No .env. No unrelated cloud (SharePoint/Azure/AWS).", "tested_by": "TestPS1NoSecrets"},
+    {"id": "OBS-007", "location": "scripts/run_onedrive_alert_delivery.ps1:9-18", "description": "Missing OneDrive, Python runtime, alert spool, sink manifest all throw. Delivery failure throws. ErrorActionPreference=Stop.", "tested_by": "TestPS1FailClosed"},
+    {"id": "OBS-008", "location": "scripts/run_onedrive_alert_delivery.ps1:8-11", "description": "Process-level $env:OneDrive precedes user-level GetEnvironmentVariable('OneDrive','User'). IsNullOrWhiteSpace triggers fallback.", "tested_by": "TestOneDriveResolution"},
+    {"id": "OBS-009", "location": "scripts/run_onedrive_alert_delivery.ps1:13", "description": "Join-Path handles spaces in paths. Sink path with spaces tested in Python deliver_alerts.", "tested_by": "TestSpacesInPaths"},
+    {"id": "OBS-010", "location": "off_host_alert_delivery.py:131-137", "description": "Idempotent delivery: existing identical envelope accepted. Conflicting cloud file (tampered envelope) rejects with 'conflicts'.", "tested_by": "TestIdempotent"},
+    {"id": "OBS-011", "location": "scripts/run_onedrive_alert_delivery.ps1:1-20", "description": "No task control (Register/Unregister/Enable/Disable/Start/Stop/Set/New-ScheduledTask). No process control (Start/Stop-Process). No network cmdlets. No recorder references. Python has no network imports or trading control.", "tested_by": "TestNoControl"},
+    {"id": "OBS-012", "location": "monitoring/OFF_HOST_ALERT_DELIVERY_FOUNDATION.md:12-23", "description": "Disclaims authenticated acknowledgements ('not cryptographically authenticated'), institutional readiness ('Institutional readiness requires'), no guaranteed availability. Describes OneDrive connector and scheduling as separate.", "tested_by": "TestDocumentation"},
+    {"id": "OBS-013", "location": "scripts/run_onedrive_alert_delivery.ps1:1-20", "description": "No scheduling: no Register-ScheduledTask, no New-ScheduledTask, no RepetitionInterval, no New-TimeSpan. No install/enable script for OneDrive connector. Documentation states scheduling is a separate audited step.", "tested_by": "TestNoScheduling"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_delivery_is_atomic_idempotent_and_content_verified", "test_delivery_rejects_authority_identity_duplicate_and_sink_attacks", "test_acknowledgement_requires_receipt_integrity_chronology_and_sla", "test_acknowledgement_is_explicitly_not_authenticated", "test_sensitive_field_names_and_tampered_receipts_fail_closed", "test_cli_delivers_without_exposing_authority", "test_onedrive_runner_is_narrow_and_secret_free"],
+    "accepted_after_correction": ["test_ack_output_trading_authority_false (fixed: uses real datetime.now(timezone.utc) for delivery and ack timestamps to pass chronology check)"],
+    "redundant": ["Some PS1 source assertions overlap with existing test_onedrive_runner_is_narrow_and_secret_free"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

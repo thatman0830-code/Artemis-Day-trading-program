@@ -1,0 +1,10 @@
+{
+  "audit_assignment": "AUDIT-CONTROLLED-STALE-ALERT-DRILL",
+  "date": "2026-09-01",
+  "checkpoint": "a0ad9c7cdf85117db631af98e2b6e99b449f1dc3",
+  "filesystem_sha256": {
+    "scripts/invoke_controlled_stale_alert_drill.ps1": "30ddf1793aa621e5a4cd71107fa65b14dfc8c3dcb266eb142d9447bd75e2ace1",
+    "monitoring/test_controlled_stale_alert_drill.py": "aafc60fede90b8ae9333aeabe2b3c26ed21bc7133b8884b6ce44499c27fd897a"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files on 2026-09-01."
+}

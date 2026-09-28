@@ -1,0 +1,21 @@
+{
+  "schema_version": "bot2-feature-registry-v2",
+  "feature_schema": "bot2-feature-row-v2",
+  "target_schema": "bot2-future-target-row-v2",
+  "normalization": "NONE_CAUSAL",
+  "feature_count": 24,
+  "features": [
+    "price", "log_return_1", "log_return_3", "log_return_5",
+    "rolling_price_range_3", "rolling_price_range_5", "realized_volatility_3", "realized_volatility_5",
+    "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session",
+    "relative_volume", "volume_acceleration", "session_vwap", "price_to_session_vwap",
+    "seconds_since_session_open", "session_phase", "time_sin", "time_cos",
+    "cross_market_log_return_1", "cross_market_relative_return_1", "cross_market_rolling_correlation_5",
+    "cross_market_divergence_1"
+  ],
+  "cross_market_join": "exact root/session/event-timestamp matching by canonical roots; no nearest-neighbor join, forward-fill, or synthetic row",
+  "continuous_contract": "NONE; contract identity remains a feature-row dimension",
+  "future_information_allowed_in_features": false,
+  "future_information_allowed_in_targets": true,
+  "trading_authority": false
+}

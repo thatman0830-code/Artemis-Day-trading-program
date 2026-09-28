@@ -1,0 +1,12 @@
+{
+  "audit_assignment": "AUDIT-ONEDRIVE-ALERT-CONNECTOR",
+  "date": "2026-08-31",
+  "checkpoint": "e99539963371eb976b50faee1d6887c09c972ab7",
+  "files": {
+    "monitoring/off_host_alert_delivery.py": "eaf7bffed4e398d0824ffbd831f085393bfa7a7065ea5d4ce038e8f9707bfa28",
+    "monitoring/test_off_host_alert_delivery.py": "4b358e9a95376bdd72c2869353836fae2399b51cbe6e0f1dce6096b143ec48c8",
+    "monitoring/OFF_HOST_ALERT_DELIVERY_FOUNDATION.md": "54c7e0d69163b98954179ba80e859cbee64b782e67f9c5cbc2f2d92edbd26e50",
+    "scripts/run_onedrive_alert_delivery.ps1": "65047045b6ef3393904106ec1677ecf9324e8ca74f45576cb96a11a1d8527118"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-31."
+}

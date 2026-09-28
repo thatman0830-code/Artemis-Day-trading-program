@@ -1,0 +1,712 @@
+{
+  "archive": "AI-Day-Trading-Project-Expanded-2026-09-25.zip",
+  "sources": {
+    "project-main": {
+      "path": "C:\\Users\\fjone\\hyperliquid-trading-bot",
+      "included_files": 200655,
+      "bytes": 1213798751
+    },
+    "project-phase5c-v3": {
+      "path": "C:\\Users\\fjone\\hyperliquid-trading-bot-phase5c-v3",
+      "included_files": 1941,
+      "bytes": 122417684
+    },
+    "obsidian-Brain": {
+      "path": "C:\\Users\\fjone\\OneDrive\\Documents\\WindowsPowerShell\\Brain",
+      "included_files": 610,
+      "bytes": 1158685419
+    },
+    "other-project-worktrees/hermes": {
+      "path": "C:\\Users\\fjone\\hyperliquid-trading-bot-hermes",
+      "included_files": 649,
+      "bytes": 5251935
+    },
+    "other-project-worktrees/protective-lifecycle-audit": {
+      "path": "C:\\Users\\fjone\\protective-lifecycle-audit",
+      "included_files": 766,
+      "bytes": 5903976
+    },
+    "other-project-worktrees/clean-slate": {
+      "path": "C:\\Users\\fjone\\Documents\\Codex\\2026-08-21\\referenced-chatgpt-conversation-this-is-an\\w",
+      "included_files": 1299,
+      "bytes": 10023060
+    },
+    "other-project-worktrees/adversarial-review": {
+      "path": "C:\\Users\\fjone\\Documents\\Codex\\2026-08-21\\referenced-chatgpt-conversation-this-is-an\\w-p5-adversarial",
+      "included_files": 1284,
+      "bytes": 9863574
+    },
+    "supporting-integrations/tradingview-mcp": {
+      "path": "C:\\Users\\fjone\\tradingview-mcp",
+      "included_files": 84,
+      "bytes": 542357
+    }
+  },
+  "errors": [],
+  "redacted_files": [
+    "project-main/.env",
+    "project-main/.env.txt",
+    "project-main/outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+    "obsidian-Brain/.obsidian/plugins/mcp-tools-istefox/data.json",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T001252Z-7be011fd7f68/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T001839Z-4c361bb6ddc5/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T002444Z-50199c5458b2/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T003351Z-882217aa192a/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T003544Z-b5520fc9b39f/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T050124Z-b8d090be4514/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T050248Z-f43372abf087/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T051856Z-d9acada56493/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T052659Z-239e955ae6f1/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T063336Z-239e955ae6f1/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T084623Z-141a8b0d4f0e/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T085428Z-4ba3644d9b13/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T090011Z-1c700ed65d78/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T090557Z-971da1ad368d/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T090625Z-971da1ad368d/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T091508Z-6869582c7bfa/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T091716Z-6869582c7bfa/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T091939Z-6869582c7bfa/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T092325Z-03191a646808/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T093028Z-03191a646808/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T123336Z-03191a646808/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T183336Z-03191a646808/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T193707Z-12f6dbb6d235/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T194057Z-3266096814ad/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T194514Z-b602a42de7af/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260907T003336Z-e7112b3f970d/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T072021Z-135ddf216bce/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T072841Z-52de695f0351/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T123336Z-c75ea42a106e/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T183336Z-c75ea42a106e/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T205054Z-efbea3a2dfbc/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T205642Z-bc1724498149/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T220835Z-5d63be0b38fb/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T221645Z-0562362e5e60/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T233327Z-9a55549e8fd8/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T003336Z-9a55549e8fd8/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T011619Z-ee35f1b74871/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T023355Z-79f0ae64ff98/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T024231Z-7c4904b351f3/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T063336Z-7c4904b351f3/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T185609Z-3a4aa859aa57/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T191859Z-da36ff7a2af2/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T202524Z-101887279d2c/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T203359Z-91fcfd846f60/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T213109Z-cef5a598e798/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T213206Z-cef5a598e798/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T225327Z-cef5a598e798/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T225644Z-cef5a598e798/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260910T003337Z-062fcf2b96f2/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260910T063337Z-062fcf2b96f2/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260910T123337Z-062fcf2b96f2/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260910T183337Z-062fcf2b96f2/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T055937Z-d04a9ebb084f/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T063337Z-d04a9ebb084f/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T123338Z-d04a9ebb084f/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T183338Z-d04a9ebb084f/runtime-evidence.zip",
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T215440Z-8219e72e4f79/runtime-evidence.zip"
+  ],
+  "nested_redactions": [
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T001252Z-7be011fd7f68/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T001839Z-4c361bb6ddc5/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T002444Z-50199c5458b2/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T003351Z-882217aa192a/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T003544Z-b5520fc9b39f/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T050124Z-b8d090be4514/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T050248Z-f43372abf087/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T051856Z-d9acada56493/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T052659Z-239e955ae6f1/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T063336Z-239e955ae6f1/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T084623Z-141a8b0d4f0e/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T085428Z-4ba3644d9b13/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T090011Z-1c700ed65d78/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T090557Z-971da1ad368d/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T090625Z-971da1ad368d/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T091508Z-6869582c7bfa/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T091716Z-6869582c7bfa/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T091939Z-6869582c7bfa/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T092325Z-03191a646808/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T093028Z-03191a646808/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T123336Z-03191a646808/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T183336Z-03191a646808/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T193707Z-12f6dbb6d235/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T194057Z-3266096814ad/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260906T194514Z-b602a42de7af/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260907T003336Z-e7112b3f970d/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T072021Z-135ddf216bce/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T072841Z-52de695f0351/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T123336Z-c75ea42a106e/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T183336Z-c75ea42a106e/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T205054Z-efbea3a2dfbc/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T205642Z-bc1724498149/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T220835Z-5d63be0b38fb/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T221645Z-0562362e5e60/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260908T233327Z-9a55549e8fd8/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T003336Z-9a55549e8fd8/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T011619Z-ee35f1b74871/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T023355Z-79f0ae64ff98/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T024231Z-7c4904b351f3/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T063336Z-7c4904b351f3/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T185609Z-3a4aa859aa57/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T191859Z-da36ff7a2af2/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T202524Z-101887279d2c/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T203359Z-91fcfd846f60/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T213109Z-cef5a598e798/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T213206Z-cef5a598e798/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T225327Z-cef5a598e798/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260909T225644Z-cef5a598e798/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260910T003337Z-062fcf2b96f2/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260910T063337Z-062fcf2b96f2/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260910T123337Z-062fcf2b96f2/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260910T183337Z-062fcf2b96f2/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T055937Z-d04a9ebb084f/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T063337Z-d04a9ebb084f/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T123338Z-d04a9ebb084f/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T183338Z-d04a9ebb084f/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    },
+    {
+      "archive": "obsidian-Brain/02_Projects/Trading Brain Continuity/20260911T215440Z-8219e72e4f79/runtime-evidence.zip",
+      "entry": "outputs/futures_forward/forensic_attempt_25b33fe6bc5d6516.json",
+      "status": "redacted"
+    }
+  ],
+  "opaque_archives": [
+    "obsidian-Brain/02_Projects/Trading Brain Continuity/.staging-8f659ebe75604ebfb93498cd5bdd4847/runtime-evidence.zip"
+  ],
+  "excluded": [
+    {
+      "path": "project-main/.git",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/.pytest_cache",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/.venv",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/backtesting/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/backtesting/core_v1/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/backtesting/execution_accounting_v2/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/bot2/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/bot2/data_foundation/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/bot2/features_labels/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/bot2/modeling/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/bot2/neural/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/bot2/phase5a/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/bot2/regimes/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/config/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/database/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/exchange/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/execution/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/futures_data/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/monitoring/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/research/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/risk/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/scripts/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/strategy/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-main/strategy/trading_brain/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/.pytest_cache",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/.git",
+      "reason": "Working metadata/cache; SQLite files exported with backup API"
+    },
+    {
+      "path": "project-phase5c-v3/backtesting/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/backtesting/core_v1/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/backtesting/execution_accounting_v2/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/bot2/data_foundation/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/bot2/features_labels/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/bot2/modeling/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/bot2/neural/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/bot2/phase5a/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/bot2/phase5c_v3/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/bot2/regimes/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/database/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/exchange/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/execution/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/futures_data/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/monitoring/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/research/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/risk/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/scripts/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/strategy/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "project-phase5c-v3/strategy/trading_brain/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/.pytest_cache",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/.git",
+      "reason": "Working metadata/cache; SQLite files exported with backup API"
+    },
+    {
+      "path": "other-project-worktrees/hermes/backtesting/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/backtesting/execution_accounting_v2/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/database/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/execution/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/monitoring/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/risk/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/strategy/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/hermes/strategy/trading_brain/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/.pytest_cache",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/.git",
+      "reason": "Working metadata/cache; SQLite files exported with backup API"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/backtesting/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/backtesting/core_v1/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/backtesting/execution_accounting_v2/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/database/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/exchange/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/execution/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/futures_data/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/monitoring/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/risk/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/strategy/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/protective-lifecycle-audit/strategy/trading_brain/__pycache__",
+      "reason": "Git working metadata or regenerable dependency/cache directory"
+    },
+    {
+      "path": "other-project-worktrees/clean-slate/.git",
+      "reason": "Working metadata/cache; SQLite files exported with backup API"
+    },
+    {
+      "path": "other-project-worktrees/adversarial-review/.git",
+      "reason": "Working metadata/cache; SQLite files exported with backup API"
+    },
+    {
+      "path": "project-main/data/ninjatrader_closed_bars/.single-writer.lock",
+      "reason": "In-use recorder synchronization lock; not trading data. Original left untouched."
+    },
+    {
+      "path": "supporting-integrations/tradingview-mcp/.claude",
+      "reason": "Machine-specific metadata/policies or regenerable dependencies/cache"
+    },
+    {
+      "path": "supporting-integrations/tradingview-mcp/.git",
+      "reason": "Machine-specific metadata/policies or regenerable dependencies/cache"
+    },
+    {
+      "path": "supporting-integrations/tradingview-mcp/node_modules",
+      "reason": "Machine-specific metadata/policies or regenerable dependencies/cache"
+    }
+  ],
+  "files_changing_while_read": [],
+  "started_utc": "2026-09-26T01:17:07Z",
+  "finished_utc": "2026-09-26T01:28:09Z",
+  "file_count_before_indexes": 207299,
+  "bytes_before_indexes": 2529577944,
+  "resolved_read_errors": [
+    {
+      "path": "project-main/data/ninjatrader_closed_bars/.single-writer.lock",
+      "error": "[Errno 13] Permission denied"
+    }
+  ]
+}

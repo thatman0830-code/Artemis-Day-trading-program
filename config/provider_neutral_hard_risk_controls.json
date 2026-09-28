@@ -1,0 +1,15 @@
+{
+  "schema_version": "provider-neutral-hard-risk-controls-v1",
+  "max_risk_per_trade_pct": 0.5,
+  "max_daily_loss_pct": 1.5,
+  "max_portfolio_exposure_pct": 2.0,
+  "max_leverage": 1.0,
+  "max_data_age_seconds": 5.0,
+  "max_feed_latency_seconds": 5.0,
+  "max_drawdown_pct": 3.0,
+  "max_concurrent_positions": 1,
+  "emergency_halt_on_unknown_state": true,
+  "automatic_policy_change_permitted": false,
+  "live_trading_permitted": false,
+  "trading_authority": false
+}

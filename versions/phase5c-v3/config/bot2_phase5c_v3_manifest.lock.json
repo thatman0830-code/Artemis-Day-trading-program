@@ -1,0 +1,10 @@
+{
+  "schema_version": "bot2-phase5c-manifest-pin-v1",
+  "manifest_file": "bot2_phase5c_experiment_manifest_v3.json",
+  "manifest_version": "bot2-phase5c-experiment-manifest-v3",
+  "canonical_manifest_sha256": "c9ae6da9f8d73708c3ca17a28788c80722c5852c48ca658f8ffad75ecb56dc19",
+  "raw_archive_tree_sha256": "405ff5602600fbe361c7136b85be0b26d46567c1c080dfefab2e506e109a775b",
+  "protocol_parent_commit": "ff81aa31d5cf1ea7168ceb2eaa017c0d50b47b94",
+  "protocol_anchor_commit": "9a1ecfaf08077252049dd187d44f8641da1186aa",
+  "binding_policy": "The protocol anchor identifies the commit that first introduced the frozen v3 manifest. Remediation commits must descend from it; the canonical manifest digest is pinned independently in manifest.py."
+}

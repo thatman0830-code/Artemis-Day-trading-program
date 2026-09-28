@@ -1,0 +1,11 @@
+{
+  "hash_basis": "SHA-256 of canonical Git blob bytes for committed baseline objects; working-file bytes for the not-yet-committed integrated test",
+  "self_hash_exclusion": "hermes_audit/phase5/FILE_CHECKSUMS.json is excluded",
+  "audited_parent": "6edb0390311d6564878cf99cb667165351e310a4",
+  "files": {
+    "backtesting/execution_accounting_v2/risk_sessions.py": "adf108ab93516dc6ce93eb3039ba10a7b1997c49fe33730dad407aca9e6c6099",
+    "backtesting/execution_accounting_v2/test_risk_sessions.py": "dd38d315f9f1a04fe4e67629cbb614344bd5227a31d6398e8dbbc0b2440e62fa",
+    "backtesting/execution_accounting_v2/phase5_evidence.json": "1f905e3d7b6e405acc964e24f65cba125f0694f0730b241d3247f22adccd444c",
+    "backtesting/execution_accounting_v2/test_hermes_phase5_adversarial.py": "5efff1d159037d39dace4adfbb403a1adc071620f3b6749216c4c45076258eda"
+  }
+}

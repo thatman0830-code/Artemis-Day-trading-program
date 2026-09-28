@@ -1,0 +1,32 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-OPERATIONAL-DRILLS",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "401fb830e80f11fd612bb044a7a1d2117867ed8e",
+  "parent_sha": "d7fff151384d518f02ce76767b7ba6b373208c4e",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "supervised_paper_operational_drills_v1.py:89-91", "description": "Drill root must be new: root.exists() or root.is_symlink() rejects with ValueError. observed_at must be UTC.", "tested_by": "TestDrillRoot"},
+    {"id": "OBS-002", "location": "supervised_paper_operational_drills_v1.py:38-56", "description": "All evidence frozen, deterministic, content-addressed: OperationalDrillReportV1 and OperationalDrillObservationV1 are frozen dataclasses. report_id=sha256(core). Deterministic replay produces identical report. 11 unique observations with unique evidence_ids.", "tested_by": "TestEvidenceIntegrity"},
+    {"id": "OBS-003", "location": "supervised_paper_operational_drills_v1.py:107-122", "description": "Simulated power-loss: first session executes a command, second session acquires and starts (restart), waiting cycle returns RECONCILIATION_REQUIRED, exact observation restores connectivity.", "tested_by": "TestPowerLossRestart"},
+    {"id": "OBS-004", "location": "supervised_paper_operational_drills_v1.py:124-131", "description": "Process exception: RuntimeError inside context manager releases lock via __exit__. Lock file is absent after exception. Durable checkpoint remains loadable.", "tested_by": "TestProcessException"},
+    {"id": "OBS-005", "location": "supervised_paper_operational_drills_v1.py:134-145", "description": "Stale input (6s ago) → HALTED_STALE_INPUT with kill_switch + disconnected. Future input (1us ahead) → HALTED_FUTURE_INPUT. Both durably checkpointed. No recorder operated.", "tested_by": "TestStaleFutureInput"},
+    {"id": "OBS-006", "location": "supervised_paper_operational_drills_v1.py:1-24", "description": "No recorder imports or control functions. No start/stop/btc/es_nq recorder references.", "tested_by": "TestNoRecorderControl"},
+    {"id": "OBS-007", "location": "supervised_paper_operational_drills_v1.py:147-156", "description": "Checkpoint corruption: writing corrupt bytes then attempting restart rejects with exception and releases ownership lock.", "tested_by": "TestCheckpointCorruption"},
+    {"id": "OBS-008", "location": "supervised_paper_operational_drills_v1.py:158-167", "description": "Exact command replay: first cycle accepts and creates 1 record/receipt. Second cycle with same command returns IDEMPOTENT_REPLAY. No duplicate order created.", "tested_by": "TestCommandReplay"},
+    {"id": "OBS-009", "location": "supervised_paper_operational_drills_v1.py:169-175", "description": "Conflicting reuse: same command_id with different submission (authorized=False) returns COMMAND_CONFLICT without changing exposure.", "tested_by": "TestConflictingReuse"},
+    {"id": "OBS-010", "location": "supervised_paper_operational_drills_v1.py:177-191", "description": "Reconciliation mismatch: empty observation while disconnected → RECONCILIATION_REQUIRED, kill_switch_active, not connected. Durable.", "tested_by": "TestReconciliationMismatch"},
+    {"id": "OBS-011", "location": "supervised_paper_operational_drills_v1.py:193-200", "description": "Controlled stop: session_id-bound, stop=True, trading_authority=False. STOPPED state, disconnected, alert emitted.", "tested_by": "TestControlledStop"},
+    {"id": "OBS-012", "location": "supervised_paper_operational_drills_v1.py:202-213", "description": "Cloud-sync alert delivery: local fixture sink with CLOUD_SYNC transport, off_host_attested=True, trading_authority=False. deliver_alerts + verify_delivery return 1. Physical off-host delivery not claimed.", "tested_by": "TestCloudSyncAlert"},
+    {"id": "OBS-013", "location": "supervised_paper_operational_drills_v1.py:1-5,54-56,218-221", "description": "No physical outage claim: physical_outage_claimed=False, recorder_operation_claimed=False. Module docstring states 'neither operate recorders nor claim physical outage'. No soak test claim.", "tested_by": "TestNoPhysicalClaim"},
+    {"id": "OBS-014", "location": "supervised_paper_operational_drills_v1.py:45,56,221", "description": "trading_authority=False throughout: observation default False, report default False, alert trading_authority False.", "tested_by": "TestTradingAuthorityFalse"},
+    {"id": "OBS-015", "location": "supervised_paper_operational_drills_v1.py:1-24", "description": "No network/credential/provider/scheduled-task/recorder/wallet/broker/exchange/signing/live imports. Only dataclass, datetime, decimal, hashlib, json, pathlib, contracts, paper modules, off_host_alert_delivery used.", "tested_by": "TestNoProhibited"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_all_isolated_operational_drills_pass", "test_report_is_deterministic_and_content_addressed", "test_existing_or_non_utc_drill_root_rejects", "test_drill_module_has_no_live_or_recorder_control_surface"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial tests overlap with existing on drill root, determinism, no network"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

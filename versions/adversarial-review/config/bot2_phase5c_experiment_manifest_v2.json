@@ -1,0 +1,224 @@
+{
+  "schema_version": "bot2-phase5c-experiment-manifest-v2",
+  "experiment_id": "bot2-phase5c-future-state-esnq-v2",
+  "protocol_status": "FROZEN_NOT_APPROVED_PENDING_REMEDIATION",
+  "evaluation_permitted": false,
+  "oos_model_scoring_performed": false,
+  "implementation_commit": "c4e56ed0346e37a3cbb8492f0da3758d771b504d",
+  "preserves_v1_manifest_sha256": "5a1249607d12dd303b0f72210868e984b5791e8bfc8af5b9535bd6e4079d003b",
+  "source_dataset_manifest_sha256": "e03e02906c8033d825d39844aaf4cf9aa3184b613e5c10974c23722531e92b67",
+  "data_eligibility_report": "docs/BOT2_PHASE5C_DATA_ELIGIBILITY.json",
+  "data_eligibility_report_sha256": "a6b7b7e398f10de8439c435f48de64468f5843221621be3ef2412e8c1210cba5",
+  "source_dataset": {
+    "provider": "Databento",
+    "archive": "Promoted Pass B v3 normalized ES/NQ OHLCV one-minute bars",
+    "date_range_inclusive": ["2025-06-02", "2026-08-26"],
+    "expected_interval_seconds": 60,
+    "timestamp": "Exchange event-window bar close; historical receipt timestamp unavailable",
+    "contracts": {
+      "ES": ["ESM5", "ESU5", "ESZ5", "ESH6", "ESM6", "ESU6"],
+      "NQ": ["NQM5", "NQU5", "NQZ5", "NQH6", "NQM6", "NQU6"]
+    },
+    "roll_policy": "No continuous-contract stitching; retain exact listed contract and use frozen Pass B active-window rollover metadata.",
+    "session_policy": "Explicit archived exchange session IDs; never bridge session or contract boundaries.",
+    "gap_policy": "No synthetic bars/fill/interpolation; exact 60s cadence only. Source reason SPARSE_NO_ELIGIBLE_TRADE_AGGREGATE is retained as ambiguous between no eligible trade and source omission.",
+    "eligibility_counts": {
+      "ES": {
+        "total_observations": 438873,
+        "valid_cadence_pairs": 438503,
+        "checked_cadence_pairs": 438551,
+        "invalid_cadence_pairs": 48,
+        "calendar_closure_crossings_excluded": 9,
+        "within_interval_missing_minutes_between_observed_bars": 104,
+        "source_quality_gap_episodes": 53,
+        "source_quality_missing_minutes": 2217,
+        "all_features_eligible_rows": 436303,
+        "all_features_eligible_percent": 99.41440917987664,
+        "valid_targets_by_horizon": {"5": 426070, "15": 422451, "30": 417067},
+        "target_eligible_percent_by_horizon": {"5": 97.0827551478446, "15": 96.2581430163168, "30": 95.03136442661089},
+        "eligible_sequences_length_8_by_horizon": {"5": 424290, "15": 420715, "30": 415374},
+        "sequence_eligible_percent_by_horizon": {"5": 97.16223705121804, "15": 96.34356350845695, "30": 95.12047668555151}
+      },
+      "NQ": {
+        "total_observations": 438806,
+        "valid_cadence_pairs": 438387,
+        "checked_cadence_pairs": 438484,
+        "invalid_cadence_pairs": 97,
+        "calendar_closure_crossings_excluded": 9,
+        "within_interval_missing_minutes_between_observed_bars": 211,
+        "source_quality_gap_episodes": 101,
+        "source_quality_missing_minutes": 2284,
+        "all_features_eligible_rows": 436303,
+        "all_features_eligible_percent": 99.42958847417765,
+        "valid_targets_by_horizon": {"5": 425247, "15": 421525, "30": 416005},
+        "target_eligible_percent_by_horizon": {"5": 96.91002401972627, "15": 96.06181319307393, "30": 94.80385409497592},
+        "eligible_sequences_length_8_by_horizon": {"5": 423880, "15": 420216, "30": 414752},
+        "sequence_eligible_percent_by_horizon": {"5": 97.08324267375149, "15": 96.24405941160977, "30": 94.99261362985698}
+      },
+      "exact_es_nq_aligned_rows": 438723,
+      "unmatched_es": 150,
+      "unmatched_nq": 83,
+      "es_alignment_percent": 99.96582154746362,
+      "nq_alignment_percent": 99.98108503530034,
+      "source_report_path": "docs/BOT2_PHASE5C_DATA_ELIGIBILITY.json",
+      "source_report_sha256": "a6b7b7e398f10de8439c435f48de64468f5843221621be3ef2412e8c1210cba5"
+    }
+  },
+  "feature_specification": {
+    "schema_version": "bot2-feature-row-v3",
+    "registry_version": "bot2-feature-registry-v3",
+    "registry_path": "config/bot2_feature_registry_v3.json",
+    "registry_sha256": "a0c32f664d76bf6e971c5c30cd002fba3aec57826d60f920c24596e70e6fcd3c",
+    "features": [
+      "price", "log_return_1m", "log_return_3m", "log_return_5m",
+      "rolling_price_range_3m", "rolling_price_range_5m", "realized_volatility_3m", "realized_volatility_5m",
+      "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session",
+      "relative_volume_3m", "volume_acceleration_1m", "session_vwap", "price_to_session_vwap",
+      "seconds_since_session_open", "session_phase", "time_sin", "time_cos",
+      "cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m",
+      "cross_market_divergence_1m"
+    ],
+    "sequence_length": 8,
+    "sequence_cadence_seconds": 60,
+    "required_sequence_identity": "same session, exact listed contract, contiguous timestamps, all registered inputs non-null",
+    "categorical_encoding": {"session_phase": {"OPENING": 0, "EARLY": 1, "LATE": 2}},
+    "normalization": "Fit per-feature mean/population standard deviation using each unique eligible TRAIN feature row once, not once per overlapping sequence; zero standard deviation becomes 1e-12; apply unchanged to all later partitions.",
+    "missing_data": "No imputation; machine-readable rejection reason; no future or counterpart forward-fill.",
+    "future_information": false
+  },
+  "target_specification": {
+    "version": "bot2-future-market-state-v3",
+    "spec_sha256": "4c66debf7805374575451cf5d8a097f16aefed23478cd240e3540bd9943e12c1",
+    "horizons_minutes": [5, 15, 30],
+    "cadence_seconds": 60,
+    "invalid_policy": "Invalidate target for incomplete cadence, session/contract boundary, missing observation, or invalid causal reference; never shorten or fill horizon.",
+    "class_indices": {
+      "direction": {"DOWN": 0, "FLAT": 1, "UP": 2},
+      "volatility": {"LOW": 0, "NORMAL": 1, "HIGH": 2},
+      "structure": {"RANGE": 0, "TRANSITION": 1, "TREND": 2}
+    },
+    "targets_are_inputs": false
+  },
+  "architectures": {
+    "A0_PREVIOUS_LABEL_PERSISTENCE": "For each head/root/horizon, carry the latest label whose information interval ends no later than T; otherwise abstain.",
+    "A0_TRAIN_MAJORITY": "TRAIN-only per root/head/horizon majority; lexical tie-break.",
+    "A0_TRAIN_TRANSITION_MATRIX": "TRAIN-only first-order transition probabilities, Laplace alpha=1, prior label eligible only when its information interval ends by T.",
+    "A1_NUMPY_MULTIHEAD_MLP": {
+      "implementation": "Existing bot2.neural.model.MultiHeadMLP",
+      "input": "Flatten standardized 8x24 sequence to 192 values",
+      "hidden_width": 8,
+      "activation": "tanh",
+      "heads": "Three independent 3-class softmax outputs",
+      "initialization": "numpy.random.default_rng(seed); weights normal(0,0.05), biases zero",
+      "optimizer": "Full-batch simultaneous gradient descent",
+      "loss": "Unweighted sum of three categorical cross-entropies",
+      "epochs": 50,
+      "learning_rate": 0.01,
+      "early_stopping": false,
+      "regularization": "none",
+      "minibatch_shuffle": false
+    },
+    "A2_EXISTING_CAUSAL_TEMPORAL_CANDIDATE": {
+      "implementation": "Existing CausalTemporalConv.transform followed by same 8-unit three-head MLP",
+      "transform": "Concatenate sequence mean, endpoint, and mean(x[:,1:])-mean(x[:,:-1]); output width 72 for 8x24 input.",
+      "known_architecture_discrepancy": "Current transform is a fixed causal summary, not a learned temporal convolution; architecture review must explicitly resolve this discrepancy before approval.",
+      "training": "Same optimizer/loss/epochs/rate as A1."
+    },
+    "no_other_architectures": ["LSTM", "GRU", "Transformer", "larger MLP", "additional temporal models"],
+    "multiclass_logistic_baseline": "Excluded: existing logistic implementation is binary and not comparable to the frozen three-head task; adding a new candidate is outside this candidate set."
+  },
+  "strongest_A0_selection": "Select per root/head/horizon/window by validation categorical log loss ascending, then validation macro-F1 descending, then fixed lexical model ID ascending; freeze for test/OOS.",
+  "random_seeds": [1, 2, 3],
+  "chronological_partitions_inclusive": {
+    "TRAIN": ["2025-06-02", "2025-12-31"],
+    "VALIDATION_AND_CALIBRATION": ["2026-01-01", "2026-02-27"],
+    "OOS_TEST": ["2026-03-01", "2026-08-26"]
+  },
+  "walk_forward_windows_inclusive": [
+    {"id": "WF1", "train": ["2025-06-02", "2025-07-31"], "validation": ["2025-08-01", "2025-08-29"], "test": ["2025-09-02", "2025-09-30"]},
+    {"id": "WF2", "train": ["2025-06-02", "2025-08-29"], "validation": ["2025-09-02", "2025-09-30"], "test": ["2025-10-01", "2025-10-31"]},
+    {"id": "WF3", "train": ["2025-06-02", "2025-09-30"], "validation": ["2025-10-01", "2025-10-31"], "test": ["2025-11-03", "2025-12-31"]},
+    {"id": "WF4", "train": ["2025-06-02", "2025-12-31"], "validation": ["2026-01-02", "2026-01-30"], "test": ["2026-02-02", "2026-02-27"]}
+  ],
+  "purge_embargo": {
+    "max_label_horizon_minutes": 30,
+    "max_feature_lookback_minutes": 30,
+    "sequence_lookback_minutes": 7,
+    "purge_minutes": 30,
+    "rule": "Require full label information interval end < next partition's first timestamp minus 30 elapsed minutes; no session/contract bridging.",
+    "embargo_minutes": 30,
+    "rule_embargo": "Exclude first 30 elapsed minutes after each validation/test partition's first in-session timestamp from calibration/scored rows.",
+    "identical_evaluation_intersection": true
+  },
+  "class_imbalance": {
+    "class_weights": "none",
+    "sampling": "none",
+    "synthetic_examples": "none",
+    "loss": "unweighted",
+    "report_class_prevalence": true
+  },
+  "metrics": {
+    "primary": ["macro_f1", "categorical_log_loss"],
+    "primary_aggregate": "For each root/window, equal-weight arithmetic mean over the nine head x horizon cells; each cell is also reported and cannot be selected post hoc.",
+    "primary_direction": {"macro_f1": "higher", "categorical_log_loss": "lower"},
+    "secondary": ["multiclass_brier_score", "balanced_accuracy", "per_class_precision", "per_class_recall", "fixed_order_3x3_confusion_matrix", "10_bin_equal_width_top_label_reliability", "top_label_expected_calibration_error", "coverage_and_rejection_counts"],
+    "metric_conventions": "Argmax ties choose lowest class index; zero denominator precision/recall=0; macro-F1 and balanced accuracy are equal class means; categorical log loss clips p below 1e-15; multiclass Brier=mean(sum_class((p-onehot)^2)/3); top-label ECE=sum_bin(n_bin/N*abs(bin_accuracy-bin_mean_max_probability)) with ten fixed bins [0,.1),...,[.9,1].",
+    "accuracy": "descriptive only, not primary"
+  },
+  "calibration": {
+    "method": "single scalar temperature scaling per root/head/horizon",
+    "fit_partition": "VALIDATION only",
+    "objective": "minimum mean categorical log loss",
+    "deterministic_grid": {"start": 0.05, "stop": 10.0, "step": 0.01, "tie_break": "smallest temperature"},
+    "probability_transform": "p_i^(1/T)/sum_j(p_j^(1/T))",
+    "reliability_bins": 10,
+    "oos_fit": false
+  },
+  "uncertainty_abstention": {
+    "normalized_entropy": "-sum(p*ln(p))/ln(3)",
+    "seed_disagreement": "Mean of all three pairwise Jensen-Shannon divergences across seed probability vectors, natural-log entropy divided by ln(2).",
+    "coverage_points": [1.0, 0.9, 0.75, 0.5],
+    "ranking": "Ascending normalized entropy; ties by timestamp, instrument, then exact contract ID; retain full cutoff tie group and report realized coverage.",
+    "threshold_selection_partition": "VALIDATION only",
+    "oos_or_pnl_optimization": false
+  },
+  "uncertainty_interval": {
+    "method": "paired session-cluster bootstrap",
+    "replicates": 2000,
+    "seed": 20260921,
+    "interval": "percentile 95%; resample full sessions within root/window",
+    "pairing_and_p_value": "Same session resample indices for candidate and comparator; directional delta positive means candidate better; two-sided add-one empirical sign p=min(1,2*min((1+n(delta<=0))/2001,(1+n(delta>=0))/2001)).",
+    "minimum_support": "At least 20 eligible session clusters per root/window and at least two distinct sessions containing each of the three target classes in every cell; otherwise inconclusive."
+  },
+  "shuffled_label_control": {
+    "seeds": [17, 23, 42],
+    "runs_per_candidate_seed": 3,
+    "partition_shuffled": "TRAIN only",
+    "permutation_unit": "Within exact root/contract/session/horizon/head, permute labels across timestamps; independently permute heads; preserve each group's class counts.",
+    "evaluation_labels": "Validation/test/OOS labels unchanged",
+    "confirmatory_family": "96 tests = 3 shuffle seeds x 2 primary metrics x 2 neural candidates x 2 roots x 4 walk-forward test windows, using the same nine-cell aggregate and Holm family-wise alpha 0.05.",
+    "stop_rule": "If any shuffled-label comparison significantly beats the corresponding no-skill A0 comparator after Holm correction (p<0.05) and paired percentile 95% interval excludes zero, stop and investigate leakage."
+  },
+  "feature_ablations": [
+    {"id": "ALL", "excluded_features": []},
+    {"id": "MINUS_CROSS_MARKET", "excluded_features": ["cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m", "cross_market_divergence_1m"]},
+    {"id": "MINUS_VWAP", "excluded_features": ["session_vwap", "price_to_session_vwap"]},
+    {"id": "MINUS_VOLUME", "excluded_features": ["cumulative_volume_session", "relative_volume_3m", "volume_acceleration_1m"]},
+    {"id": "MINUS_VOLATILITY", "excluded_features": ["realized_volatility_3m", "realized_volatility_5m"]},
+    {"id": "MINUS_SESSION_TIME", "excluded_features": ["seconds_since_session_open", "session_phase", "time_sin", "time_cos"]}
+  ],
+  "acceptance_criteria": {
+    "multiplicity": "32 confirmatory tests = 2 primary metrics x 2 neural candidates (ALL features) x 2 roots x 4 walk-forward windows; equal-weight nine-cell aggregate; Holm family-wise alpha 0.05; also require paired percentile 95% session-bootstrap interval to exclude zero in favorable direction.",
+    "supported": "For both ES and NQ, candidate improves both nine-cell aggregate primary metrics versus validation-selected strongest A0 with Holm-adjusted p<0.05 and paired percentile intervals excluding zero in >=3/4 walk-forward windows and all seeds; no class has zero predictions or zero recall in any cell; every head x horizon cell has favorable primary-metric point estimates in both roots; aggregate Brier/ECE point estimates are not worse than A0 in either root; shuffled-label control does not trigger stop.",
+    "partially_supported": "Only a precisely stated subset meets the same requirements; all contrary evidence is reported.",
+    "inconclusive": "Minimum eligible cluster/class support is not met, intervals span no difference, seeds/windows disagree with the frozen rule, or frozen analysis is incomplete.",
+    "not_supported": "Adequately powered comparisons show no primary improvement or consistent degradation.",
+    "leakage_control_failure": "Invalid experiment and stop, not evidence for or against the candidate.",
+    "minimum_point_effect": "None imposed; report effect sizes in native metric units and require corrected uncertainty, cross-seed/window/instrument consistency, calibration, and control checks.",
+    "criteria_mutable_after_results": false
+  },
+  "architecture_review_required_before_scoring": true,
+  "trading_authority": false,
+  "manifest_hashing": "SHA-256 canonical sorted compact JSON excluding manifest_sha256",
+  "manifest_sha256": "e805a78d552bc6c04d5665c818a9022dec7eb0a4da5e4db1432f28246e1973bb"
+}

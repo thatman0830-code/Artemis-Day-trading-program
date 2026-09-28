@@ -1,0 +1,104 @@
+{
+  "audit_id": "AUDIT-V2-PHASE1-PHASE2",
+  "audit_date": "2026-08-27",
+  "source": "implementation (order_ledger.py:228-245 ALLOWED_TRANSITIONS)",
+  "frozen_matrix": "backtesting/execution_accounting_v2/ORDER_LEDGER_TRANSITION_MATRIX.md",
+  "verification_method": "Static ALLOWED_TRANSITIONS-to-frozen-matrix comparison plus targeted runtime transition tests",
+  "exhaustive_runtime_negative_edge_tests": false,
+  "terminal_states": ["FILLED", "REJECTED", "CANCELLED", "EXPIRED", "REPLACED"],
+  "transitions": {
+    "CREATED": {
+      "SUBMIT": {"result": "SUBMITTED", "verified": true},
+      "FORCED_CLOSE_INTENT": {"result": "SUBMITTED", "verified": true},
+      "ACCEPT": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "REJECT": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "ACTIVATE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "FILL": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "TRIGGER": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "CANCEL_REQUEST": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "CANCEL": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "EXPIRE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "REPLACE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "EXECUTION_EVALUATED": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true}
+    },
+    "SUBMITTED": {
+      "ACCEPT": {"result": "ACCEPTED", "verified": true, "note": "requested quantity becomes accepted/remaining"},
+      "REJECT": {"result": "REJECTED", "verified": true},
+      "ACTIVATE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "FILL": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "TRIGGER": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "CANCEL_REQUEST": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "CANCEL": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "EXPIRE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "REPLACE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "EXECUTION_EVALUATED": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "SUBMIT": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "FORCED_CLOSE_INTENT": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true}
+    },
+    "ACCEPTED": {
+      "ACTIVATE": {"result": "ACTIVE", "verified": true, "note": "requires contract_eligibility_verified"},
+      "REJECT": {"result": "REJECTED", "verified": true},
+      "CANCEL_REQUEST": {"result": "CANCEL_REQUESTED", "verified": true},
+      "CANCEL": {"result": "CANCELLED", "verified": true},
+      "FILL": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "TRIGGER": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "EXPIRE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "REPLACE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "EXECUTION_EVALUATED": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true}
+    },
+    "ACTIVE": {
+      "TRIGGER": {"result": "TRIGGERED", "verified": true, "note": "stop orders only"},
+      "FILL": {"result": "PARTIALLY_FILLED or FILLED", "verified": true, "note": "quantity conservation enforced"},
+      "EXECUTION_EVALUATED": {"result": "CANCELLED", "verified": true, "note": "IOC residual cancel"},
+      "CANCEL_REQUEST": {"result": "CANCEL_REQUESTED", "verified": true},
+      "CANCEL": {"result": "CANCELLED", "verified": true},
+      "EXPIRE": {"result": "EXPIRED", "verified": true, "note": "DAY requires session_boundary, GTC requires contract_eligibility"},
+      "REPLACE": {"result": "REPLACED", "verified": true, "note": "creates child order"},
+      "ACCEPT": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "REJECT": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "ACTIVATE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true}
+    },
+    "TRIGGERED": {
+      "FILL": {"result": "PARTIALLY_FILLED or FILLED", "verified": true, "note": "stop-limit fill must follow trigger"},
+      "EXECUTION_EVALUATED": {"result": "CANCELLED", "verified": true, "note": "IOC residual cancel"},
+      "CANCEL_REQUEST": {"result": "CANCEL_REQUESTED", "verified": true},
+      "CANCEL": {"result": "CANCELLED", "verified": true},
+      "EXPIRE": {"result": "EXPIRED", "verified": true},
+      "REPLACE": {"result": "REPLACED", "verified": true},
+      "TRIGGER": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true}
+    },
+    "PARTIALLY_FILLED": {
+      "FILL": {"result": "PARTIALLY_FILLED or FILLED", "verified": true},
+      "CANCEL_REQUEST": {"result": "CANCEL_REQUESTED", "verified": true},
+      "CANCEL": {"result": "CANCELLED", "verified": true},
+      "EXPIRE": {"result": "EXPIRED", "verified": true},
+      "REPLACE": {"result": "REPLACED", "verified": true},
+      "TRIGGER": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "EXECUTION_EVALUATED": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true}
+    },
+    "CANCEL_REQUESTED": {
+      "FILL": {"result": "PARTIALLY_FILLED or FILLED", "verified": true},
+      "CANCEL": {"result": "CANCELLED", "verified": true},
+      "EXPIRE": {"result": "EXPIRED", "verified": true},
+      "TRIGGER": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "REPLACE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "ACTIVATE": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true},
+      "EXECUTION_EVALUATED": {"result": null, "rejected": true, "reason": "INVALID_ORDER_TRANSITION", "verified": true}
+    }
+  },
+  "terminal_state_immutability": {
+    "FILLED": {"verified": true, "fills_rejected_with": "TERMINAL_ORDER_MUTATION"},
+    "REJECTED": {"verified": true, "fills_rejected_with": "TERMINAL_ORDER_MUTATION"},
+    "CANCELLED": {"verified": true, "fills_rejected_with": "CANCELLED_ORDER_FILL"},
+    "EXPIRED": {"verified": true, "fills_rejected_with": "TERMINAL_ORDER_MUTATION"},
+    "REPLACED": {"verified": true, "fills_rejected_with": "REPLACED_ORDER_FILL"}
+  },
+  "event_priority_order": {
+    "source": "order_ledger.py:33-46 EVENT_PRIORITY",
+    "order": ["SUBMIT=10", "FORCED_CLOSE_INTENT=10", "ACCEPT=20", "REJECT=25", "ACTIVATE=30", "CANCEL_REQUEST=40", "CANCEL=41", "REPLACE=42", "EXPIRE=43", "TRIGGER=50", "FILL=60", "EXECUTION_EVALUATED=60"],
+    "verified": true,
+    "note": "Equal-timestamp events sort by (priority, event_id); FILL and EXECUTION_EVALUATED share priority 60"
+  },
+  "implementation_vs_matrix_match": true,
+  "discrepancies": []
+}

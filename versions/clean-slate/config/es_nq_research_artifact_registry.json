@@ -1,0 +1,7 @@
+{
+  "schema_version": "es-nq-research-artifact-registry-v1",
+  "strategy_specs_path": "C:/Users/fjone/hyperliquid-trading-bot/research/es_nq_trader_package_2026-09/ES_NQ_Strategy_Specs.json",
+  "trader_package_path": "C:/Users/fjone/hyperliquid-trading-bot/research/es_nq_trader_package_2026-09/ES_NQ_Trader_Research_Package.md",
+  "strategy_specs_sha256": "F49E1B7767631D6DA66BCA0115A53382EEB1F5F95D99920135D0A42A239BFD6B",
+  "trader_package_sha256": "EA1A6EF6ADA46C120FE7882F8AAD30A7510A04BAF411BFC427E7B147B3479900"
+}

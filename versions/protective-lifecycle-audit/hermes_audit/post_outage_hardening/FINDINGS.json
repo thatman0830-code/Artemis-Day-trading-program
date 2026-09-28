@@ -1,0 +1,35 @@
+{
+  "audit_assignment": "AUDIT-POST-OUTAGE-OPERATIONAL-HARDENING",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "14e40b39c5cb97d75956d9722848531d70cbfff3",
+  "parent_sha": "5420e97b04516b891f539d55a649efc102a312c8",
+  "defects": [],
+  "live_verification": {
+    "original_failure": "HEALTH_COLLECTION_FAILED with orphaned temp evidence",
+    "after_correction": "Real scheduled watchdog run returned HEALTHY with ready_for_unattended_operation=true",
+    "artifacts_cleaned": "No new temp or backup artifact remained after the successful run",
+    "recorder_status": "BTC recorder Running and HEALTHY; ES/NQ recorder Ready and HEALTHY"
+  },
+  "observations": [
+    {"id": "OBS-001", "location": "scripts/collect_owner_context_health_facts.ps1:164-180", "description": "Existing facts replaced atomically via [IO.File]::Replace($temp, $OutputPath, $backup). First-write uses Move-Item. Backup path generated with Guid.", "tested_by": "TestAtomicReplacement, TestFirstWrite"},
+    {"id": "OBS-002", "location": "scripts/collect_owner_context_health_facts.ps1:173-179", "description": "Temp and backup files cleaned in finally block: [IO.File]::Exists check before [IO.File]::Delete for both $temp and $backup. Cleanup runs on both success and failure paths.", "tested_by": "TestCleanup"},
+    {"id": "OBS-003", "location": "scripts/collect_owner_context_health_facts.ps1:181", "description": "Replacement failures remain fail-closed: Write-Output is after the try/finally block. ErrorActionPreference=Stop causes exit before Write-Output on failure. No false health reported.", "tested_by": "TestFailClosed"},
+    {"id": "OBS-004", "location": "scripts/collect_owner_context_health_facts.ps1:164-180", "description": "No unrelated or pre-existing evidence deleted: no Remove-Item, no rmdir, no -Recurse. Only $temp and $backup are deleted.", "tested_by": "TestNoUnrelatedDeletion"},
+    {"id": "OBS-005", "location": "scripts/collect_owner_context_health_facts.ps1:167", "description": "UTF-8 JSON integrity: [IO.File]::WriteAllText with [Text.UTF8Encoding]::new($false), ConvertTo-Json -Depth 8.", "tested_by": "TestJsonIntegrity"},
+    {"id": "OBS-006", "location": "scripts/install_es_nq_delayed_forward_task.ps1:5", "description": "ES/NQ installer includes -WindowStyle Hidden in the scheduled task action arguments.", "tested_by": "TestHiddenWindow"},
+    {"id": "OBS-007", "location": "scripts/install_es_nq_delayed_forward_task.ps1:6-8", "description": "Single-instance IgnoreNew, RestartCount 0, RunLevel Limited, StartWhenAvailable, Daily trigger, ExecutionTimeLimit, Disable after install, Get-Credential, no trading authority — all unchanged.", "tested_by": "TestBoundariesUnchanged"},
+    {"id": "OBS-008", "location": "scripts/collect_owner_context_health_facts.ps1", "description": "No network cmdlets, no recorder mutation (no Start/Stop/Enable/Disable/Register/Unregister-ScheduledTask), no trading control. trading_authority=$false in collector output.", "tested_by": "TestNoProhibitedAccess"},
+    {"id": "OBS-009", "location": "scripts/install_es_nq_delayed_forward_task.ps1", "description": "No OneDrive access in installer. No network cmdlets in installer.", "tested_by": "TestNoProhibitedAccess"},
+    {"id": "OBS-010", "location": "monitoring/test_owner_context_collector.py:58-66", "description": "New test test_existing_facts_are_atomically_replaced_and_generated_temp_is_cleaned checks: Test-Path existing, backup Guid, IO.File.Replace, Exists/Delete for temp and backup.", "tested_by": "TestExistingCoverage"},
+    {"id": "OBS-011", "location": "futures_data/test_forward_collector.py:98", "description": "New assertion checks -WindowStyle Hidden in the ES/NQ installer test.", "tested_by": "TestExistingCoverage"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_scripts_are_owner_dpapi_redacted_nonoverlap_and_preserve_data (+ new -WindowStyle Hidden assertion)", "test_output_is_atomic_utf8_json_and_contains_no_secret_inputs", "test_clock_and_es_integrity_are_derived_from_read_only_verifiers", "test_collector_is_explicitly_owner_read_only_and_fail_closed", "test_collector_requires_exact_tasks_and_single_actions", "test_collector_hashes_sources_and_verifies_btc_archive_content"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial source assertions overlap with existing collector test on trading_authority=$false and ErrorActionPreference=Stop"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": [],
+    "pre_existing_failures": ["2 futures_data/test_forward_collector.py tests fail due to pinned Python unavailable in worktree — pre-existing, not regressions"]
+  }
+}

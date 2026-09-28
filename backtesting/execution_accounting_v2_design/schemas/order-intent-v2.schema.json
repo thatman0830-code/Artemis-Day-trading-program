@@ -1,0 +1,11 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"order-intent-v2.schema.json","type":"object","additionalProperties":false,
+  "required":["schema_version","order_id","run_id","action_id","symbol","instrument_id","side","quantity","order_type","time_in_force","submitted_at","activation_at","configuration_version","execution_policy_version"],
+  "properties":{
+    "schema_version":{"const":"order-intent-v2-1"},"order_id":{"$ref":"common-defs-v2.schema.json#/$defs/id"},"run_id":{"$ref":"common-defs-v2.schema.json#/$defs/id"},"action_id":{"$ref":"common-defs-v2.schema.json#/$defs/id"},
+    "symbol":{"type":"string","minLength":1},"instrument_id":{"type":"string","minLength":1},"contract_id":{"type":["string","null"]},"side":{"enum":["BUY","SELL"]},"quantity":{"$ref":"common-defs-v2.schema.json#/$defs/positiveDecimal"},
+    "order_type":{"enum":["MARKET","LIMIT","STOP_MARKET","STOP_LIMIT"]},"time_in_force":{"enum":["DAY","GTC","IOC"]},"limit_price":{"anyOf":[{"$ref":"common-defs-v2.schema.json#/$defs/positiveDecimal"},{"type":"null"}]},"stop_price":{"anyOf":[{"$ref":"common-defs-v2.schema.json#/$defs/positiveDecimal"},{"type":"null"}]},
+    "submitted_at":{"$ref":"common-defs-v2.schema.json#/$defs/utc"},"activation_at":{"$ref":"common-defs-v2.schema.json#/$defs/utc"},"expires_at":{"anyOf":[{"$ref":"common-defs-v2.schema.json#/$defs/utc"},{"type":"null"}]},"parent_order_id":{"anyOf":[{"$ref":"common-defs-v2.schema.json#/$defs/id"},{"type":"null"}]},"replaces_order_id":{"anyOf":[{"$ref":"common-defs-v2.schema.json#/$defs/id"},{"type":"null"}]},
+    "intent_kind":{"enum":["ENTRY","EXIT","REDUCE","RISK_FLATTEN","SESSION_FLATTEN","END_OF_DATA","ROLLOVER_OUT","ROLLOVER_IN"]},"configuration_version":{"$ref":"common-defs-v2.schema.json#/$defs/version"},"execution_policy_version":{"$ref":"common-defs-v2.schema.json#/$defs/version"}
+  }
+}

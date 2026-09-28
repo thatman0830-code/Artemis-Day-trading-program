@@ -1,0 +1,10 @@
+{
+  "hash_basis":"SHA-256 of integrated working bytes; audit source claims independently checked against canonical Git blobs",
+  "self_hash_exclusion":"hermes_audit/phase6/FILE_CHECKSUMS.json",
+  "files":{
+    "backtesting/execution_accounting_v2/test_hermes_phase6_adversarial.py":"8cf29dce1e90dec3c8fb6233c45f9e76c99eaf28ad49768a4e658d80b684d709",
+    "backtesting/execution_accounting_v2/rollover_funding.py":"d6cb2538776cd519338a192918ecba39c26a83dd34c60a5800a97a2f83f82da9",
+    "backtesting/execution_accounting_v2/test_rollover_funding.py":"276088fb9ddb635f7904aeb22ab42039e782c26a949486ccf0d7c41384212296",
+    "backtesting/execution_accounting_v2/schemas/rollover-funding-v2.schema.json":"bbef424c12c2a51684e75f7878876745e73aa36a5bf8c0f2270ff3be3b2ba334"
+  }
+}

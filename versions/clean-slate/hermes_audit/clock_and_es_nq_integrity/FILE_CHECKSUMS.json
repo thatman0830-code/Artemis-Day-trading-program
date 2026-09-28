@@ -1,0 +1,14 @@
+{
+  "audit_assignment": "AUDIT-CLOCK-AND-ES-NQ-INTEGRITY",
+  "date": "2026-08-30",
+  "checkpoint": "73fdf80bfeb46fef8fa075d5aa25df686cef89fc",
+  "files": {
+    "futures_data/forward_archive_integrity.py": "54395f6c0808b5888e6e3e82e4bf78813d21ca2c5e2553c9296a68f0512dfecb",
+    "futures_data/test_forward_archive_integrity.py": "05928a9185d7ecf9af505e89e4d3836b419af5e027315336cccdf26652b84a14",
+    "futures_data/FORWARD_ARCHIVE_INTEGRITY_REPORT.md": "6af14da3c8eacdc86a4aaf694c9fe96efaddc0ed079de4dcbb756b268dce7465",
+    "monitoring/test_owner_context_collector.py": "5331aa0293305e7eefd07cc4940beff6381f96678fa03b9f461d0369e697c759",
+    "scripts/collect_owner_context_health_facts.ps1": "e0b73db5b446ea98c387434c22e5c9a2dc19472b8347d15cc966a040ba1b7fb4",
+    "backtesting/execution_accounting_v2/test_hermes_owner_context_live_evidence_adversarial.py": "1db1c16e3d169986d90cf3ab5f4c4895800bf0502031b00335049bd9aa88d5b2"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-30."
+}

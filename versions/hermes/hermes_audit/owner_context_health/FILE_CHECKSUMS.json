@@ -1,0 +1,19 @@
+{
+  "audit_assignment": "AUDIT-OWNER-CONTEXT-HEALTH-ADAPTER",
+  "date": "2026-08-30",
+  "checkpoint": "999f48fe57e1e6761fa2f56c60ef8aaea2250209",
+  "files": {
+    "monitoring/owner_context_health_adapter.py": "a860de63a32615db368f2dc8731105a5b22b0a1aaee3d798632ce8162128b1fb",
+    "monitoring/test_owner_context_health_adapter.py": "061b64f6f8a310b15ae274494ae76bd17b33ee81205fbe09699f2d7b11e1496c",
+    "monitoring/__init__.py": "3e9f9fbb5c62daa04a5665e240d284e2253cd25863ae1eda50da2b38294f3316",
+    "monitoring/operational_resilience.py": "e87cfe200e2bb61a15496869bc2ea0d2f80dc41d6dae1db6c5e29a3096598412",
+    "monitoring/OWNER_CONTEXT_HEALTH_ADAPTER_IMPLEMENTATION.md": "99fccdfbbc0d5ce826abedd627153466bb485df92b7958196568e75bbbe624c0",
+    "monitoring/OWNER_CONTEXT_HEALTH_CHANGED_FILE_INVENTORY.md": "dea228b32c24777f16824001b78ab0316bffa384a9bc49ed80e43401860ec0e4",
+    "monitoring/OWNER_CONTEXT_HEALTH_INVARIANT_MATRIX.json": "4701a970fbfa9ffc2e81fae4adf8ecbec8e21ac3165039f4699fa7ca3a7613d9",
+    "monitoring/OWNER_CONTEXT_HEALTH_REASON_CATALOG.json": "0b0223b17d15f477bcc800d158d951f051b3a3b1be2f42469eeae2b46362e563",
+    "monitoring/schemas/owner-context-health-adapter-v1.schema.json": "b8e17c61c46f0dec1515eab4df895d80d45a3b58b9b05c82a667306f4010e5a7",
+    "backtesting/execution_accounting_v2/__init__.py": "a87d55a9444076c4483a32a49c070f523dd0cd865d49edc0eea1ddde7ea3975b",
+    "backtesting/execution_accounting_v2/test_specifications.py": "a53e3ee1b3c9f604d48409c31391b2ff26e78a96d3a4bd0fa2eeba37e191b5f8"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-30."
+}

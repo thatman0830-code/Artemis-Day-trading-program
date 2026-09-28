@@ -1,0 +1,26 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-PERFORMANCE-PERSISTENCE",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "bc4dae95f120dd49d91c66c19de49eaf40c5d65c",
+  "parent_sha": "31be8980f4ef09c6e94c57cd6ffda6a1e3301b93",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "supervised_paper_performance_v1.py:41-68", "description": "Initial performance-checkpoint creation: start() creates adapter checkpoint + performance checkpoint atomically. Restart reconciles both. Corrupt checkpoint halts.", "tested_by": "TestStart"},
+    {"id": "OBS-002", "location": "supervised_paper_performance_v1.py:70-109", "description": "Every accepted fill has matching paper-event, execution-fill, and cost evidence. Accepted fill without verified evidence halts durably. Wrong paper event rejects. Idempotent fill replay.", "tested_by": "TestFillPersistence"},
+    {"id": "OBS-003", "location": "supervised_paper_performance_v1.py:96-100", "description": "Mark persistence: verified closed BTC marks persist when healthy. Mark rejected while workflow unhealthy. Gateway/accounting reconciliation on every cycle.", "tested_by": "TestMarkPersistence"},
+    {"id": "OBS-004", "location": "supervised_paper_performance_v1.py:111-113", "description": "Checkpoint write conflict (writer-lock) durably halts adapter with kill_switch_active.", "tested_by": "TestLockConflict"},
+    {"id": "OBS-005", "location": "supervised_paper_performance_v1.py:115-124, supervised_paper_workflow_v1.py:154-161", "description": "Durable kill-switch activation after persistence/reconciliation failure. HALTED_PERFORMANCE_PERSISTENCE state and alert evidence emitted.", "tested_by": "TestHaltedState"},
+    {"id": "OBS-006", "location": "supervised_paper_performance_v1.py:1-6", "description": "No provider/network/credential/broker/exchange/wallet/signing/live-order/submission imports. No fabricated fills, marks, costs, or prices.", "tested_by": "TestNoProhibited, TestNoFabrication"},
+    {"id": "OBS-007", "location": "supervised_paper_performance_v1.py:41-124", "description": "Immutable, deterministic, advisory-only. trading_authority=false throughout. Ledger identity preserved and deterministic across load/save.", "tested_by": "TestTradingAuthority, TestDeterminism"},
+    {"id": "OBS-008", "location": "supervised_paper_workflow_v1.py:28", "description": "New HALTED_PERFORMANCE_PERSISTENCE state added to SupervisedPaperState enum.", "tested_by": "TestHaltedState"},
+    {"id": "OBS-009", "location": "supervised_paper_workflow_v1.py:154-161", "description": "halt_performance_persistence method: durably halts adapter store, writes health with HALTED_PERFORMANCE_PERSISTENCE state, emits alert evidence.", "tested_by": "TestHaltedState"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_start_creates_atomic_performance_checkpoint", "test_verified_fill_and_closed_mark_persist_and_reconcile", "test_accepted_fill_without_evidence_halts_durably", "test_checkpoint_write_conflict_halts_adapter", "test_restart_reconciles_both_checkpoints", "test_module_has_no_network_credentials_or_live_submission"],
+    "accepted_after_correction": ["_initial() must return PaperExchangeAdapterV1 not PaperGatewaySnapshotV1 (workflow.store.initialize expects adapter)", "snapshot.mark_price → snapshot.position.mark_price (mark_price is on PositionStateV2 not AccountingSnapshotPhase4V2)", "test_alert_emitted_on_halt (corrected: must provide verified_fill that changes ledger so _save_if_changed triggers the lock conflict; empty cycle with no changes skips save)"],
+    "redundant": ["Some adversarial tests overlap with existing on start, fill persistence, lock conflict, restart, no network"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

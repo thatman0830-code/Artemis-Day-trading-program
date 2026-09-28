@@ -1,0 +1,11 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-LAUNCH-EVIDENCE-COLLECTOR",
+  "date": "2026-09-01",
+  "checkpoint": "595d6afde82d4d86c4df1af73d6b078e77b5e4fb",
+  "filesystem_sha256": {
+    "execution/supervised_paper_launch_evidence_collector_v1.py": "e9af0bad50d74c2653a324792479bb99b09e5fa3af2c5d629e080938c79b94b5",
+    "execution/test_supervised_paper_launch_evidence_collector_v1.py": "0a97bd99c9786d1b61a36c2660467dd985d3dac706a7316dfd385ff1d31766ae",
+    "scripts/collect_supervised_paper_launch_evidence.ps1": "c952196103614275f1a76eee9b33f65872250c976acb4cce143bc6166e77974d"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files on 2026-09-01."
+}

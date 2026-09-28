@@ -1,0 +1,12 @@
+{
+  "audit_assignment": "AUDIT-ES-NQ-SESSION-GAP-RECONCILIATION",
+  "date": "2026-08-31",
+  "checkpoint": "bfdc692ec2b0d7d1b5651a97f17dbd34d76adf38",
+  "files": {
+    "backtesting/execution_accounting_v2/session_gap_reconciler.py": "96fa3b6c5c60dbc00a6de01df2d9e43e046b8611c466a1619658d00287e13845",
+    "backtesting/execution_accounting_v2/test_session_gap_reconciler.py": "c00a70f126bd95bfd0fbc3b500efef42ed27fd5bdc9821708d30f04cd04d3e18",
+    "backtesting/execution_accounting_v2/SESSION_GAP_RECONCILIATION.md": "86885a6c6386ef17ff620e8cd25990feacc695c91bfee663e3725314657ed3ce",
+    "backtesting/execution_accounting_v2/__init__.py": "c608aad4e197532a09fba93619f1c39f623b8af1a00ea7ed8d3d6710b08abe35"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-31."
+}

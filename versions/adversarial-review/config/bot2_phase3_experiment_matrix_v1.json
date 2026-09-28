@@ -1,0 +1,13 @@
+{
+  "schema_version": "bot2-experiment-matrix-v1",
+  "final_holdout": "UNTOUCHED_AND_NOT_USED_FOR_TUNING",
+  "experiments": [
+    {"id": "p3-forward-return-zero-reference", "target": "forward_return", "model": "zero_return", "families": ["ALL"]},
+    {"id": "p3-direction-majority", "target": "direction", "model": "majority_class", "families": ["ALL"]},
+    {"id": "p3-direction-logistic-all", "target": "direction", "model": "logistic_regression", "families": ["ALL"]},
+    {"id": "p3-volatility-prior-mean", "target": "future_realized_volatility", "model": "prior_mean", "families": ["ALL"]},
+    {"id": "p3-direction-logistic-family-ablation", "target": "direction", "model": "logistic_regression", "families": ["PRICE", "VOLATILITY", "VOLUME", "VWAP", "SESSION_TIME", "CROSS_MARKET"]}
+  ],
+  "shuffle_policy": "NEVER_SHUFFLE_OBSERVATIONS_ACROSS_TIME",
+  "neural_models": "FORBIDDEN_IN_PHASE_3"
+}

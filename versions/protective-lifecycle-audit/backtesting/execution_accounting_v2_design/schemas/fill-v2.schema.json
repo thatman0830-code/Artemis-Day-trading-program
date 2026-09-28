@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"fill-v2.schema.json","type":"object","additionalProperties":false,
+  "required":["schema_version","fill_id","order_id","market_event_id","fill_time","side","quantity","economic_price","reference_price","friction","fee_total","currency","execution_policy_version"],
+  "properties":{"schema_version":{"const":"fill-v2-1"},"fill_id":{"$ref":"common-defs-v2.schema.json#/$defs/id"},"order_id":{"$ref":"common-defs-v2.schema.json#/$defs/id"},"market_event_id":{"$ref":"common-defs-v2.schema.json#/$defs/id"},"fill_time":{"$ref":"common-defs-v2.schema.json#/$defs/utc"},"side":{"enum":["BUY","SELL"]},"quantity":{"$ref":"common-defs-v2.schema.json#/$defs/positiveDecimal"},"economic_price":{"$ref":"common-defs-v2.schema.json#/$defs/positiveDecimal"},"reference_price":{"$ref":"common-defs-v2.schema.json#/$defs/positiveDecimal"},"friction":{"$ref":"common-defs-v2.schema.json#/$defs/decimal"},"fee_total":{"$ref":"common-defs-v2.schema.json#/$defs/decimal"},"currency":{"type":"string","minLength":1},"execution_policy_version":{"$ref":"common-defs-v2.schema.json#/$defs/version"}}
+}

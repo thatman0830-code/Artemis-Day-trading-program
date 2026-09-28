@@ -1,0 +1,29 @@
+{
+  "audit_assignment": "AUDIT-OWNER-CONTEXT-HEALTH-WATCHDOG",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "17f44e95648cc2ba100dda5d52816c529bd14727",
+  "parent_sha": "fd991a4385328e94f6751b49eed5c889a4008503",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "owner_context_health_watchdog.py:68", "description": "trading_authority is checked False in report payload; all status, alert, and state records set trading_authority=False.", "tested_by": "TestTradingAuthorityAlwaysFalse"},
+    {"id": "OBS-002", "location": "owner_context_health_watchdog.py:93-105", "description": "record_failure atomically writes UNHEALTHY status with failure_reason; unsupported reason rejects.", "tested_by": "TestFailClosed"},
+    {"id": "OBS-003", "location": "owner_context_health_watchdog.py:96-99", "description": "Failure atomically overwrites latest-watchdog-status.json; recovery overwrites failure status. Stale successful status cannot remain authoritative.", "tested_by": "TestStaleStatusOverwritten"},
+    {"id": "OBS-004", "location": "owner_context_health_watchdog.py:27-32", "description": "Atomic writes via .tmp-{pid} + os.replace; no temp files remaining after write.", "tested_by": "TestAtomicWrites"},
+    {"id": "OBS-005", "location": "owner_context_health_watchdog.py:70-71", "description": "Report stored as reports/<report_id>.json; report_id is SHA-256 content-addressed.", "tested_by": "TestContentAddressedReports"},
+    {"id": "OBS-006", "location": "owner_context_health_watchdog.py:51-52", "description": "Alert event_id is SHA-256 over canonical JSON; alerts contain watchdog_version and trading_authority=False.", "tested_by": "TestAlerts"},
+    {"id": "OBS-007", "location": "owner_context_health_watchdog.py:49-50", "description": "Deduplication: repeated identical signature returns False (no new alert). Recovery and regression emit new alerts. Repeated failure deduplicates.", "tested_by": "TestDeduplication"},
+    {"id": "OBS-008", "location": "owner_context_health_watchdog.py:39-42", "description": "Malformed state: wrong keys or trading_authority=True rejects. Corrupt JSON rejects.", "tested_by": "TestMalformedState"},
+    {"id": "OBS-009", "location": "owner_context_health_watchdog.py:63-66", "description": "Missing/corrupt/wrong-schema/trading_authority=True facts all reject via evaluate_sanitized_owner_facts.", "tested_by": "TestEvidenceHandling"},
+    {"id": "OBS-010", "location": "scripts/run_owner_context_health_watchdog.ps1:1-27", "description": "No Start/Stop/Enable/Disable-ScheduledTask or Start/Stop-Process. No 'trading' in source.", "tested_by": "TestNoRecorderControl"},
+    {"id": "OBS-011", "location": "scripts/install_owner_context_health_watchdog_task.ps1:1-23", "description": "Single-instance IgnoreNew, 4-min execution time limit, 5-min repetition, disabled after install, RunLevel Limited, no Enable-ScheduledTask, no Start-ScheduledTask.", "tested_by": "TestInstaller"},
+    {"id": "OBS-012", "location": "monitoring/OWNER_CONTEXT_WATCHDOG_IMPLEMENTATION.md:28-33", "description": "Disclaims off-host notification and institutional/24/7 readiness. States local evidence only.", "tested_by": "TestNoOffHostClaim"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_watchdog_persists_content_addressed_report_and_deduplicates_state", "test_health_transition_and_failure_are_append_only_and_secret_free", "test_runner_is_read_only_fail_closed_and_records_sanitized_failures", "test_installer_is_single_instance_bounded_and_disabled_by_default"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial tests overlap with existing tests on trading_authority=False and alert secret-free checks"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

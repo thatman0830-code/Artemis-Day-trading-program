@@ -1,0 +1,34 @@
+{
+  "audit_assignment": "AUDIT-ONEDRIVE-ALERT-DELIVERY-TASK",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "fef8020f71f7afc4a61640a1cce679f99e09c108",
+  "parent_sha": "9a881e6c3d2c3ba0e1b3e6eaefe7ed70f0768a17",
+  "defects": [],
+  "evolutionary_correction": {
+    "location": "monitoring/test_hermes_onedrive_alert_connector_adversarial.py",
+    "old": "test_no_install_or_enable_script_for_onedrive — asserted no install/enable OneDrive scripts exist in the repository",
+    "new": "test_connector_runner_has_no_embedded_scheduling — asserts the connector RUNNER has no Register/New/Enable/Start-ScheduledTask",
+    "classification": "ACCEPTABLE_CORRECTION",
+    "rationale": "The old assertion was valid for the connector-only milestone. This milestone intentionally introduced install/enable/audit/remove scripts as a separately gated deployment. The enduring invariant (connector runner stays scheduling-free) is preserved by the new assertion, which is stricter about the right thing."
+  },
+  "observations": [
+    {"id": "OBS-001", "location": "scripts/run_onedrive_alert_delivery.ps1:1-20", "description": "Connector runner has no Register/New/Enable/Start-ScheduledTask, no RepetitionInterval, no New-TimeSpan. Scheduling-free.", "tested_by": "TestConnectorSchedulingFree"},
+    {"id": "OBS-002", "location": "scripts/install_onedrive_alert_delivery_task.ps1:1-23", "description": "Installer: 5-min repetition, 2-min execution limit, IgnoreNew, RunLevel Limited, disabled after install, StartWhenAvailable, Interactive logon, no trading authority, already-exists rejection.", "tested_by": "TestInstaller"},
+    {"id": "OBS-003", "location": "scripts/audit_onedrive_alert_delivery_task.ps1:1-32", "description": "Auditor: read-only (no mutation cmdlets), validates exact identity (name, path, single action+trigger, exe, args, working dir, owner, logon, run level, IgnoreNew, PT2M, PT5M, StartWhenAvailable, runner, Python). action_verified=$true, trading_authority=$false.", "tested_by": "TestAuditor"},
+    {"id": "OBS-004", "location": "scripts/enable_and_verify_onedrive_alert_delivery_task.ps1:1-25", "description": "Enablement: requires disabled+audited task, fresh LastRunTime>=startedAt, LastTaskResult=0, calls onedrive_delivery_verifier, requires DELIVERY_VERIFIED + verified_count>=1 + trading_authority=false. Catch disables on any failure. Timeout 30-240s default 120.", "tested_by": "TestEnablement"},
+    {"id": "OBS-005", "location": "monitoring/off_host_alert_delivery.py:160-183, monitoring/onedrive_delivery_verifier.py:1-24", "description": "verify_delivery: every alert has its envelope (matching all fields), receipt (matching schema, delivery_id, sink_id, alert_event_id, envelope_sha256, receipt_id, trading_authority=false). Missing/tampered envelope or receipt rejects. CLI output: state=DELIVERY_VERIFIED, trading_authority=false.", "tested_by": "TestDeliveryVerifier"},
+    {"id": "OBS-006", "location": "scripts/remove_onedrive_alert_delivery_task.ps1:1-9", "description": "Removal: requires action_verified + trading_authority=false from audit. Disable → Stop → Unregister (safe order). No Remove-Item. EVIDENCE_PRESERVED. No evidence file access (no alerts.jsonl, inbox, receipts).", "tested_by": "TestRemoval"},
+    {"id": "OBS-007", "location": "all scripts", "description": "trading_authority=false in installer ('No trading authority'), auditor ($false), enablement (ne $false check), verifier output (false).", "tested_by": "TestTradingAuthority"},
+    {"id": "OBS-008", "location": "monitoring/OFF_HOST_ALERT_DELIVERY_FOUNDATION.md:24-30", "description": "Documentation disclaims authenticated acks, institutional readiness, guaranteed availability. Describes scheduling layer, disable-on-failure, evidence preservation, enablement audit requirement.", "tested_by": "TestDocumentation"},
+    {"id": "OBS-009", "location": "monitoring/test_hermes_onedrive_alert_connector_adversarial.py", "description": "Evolutionary correction: test_no_install_or_enable_script_for_onedrive replaced with test_connector_runner_has_no_embedded_scheduling. Old assertion valid for connector-only; new assertion preserves enduring invariant. ACCEPTABLE_CORRECTION.", "tested_by": "TestEvolutionaryCorrection"},
+    {"id": "OBS-010", "location": "all scripts", "description": "All PowerShell: requires 5.1, CmdletBinding, ErrorActionPreference. No network/credential/recorder/trading control. Delivery PY has no network imports.", "tested_by": "TestPowerShellSyntax, TestNoProhibitedControl"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_delivery_is_atomic_idempotent_and_content_verified", "test_delivery_rejects_authority_identity_duplicate_and_sink_attacks", "test_acknowledgement_requires_receipt_integrity_chronology_and_sla", "test_acknowledgement_is_explicitly_not_authenticated", "test_sensitive_field_names_and_tampered_receipts_fail_closed", "test_cli_delivers_without_exposing_authority", "test_onedrive_runner_is_narrow_and_secret_free", "test_read_only_delivery_verifier_requires_every_envelope_and_receipt", "test_verify_cli_is_nontrading_and_read_only", "test_installer_is_disabled_single_instance_and_bounded", "test_audit_is_read_only_and_checks_exact_identity", "test_enablement_requires_fresh_task_success_and_complete_delivery", "test_removal_requires_identity_and_preserves_evidence"],
+    "accepted_after_correction": ["test_no_install_or_enable_script_for_onedrive → test_connector_runner_has_no_embedded_scheduling (ACCEPTABLE_CORRECTION: old assertion valid for connector-only era; new assertion preserves enduring invariant that the connector runner stays scheduling-free)"],
+    "redundant": ["Some PS1 source assertions overlap with existing task tests on installer/auditor/enablement/removal"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

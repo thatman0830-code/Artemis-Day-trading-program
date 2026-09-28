@@ -1,0 +1,40 @@
+{
+  "schema_version": "es-nq-research-quarantine-v1",
+  "package_id": "es-nq-trader-research-package-2026-09",
+  "source_artifacts_present": false,
+  "modules": [
+    {
+      "module_id": "opening_range_continuation_failure",
+      "hypothesis": "Opening-range continuation and failure deserve controlled comparison on validated ES/NQ data.",
+      "evidence_grade": "research_only",
+      "research_only": true,
+      "comparison_only": true,
+      "signal_authorized": false,
+      "execution_authorized": false
+    },
+    {
+      "module_id": "trend_pullback_resumption",
+      "hypothesis": "Trend pullback resumption deserves controlled comparison on validated ES/NQ data.",
+      "evidence_grade": "research_only",
+      "research_only": true,
+      "comparison_only": true,
+      "signal_authorized": false,
+      "execution_authorized": false
+    },
+    {
+      "module_id": "regime_classification",
+      "hypothesis": "Regime classification may improve conditioning, but requires independent walk-forward validation.",
+      "evidence_grade": "research_only",
+      "research_only": true,
+      "comparison_only": true,
+      "signal_authorized": false,
+      "execution_authorized": false
+    }
+  ],
+  "walk_forward_required": true,
+  "monte_carlo_required": true,
+  "staged_micro_deployment_required": true,
+  "paper_execution_permitted": false,
+  "live_trading_permitted": false,
+  "trading_authority": false
+}

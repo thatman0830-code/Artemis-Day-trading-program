@@ -1,0 +1,32 @@
+{
+  "audit_assignment": "AUDIT-CONTROLLED-BTC-RECORDER-RECOVERY-DRILL",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "4344877eb5b972bb1279f23e58dafd1a7f359b54",
+  "parent_sha": "a589c066abcc7c6908f4add10968842d893ecd3b",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:3-7,130-134", "description": "PREFLIGHT_ONLY is the default mode. -Execute switch is required for physical restart. PREFLIGHT_ONLY exits before Stop-ScheduledTask. Mode field distinguishes PREFLIGHT_ONLY from EXECUTE.", "tested_by": "TestPreflightDefault"},
+    {"id": "OBS-002", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:10-11,139,148,181", "description": "Only BTC task (BTC Public Candle Research Recorder) is stopped and started. ES-NQ Delayed Daily Research Collector is never stopped, started, disabled, enabled, registered, or unregistered.", "tested_by": "TestBtcOnlyControl"},
+    {"id": "OBS-003", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:82-99", "description": "Preflight requires BTC Running, exact action arguments (-NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass), working directory, IgnoreNew single-instance, single action, fresh poll (<90s), RECORDING manifest, zero gaps.", "tested_by": "TestPreflightBtc"},
+    {"id": "OBS-004", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:93-104", "description": "Preflight requires ES/NQ Ready, last result 0, no missed runs, healthy state, trading=false.", "tested_by": "TestPreflightEsNq"},
+    {"id": "OBS-005", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:137-160", "description": "Restart is bounded: Stop-ScheduledTask, 30-second stop deadline, recovery timeout 60-600s (default 180), BTC state polled.", "tested_by": "TestRestartBounded"},
+    {"id": "OBS-006", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:151-160", "description": "Recovery requires a genuinely newer healthy BTC poll (postTime > prePollTime). BTC must be Running after recovery.", "tested_by": "TestRecoveryNewPoll"},
+    {"id": "OBS-007", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:166-167", "description": "Recovery rejects new unresolved BTC gaps: postGapCount must equal preGapCount.", "tested_by": "TestRecoveryNoNewGaps"},
+    {"id": "OBS-008", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:161-164", "description": "ES/NQ state, last result, last run time, and evidence hash must remain unchanged. Any change rejects with 'ES/NQ collector changed during BTC-only recovery drill'.", "tested_by": "TestEsNqUnchanged"},
+    {"id": "OBS-009", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:177-186", "description": "Failure evidence is retained (RECOVERY_FAILED, failure_reason). Automatic BTC restart attempted (Start-ScheduledTask $btcTaskName in catch). Failure rethrows after writing report.", "tested_by": "TestFailureRecovery"},
+    {"id": "OBS-010", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:18-27,64-80", "description": "Evidence is repository-contained (path containment check), atomic (WriteAllText+Move-Item), content-addressed (SHA256 report_id), sanitized (no credentials), trading_authority=false, es_nq_collector_operated=false.", "tested_by": "TestEvidenceIntegrity"},
+    {"id": "OBS-011", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:126,130-134", "description": "PREFLIGHT_ONLY does not claim physical restart: physical_recorder_restart_claimed=false is set before preflight exit. The $true assignment is only after successful recovery, after the preflight exit.", "tested_by": "TestNoFalsePhysicalClaim"},
+    {"id": "OBS-012", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:1-190", "description": "No provider SDK, no signing, no exchange, no order-submission (place_order, submit_live, submit_order, send_order).", "tested_by": "TestNoProhibited"},
+    {"id": "OBS-013", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:1-190", "description": "No live or paper order submission: no live_order, paper_gateway, paper_exchange references.", "tested_by": "TestNoOrderSubmission"},
+    {"id": "OBS-014", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:1-9", "description": "PowerShell: requires 5.1, CmdletBinding, ErrorActionPreference=Stop, OutputPath parameter.", "tested_by": "TestPowerShellSyntax"},
+    {"id": "OBS-015", "location": "invoke_controlled_btc_recorder_recovery_drill.ps1:111-129", "description": "Report schema: controlled-btc-recorder-recovery-drill-v1, started_at, completed_at, result (PREFLIGHT_VERIFIED/RECOVERY_VERIFIED), mode, trading_authority=false.", "tested_by": "TestReportSchema"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_drill_defaults_to_non_disruptive_preflight", "test_exact_recorder_identity_and_btc_only_control_boundary", "test_preflight_requires_fresh_btc_and_healthy_unchanged_es_nq", "test_recovery_is_bounded_and_requires_new_poll_without_new_gaps", "test_failure_attempts_recovery_and_retains_fail_closed_evidence", "test_evidence_is_repository_bounded_sanitized_and_non_trading"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial tests overlap with existing on preflight default, BTC-only control, bounded recovery, failure evidence, no credentials"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version":"capability-matrix-v2-1",
+  "profiles":{
+    "ES_NQ_FUTURE":{"required":["closed_ohlcv_1m","verified_session_calendar","exact_contract_identity","rollover_decisions","tick_size","point_value","quantity_step","commission_schedule","initial_margin_schedule","maintenance_margin_schedule"],"optional":["settlement_price"],"prohibited":["continuous_synthetic_execution","fabricated_bars"]},
+    "BTC_SPOT":{"required":["closed_ohlcv_1m","tick_size","quantity_step","commission_schedule","quote_currency"],"optional":["session_calendar"],"prohibited":["funding","variation_margin"]},
+    "BTC_LINEAR_PERPETUAL":{"required":["closed_ohlcv_1m","mark_price_facts","funding_facts","funding_schedule","tick_size","quantity_step","contract_multiplier","commission_schedule","margin_schedule"],"optional":[],"prohibited":["spot_cash_semantics"]}
+  },
+  "unknown_profile_action":"REJECT"
+}

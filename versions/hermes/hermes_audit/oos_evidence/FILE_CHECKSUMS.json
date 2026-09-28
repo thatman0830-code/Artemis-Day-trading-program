@@ -1,0 +1,15 @@
+{
+  "audit_assignment": "AUDIT-OOS-EVIDENCE-READINESS",
+  "date": "2026-08-30",
+  "starting_head": "b45d866f76f736a595c5f3ba7000242072152d34",
+  "files_audited_from_primary": {
+    "backtesting/execution_accounting_v2/oos_evidence.py": "c5f7fc9b3676574a3bf75abdc913594dd01dac276cd20373ca0be339bf00d1d9",
+    "backtesting/execution_accounting_v2/test_oos_evidence.py": "bc46c2f3f597e6125a181f1a9260594fd13d1feed423761b254e2923dd737e7c",
+    "backtesting/execution_accounting_v2/OOS_EVIDENCE_READINESS_REPORT.md": "04e87ec98acd35b58d89bb6baa4ad42fbecf30c3eba278dd71e57fe3dfd1f58d",
+    "backtesting/execution_accounting_v2/schemas/oos-evidence-readiness-v1.schema.json": "9de696b66a119398d231569b189902b53dc8fe7bdaa47befdbf2f644005a5d0d",
+    "backtesting/execution_accounting_v2/__init__.py": "a87d55a9444076c4483a32a49c070f523dd0cd865d49edc0eea1ddde7ea3975b",
+    "backtesting/execution_accounting_v2/test_specifications.py": "a53e3ee1b3c9f604d48409c31391b2ff26e78a96d3a4bd0fa2eeba37e191b5f8"
+  },
+  "adversarial_test_file": "backtesting/execution_accounting_v2/test_hermes_oos_evidence_adversarial.py",
+  "verification": "SHA-256 checksums computed with hashlib.sha256 on 2026-08-30 from the primary repository uncommitted files. No production files modified."
+}

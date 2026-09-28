@@ -1,0 +1,30 @@
+{
+  "audit_assignment": "AUDIT-V2-PHASE3-CONSERVATIVE-OHLC",
+  "reconciled_by": "Codex",
+  "date": "2026-08-28",
+  "algorithm": "SHA-256 over current working-tree bytes",
+  "files": {
+    "backtesting/execution_accounting_v2/ohlc_execution.py": "029a4ad9a2527fdb36208ef201dd1261711dfd373167a434210384b27acddeca",
+    "backtesting/execution_accounting_v2/order_ledger.py": "f9176ade2ad01d37edce520a66abecb38adc2c789e441b11687d67f258746fdb",
+    "backtesting/execution_accounting_v2/contracts.py": "0ef1debc68def82040658ca38f53f161d3c439942d2d3e3309ff9068dea08d0a",
+    "backtesting/execution_accounting_v2/specifications.py": "a7b156c44d7acc718663b22180fb49c9ee0a8700fe641da59a772cf42b682007",
+    "backtesting/execution_accounting_v2/validation.py": "6eafb9a3e3495a58393596cd9604108523fed4d7bab8de8a2cf6c3c1d116a22b",
+    "backtesting/execution_accounting_v2/test_ohlc_execution.py": "253472dffc54f5cd6d544eba14ccb082b5698e461fc90e4cc1ef338115bb543d",
+    "backtesting/execution_accounting_v2/test_hermes_phase3_adversarial.py": "5e425b70f00dc98c0fe706a94b4d760f4593841562975566fbd21a23937d9c23",
+    "backtesting/execution_accounting_v2/schemas/ohlc-execution-v2.schema.json": "efb78c579af6bfa39ae9e10ef902b75d9ca0960a8caced5af31be8588b523a71",
+    "backtesting/execution_accounting_v2_design/OHLC_FILL_TRUTH_TABLES.md": "aaa22649071124c70b314fe42a91599643a37d291c1a93ca802b7bf3bbab06b3",
+    "backtesting/execution_accounting_v2_design/DECISION_REGISTER.md": "bc72d64429e920c2d5607d6b37a41e42a42a585b8b9d826bec6317fc3f61ac5b",
+    "backtesting/execution_accounting_v2_design/ORDER_STATE_TRANSITIONS.md": "f0fda06a45923663f8454aa7ea998b39296b609bdf48bc709d7c33e3ccb7913d",
+    "hermes_audit/phase3/AUDIT_REPORT.md": "9e91f0171549ed80b03677dc742c2fdab345a451137f401199ae5b8dcebcd22a",
+    "hermes_audit/phase3/FINDINGS.json": "29b18e6b7f51ac4fa5e307b6fde6589b9c826fab45129111ea53a7316b0e38ed",
+    "hermes_audit/phase3/OHLC_TRUTH_TABLE_COVERAGE.json": "be2ea8a18c0fbe4b1b157348bc35bd41dec10a43084d1a7989106fc1277834ca",
+    "hermes_audit/phase3/PARTICIPATION_INVARIANTS.json": "d7f9578953c3606e7aff1396f953481ae4733dfd4520723a272fbfac30303d59",
+    "hermes_audit/phase3/TEST_RESULTS.md": "3814546ce30b683b00bd00ccdc5b852566a79ab3d655b540720ea8c40170b470",
+    "hermes_audit/phase3/HANDOFF_TO_CODEX.md": "17d049294f90731d00169235c589b25ae7a39abd1a6cdce41394bc7c1a75e95b",
+    "hermes_audit/phase3/CODEX_RECONCILIATION.md": "25f149225c0f8f0a2ae88ff192b3bb0e14292c87e3962eb943ec0bd451fcf9b4"
+  },
+  "excluded": {
+    "hermes_audit/phase3/FILE_CHECKSUMS.json": "Self-referential digest excluded because embedding its own SHA-256 changes the hashed bytes."
+  },
+  "verification": "Every listed digest was recomputed after reconciliation; all entries are concrete SHA-256 values."
+}

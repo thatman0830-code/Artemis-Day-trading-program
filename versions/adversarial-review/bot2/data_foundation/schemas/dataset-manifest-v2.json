@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bot2-dataset-manifest-v2",
+  "type": "object",
+  "required": ["manifest_schema_version", "dataset_id", "source", "instruments", "start_exchange_time", "end_exchange_time", "schema_version", "validation_status", "source_sha256", "normalized_sha256", "code_commit", "configuration_sha256", "event_count", "quality_report", "timestamp_provenance", "trading_authority"],
+  "properties": {
+    "manifest_schema_version": {"const": "bot2-dataset-manifest-v2"},
+    "dataset_id": {"type": "string"},
+    "source": {"type": "string"},
+    "instruments": {"type": "array", "items": {"type": "string"}},
+    "schema_version": {"type": "string"},
+    "start_exchange_time": {"type": "string", "format": "date-time"},
+    "end_exchange_time": {"type": "string", "format": "date-time"},
+    "validation_status": {"enum": ["HEALTHY", "UNSAFE"]},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "normalized_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "code_commit": {"type": "string"},
+    "configuration_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "event_count": {"type": "integer", "minimum": 1},
+    "quality_report": {"type": "object"},
+    "timestamp_provenance": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "trading_authority": {"const": false}
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "audit_assignment": "AUDIT-OFF-HOST-ALERT-DELIVERY-FOUNDATION",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "b763b269ddcd1a2faf86175ef355b5acec2bff01",
+  "parent_sha": "65980bd72829f86630718af4603c2359a3899f36",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "off_host_alert_delivery.py:96-117", "description": "Alert event IDs recomputed canonically: event_id must equal _digest(body without event_id). Duplicates, missing, wrong event_id, trading_authority=true all reject.", "tested_by": "TestAlertEventIDs"},
+    {"id": "OBS-002", "location": "off_host_alert_delivery.py:71-78", "description": "Sensitive field names (password, api_key, private_key, secret, credential, token) recursively rejected from alert spool. Nested fields also rejected.", "tested_by": "TestSensitiveFields"},
+    {"id": "OBS-003", "location": "off_host_alert_delivery.py:81-93", "description": "Sink manifest: exact schema (5 keys), stable identity (lowercase alnum), eligible transport (UNC/CLOUD_SYNC/REMOVABLE), off_host_attested=True, trading_authority=False. Missing/extra/wrong/malformed all reject.", "tested_by": "TestSinkManifest"},
+    {"id": "OBS-004", "location": "off_host_alert_delivery.py:120-158", "description": "Delivery envelopes: deterministic (delivery_id=sha256(sink:alert)), atomic (.tmp-{pid}-{uuid}+os.replace), immutable (conflicting existing rejects), read-back verified (re-read matches).", "tested_by": "TestDeliveryEnvelopes, TestRetries"},
+    {"id": "OBS-005", "location": "off_host_alert_delivery.py:142-157", "description": "Receipts: content-verified (receipt_id=_digest(body)), tampered receipt rejects, idempotent retry returns same receipt.", "tested_by": "TestReceipts"},
+    {"id": "OBS-006", "location": "off_host_alert_delivery.py:161-192", "description": "Acknowledgements: exact identity (ack_id=_digest(body)), matching receipt, valid chronology (delivered<=ack<=now+1min), valid operator (_IDENTITY regex), bounded SLA. Zero/negative SLA rejects.", "tested_by": "TestAcknowledgements"},
+    {"id": "OBS-007", "location": "off_host_alert_delivery.py:176-190", "description": "Future/early/late/malformed/duplicate/conflicting/authority/unknown acks all fail closed: wrong authentication, wrong sink, wrong schema, extra fields, missing receipt, authority escalation, chronology, SLA breach.", "tested_by": "TestAckFailClosed"},
+    {"id": "OBS-008", "location": "off_host_alert_delivery.py:54-58", "description": "Atomic writes via .tmp-{pid}-{uuid}+os.replace. No temp files remaining. Read-back verification detects corruption.", "tested_by": "TestAtomicIntegrity"},
+    {"id": "OBS-009", "location": "off_host_alert_delivery.py:1-5", "description": "Module states 'does not authenticate an operator' and 'not physically off-host'. UNAUTHENTICATED_OPERATOR_ATTESTATION is the only accepted authentication value.", "tested_by": "TestNotAuthenticated"},
+    {"id": "OBS-010", "location": "OFF_HOST_ALERT_DELIVERY_FOUNDATION.md:12-17", "description": "Foundation disclaims completed off-host delivery, institutional readiness, and trading authority. States not cryptographically authenticated.", "tested_by": "TestNoCompletedClaim"},
+    {"id": "OBS-011", "location": "off_host_alert_delivery.py:1-16", "description": "No network/credential imports: no requests/httpx/socket/urllib/smtplib. os used only for os.replace, os.getpid, os.fsync. No Get-Credential/keyring/vault.", "tested_by": "TestNoNetworkCredential"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_delivery_is_atomic_idempotent_and_content_verified", "test_delivery_rejects_authority_identity_duplicate_and_sink_attacks", "test_acknowledgement_requires_receipt_integrity_chronology_and_sla", "test_acknowledgement_is_explicitly_not_authenticated", "test_sensitive_field_names_and_tampered_receipts_fail_closed"],
+    "accepted_after_correction": ["test_module_states_not_cryptographically_authenticated (fixed: 'does not authenticate' spans line break, changed to check 'does not' and 'authenticate' separately)", "test_module_no_completed_claim (same fix)"],
+    "redundant": ["Some adversarial tests overlap with existing on delivery idempotency and sensitive field rejection"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

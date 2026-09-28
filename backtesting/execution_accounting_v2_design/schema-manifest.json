@@ -1,0 +1,14 @@
+{
+  "manifest_version":"execution-accounting-v2-schema-manifest-1",
+  "design_version":"execution-accounting-v2-design-1",
+  "schemas":[
+    {"path":"schemas/common-defs-v2.schema.json","sha256":"524919a9571e769dad9ce72a4d423818b22d57a634a697e907f0e2c9589868df"},
+    {"path":"schemas/order-intent-v2.schema.json","sha256":"bd7369e17cd921243b47acbe5046047886264991a371534a5d78a6d188bbdd7d"},
+    {"path":"schemas/order-transition-v2.schema.json","sha256":"e34ecb9cc233d1de1d51b8b37f5dd85ef118952a38d039414c84cfacceb03b15"},
+    {"path":"schemas/fill-v2.schema.json","sha256":"2874abea9fa85f36c3e73e1e426e45aa9c96ba55b05c6720f363d35097610a1e"},
+    {"path":"schemas/instrument-spec-v2.schema.json","sha256":"ad4cd4c2b53ed09008110ebb53534575e352678ce7fea83a7239d19b0bdac103"},
+    {"path":"schemas/accounting-snapshot-v2.schema.json","sha256":"48e0f2ec95eb3441d450823f334333269020bd79d88d1c10b6bcc92505332961"},
+    {"path":"schemas/risk-event-v2.schema.json","sha256":"2e310c5063d3cca4f020c94fadd2dd0fc74d5f91e0598586a241f574a4f595e0"},
+    {"path":"schemas/backtest-result-v2.schema.json","sha256":"fb9fabcd2d53cae91d455c8d6875de3598f401b042dfc5a3157d767b07860470"}
+  ]
+}

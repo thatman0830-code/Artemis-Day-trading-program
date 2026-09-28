@@ -1,0 +1,33 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-WORKFLOW",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "3de3262787eeded38c067c7a5be37b795259b135",
+  "parent_sha": "74c8ddfa110cbfeef4774f23fd74fc71ad089df0",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "supervised_paper_workflow_v1.py:1-16", "description": "No network/credential/live imports. trading_authority=False in lock, health, alerts, and all returned objects.", "tested_by": "TestOfflinePaperOnly"},
+    {"id": "OBS-002", "location": "supervised_paper_workflow_v1.py:12-13,83", "description": "One authoritative state: PaperAdapterCheckpointStoreV1 is sole durable source. No legacy gateway checkpoint used. Restart/reconcile/execute all transact through adapter store.", "tested_by": "TestAuthoritativeState"},
+    {"id": "OBS-003", "location": "paper_exchange_adapter_v1.py:170-173, paper_exchange_adapter_checkpoint_v1.py:174-176", "description": "Halt boundary: halt() verifies integrity, activates kill switch, disconnects, requires reconciliation, preserves records/receipts, deterministic, cannot clear existing kill switch. Store.halt() persists atomically under writer lock.", "tested_by": "TestHaltBoundary"},
+    {"id": "OBS-004", "location": "supervised_paper_workflow_v1.py:86-108", "description": "Ownership: O_CREAT|O_EXCL lock, second owner rejected, malformed/mismatched lock rejects, no cross-release, ownership loss prevents cycle.", "tested_by": "TestOwnership"},
+    {"id": "OBS-005", "location": "supervised_paper_workflow_v1.py:110-116,188-197", "description": "Startup: first initializes once, existing triggers restart, corrupt fails closed, startup failure releases lock, __enter__ exception releases lock.", "tested_by": "TestStartup"},
+    {"id": "OBS-006", "location": "supervised_paper_workflow_v1.py:125-126,40-46", "description": "Chronology: UTC required for now and input_observed_at, future halts, stale halts, age at boundary (5s) accepted, zero/negative policy durations reject.", "tested_by": "TestCycleChronology"},
+    {"id": "OBS-007", "location": "supervised_paper_workflow_v1.py:126-147", "description": "Safety precedence: ownership > timestamp > stop > stale/future > reconciliation > command. Stop before stale/future, stale/future before reconciliation.", "tested_by": "TestSafetyPrecedence"},
+    {"id": "OBS-008", "location": "supervised_paper_workflow_v1.py:117-123,128-129", "description": "Controlled stop: session-bound, stop=True, trading_authority=False required, malformed/foreign/false/extra-field reject, STOPPED state, disconnects, no command in same cycle.", "tested_by": "TestControlledStop"},
+    {"id": "OBS-009", "location": "supervised_paper_workflow_v1.py:130-133", "description": "Stale/future halt: durably checkpointed before health, kill switch active, disconnected, reconciliation required, no command in same cycle, repeated halt no conflict.", "tested_by": "TestHaltBehavior"},
+    {"id": "OBS-010", "location": "supervised_paper_workflow_v1.py:134-142", "description": "Reconciliation: cannot execute before, exact observation restores (only without kill switch), mismatch persisted with kill switch, unsolicited rejects, no trading authority, cannot clear kill switch.", "tested_by": "TestReconciliation"},
+    {"id": "OBS-011", "location": "supervised_paper_workflow_v1.py:143-144", "description": "Command execution: only after all gates, exact retry idempotent, conflict rejects, duplicate order no exposure, receipt persisted before health.", "tested_by": "TestCommandExecution"},
+    {"id": "OBS-012", "location": "supervised_paper_workflow_v1.py:153-171", "description": "Health: frozen, deterministic, heartbeat binds all material fields, adapter_id and gateway_snapshot_id match persisted checkpoint, atomic replace, no false HEALTHY after halt/stop.", "tested_by": "TestHealthEvidence"},
+    {"id": "OBS-013", "location": "supervised_paper_workflow_v1.py:173-183", "description": "Alerts: non-HEALTHY or rejected command alerts, no healthy alert, SHA-256 event_id, no sensitive fields, deduplicated, compatible with read_alerts.", "tested_by": "TestAlertEvidence"},
+    {"id": "OBS-014", "location": "supervised_paper_workflow_v1.py:188-197", "description": "Context manager: normal exit releases lock, exceptions release lock, startup exceptions release lock, no silent lock deletion.", "tested_by": "TestContextManager"},
+    {"id": "OBS-015", "location": "supervised_paper_workflow_v1.py:72-78", "description": "Content addressing: identical initial + cycles produce deterministic state, session_id must be 32-char lowercase UUID hex.", "tested_by": "TestContentAddressing"},
+    {"id": "OBS-016", "location": "supervised_paper_workflow_v1.py:12-16", "description": "Implementation coupling: imports only paper_exchange_adapter_checkpoint_v1 and paper_exchange_adapter_v1 public contracts. No legacy gateway checkpoint.", "tested_by": "TestImplementationCoupling"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_healthy_submission_is_durable_and_auditable", "test_rejected_submission_creates_valid_alert", "test_bad_input_durably_halts_and_alerts", "test_restart_forces_reconciliation_and_exact_observation_recovers", "test_reconciliation_mismatch_is_alerted_and_killed", "test_identity_bound_stop_disconnects_and_alerts", "test_invalid_stop_and_unsolicited_reconciliation_reject", "test_single_owner_and_restart_preserve_receipts", "test_startup_failure_releases_workflow_lock", "test_module_has_no_network_credentials_or_live_submission"],
+    "accepted_after_correction": ["test_cannot_execute_before_reconciliation (corrected: cycle with command after restart returns RECONCILIATION_REQUIRED without raising — command is not executed but no exception is thrown)", "test_no_false_success_on_lock_failure (corrected: do not corrupt lock file with non-JSON text — just verify second acquire is rejected and first lock intact)"],
+    "redundant": ["Some adversarial tests overlap with existing on halt, ownership, startup, stale/future, reconciliation, stop, command, health"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

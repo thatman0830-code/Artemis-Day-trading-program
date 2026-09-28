@@ -1,0 +1,27 @@
+{
+  "audit_assignment": "AUDIT-PAPER-PERFORMANCE-CHECKPOINT",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "2e16bf99da8533c8eb2b530535564c1acbfe6965",
+  "parent_sha": "40eaa0f9f96eccbdf5a400e9b301e6b95c769b77",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_performance_checkpoint_v1.py:134-140,152-174", "description": "Byte-stable round trips for empty and populated ledgers. save/load/save stable. Decimal, UTC timestamp, and enum type preservation verified.", "tested_by": "TestRoundTrip, TestRestoration"},
+    {"id": "OBS-002", "location": "paper_performance_checkpoint_v1.py:50-71,80-131", "description": "Whitelisted immutable types only. _encode rejects floats and unknown types. _decode rejects floats, lists, unknown dataclasses, unknown enums, excessive nesting (>64), non-finite Decimals, naive/non-UTC timestamps.", "tested_by": "TestTypeSafety"},
+    {"id": "OBS-003", "location": "paper_performance_checkpoint_v1.py:143-149", "description": "Duplicate JSON keys reject at every object level via object_pairs_hook=_no_duplicates.", "tested_by": "TestDuplicateKeys"},
+    {"id": "OBS-004", "location": "paper_performance_checkpoint_v1.py:152-153,161-163", "description": "Missing/extra/malformed/oversized/non-UTF8/wrong-schema checkpoints all reject. Empty, non-UTF-8, oversized (>64MB) all reject.", "tested_by": "TestMalformed"},
+    {"id": "OBS-005", "location": "paper_performance_checkpoint_v1.py:168", "description": "Payload SHA-256 detects every single-field mutation. Authority tamper (advisory_only/live_trading_permitted/trading_authority) rejects even with recomputed checksum.", "tested_by": "TestChecksumTamper, TestAuthorityTamper"},
+    {"id": "OBS-006", "location": "paper_performance_checkpoint_v1.py:170-173", "description": "Restored PaperPerformanceLedgerV1 and InstrumentAccountingLedgerV2 identities, snapshots, source events, and fingerprints revalidated. Tampered accounting events reject.", "tested_by": "TestRestoredIntegrity"},
+    {"id": "OBS-007", "location": "paper_performance_checkpoint_v1.py:177-229", "description": "Atomic initialization and replacement via O_EXCL lock + temp + os.replace + fsync. Existing checkpoint cannot be overwritten by initialize. Single-writer lock contention rejects. Stale CAS rejects without changing retained checkpoint. Locks and temp files cleaned after success and controlled failures. Missing parent rejects. Missing checkpoint load rejects.", "tested_by": "TestStoreOperations"},
+    {"id": "OBS-008", "location": "paper_performance_checkpoint_v1.py:183,213", "description": "Symlinked checkpoint and lock paths reject as unsafe.", "tested_by": "TestSymlink"},
+    {"id": "OBS-009", "location": "paper_performance_checkpoint_v1.py:1-13", "description": "No pickle, eval, exec, dynamic import, arbitrary class loading, outbound network, or credentials. Only whitelisted dataclasses and enums. Only hashlib, json, os, pathlib, uuid, datetime, decimal, enum, dataclasses, accounting, ohlc_execution, specifications, paper_performance_ledger imported.", "tested_by": "TestNoProhibited"},
+    {"id": "OBS-010", "location": "paper_performance_checkpoint_v1.py:137,166", "description": "advisory_only=True, live_trading_permitted=False, trading_authority=False hardcoded in checkpoint payload and verified at load time.", "tested_by": "TestAuthorityTamper"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_rich_checkpoint_round_trip_is_byte_stable", "test_empty_ledger_round_trip", "test_checksum_tamper_rejects", "test_authority_tamper_rejects_even_with_recomputed_checksum", "test_malformed_checkpoint_rejects", "test_unknown_type_rejects_after_valid_checksum", "test_atomic_store_initialize_load_and_compare_and_swap", "test_existing_checkpoint_and_writer_lock_reject", "test_symlink_checkpoint_rejects"],
+    "accepted_after_correction": ["_canonical returns bytes not str — removed .encode() from all checksum recompute calls", "test_float_rejects (corrected: float injection into $decimal doesn't reject because Decimal(10000.0) is valid; changed to test _encode guard for raw floats)"],
+    "redundant": ["Some adversarial tests overlap with existing on round trip, checksum tamper, authority tamper, malformed checkpoint, atomic store, existing checkpoint, symlink"],
+    "implementation_coupled": ["_canonical is imported from the module for checksum recompute attacks — this is necessary to test the security boundary but is a direct dependency on an internal function"],
+    "incorrect_or_misleading": []
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "audit_assignment": "AUDIT-OOS-EVIDENCE-READINESS",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-30",
+  "branch": "hermes/audit-lane",
+  "starting_head": "b45d866f76f736a595c5f3ba7000242072152d34",
+  "defects": [],
+  "observations": [
+    {
+      "id": "OBS-001",
+      "location": "oos_evidence.py:157",
+      "description": "OOSReadinessPlanV1.create enforces market in (BTC, ES, NQ) — exactly three markets. Unknown markets raise INVALID_MARKET. Each market produces a distinct plan_id, ensuring market isolation.",
+      "severity": "INFO",
+      "tested_by": "TestMarketIsolation.test_each_market_creates_plan, test_unknown_market_rejects, test_market_isolation_in_plan_id"
+    },
+    {
+      "id": "OBS-002",
+      "location": "oos_evidence.py:66-69",
+      "description": "EvidenceFileV1 rejects absolute paths (startswith /), Windows drive paths (colon), and parent-directory traversal (.. in path segments). This prevents path traversal attacks on evidence files.",
+      "severity": "INFO",
+      "tested_by": "TestPathAndHashValidation.test_absolute_or_traversing_path_rejects"
+    },
+    {
+      "id": "OBS-003",
+      "location": "oos_evidence.py:163-164",
+      "description": "OOSReadinessPlanV1.create rejects duplicate evidence file paths by comparing relative_path after backslash normalization. This prevents duplicate evidence injection.",
+      "severity": "INFO",
+      "tested_by": "TestPathAndHashValidation.test_duplicate_files_rejected"
+    },
+    {
+      "id": "OBS-004",
+      "location": "oos_evidence.py:179-183",
+      "description": "Missing intervals that intersect the UNTOUCHED_OOS partition (start < oos_end and end > oos_start) are rejected with OOS_GAP. Missing intervals in training or validation are retained. This correctly uses half-open interval intersection logic.",
+      "severity": "INFO",
+      "tested_by": "TestMissingIntervalOOS.test_oos_gap_rejects, test_training_gap_accepted, test_gap_at_oos_start_boundary_accepted, test_gap_at_oos_end_boundary_accepted"
+    },
+    {
+      "id": "OBS-005",
+      "location": "oos_evidence.py:195-205",
+      "description": "Authority coverage is checked by sorting authority records by effective_start_inclusive and sweeping a cursor from oos.start_inclusive to oos.end_exclusive. If any required authority kind doesn't cover the full OOS interval, AUTHORITY_GAP is raised. Contiguous authority records are accepted.",
+      "severity": "INFO",
+      "tested_by": "TestAuthorityEvidence.test_authority_gap_rejects, test_contiguous_authority_accepted, test_authority_exactly_covering_oos_accepted"
+    },
+    {
+      "id": "OBS-006",
+      "location": "oos_evidence.py:114-116",
+      "description": "AuthorityEvidenceV1 enforces published_at <= effective_start_inclusive (LOOKAHEAD) and captured_at >= published_at. This prevents post-effective publication (future-data leakage) and inconsistent capture chronology.",
+      "severity": "INFO",
+      "tested_by": "TestAuthorityEvidence.test_late_published_rejects, test_authority_captured_before_published_rejects"
+    },
+    {
+      "id": "OBS-007",
+      "location": "oos_evidence.py:192-194",
+      "description": "Authority captured_at > frozen_at is rejected with LOOKAHEAD. This ensures all authority evidence was captured before the plan freeze, preventing post-freeze evidence injection.",
+      "severity": "INFO",
+      "tested_by": "TestAuthorityEvidence.test_post_freeze_capture_rejects"
+    }
+  ],
+  "test_assumptions": {
+    "accepted": [
+      "All existing test_oos_evidence.py tests (16) pass without modification.",
+      "Market isolation: BTC, ES, NQ are the only supported markets.",
+      "Path traversal: absolute, Windows drive, and parent-directory traversal are rejected.",
+      "Partition order: TRAINING, VALIDATION, UNTOUCHED_OOS must be in this exact order.",
+      "Missing intervals intersecting OOS are rejected; training/validation gaps are retained.",
+      "Authority coverage: each required kind must cover the entire OOS interval.",
+      "All records are frozen dataclasses.",
+      "Plan ID is content-addressed and deterministic."
+    ],
+    "corrected": [
+      "Import isolation test initially checked for 'provider' and 'promote' in the full source, but the module docstring contains these words as prose ('does not read providers, choose partitions, run strategies, promote models'). Fixed to check import lines only for provider/collector/recorder, and code lines (excluding docstrings) for strategy/promotion authority."
+    ],
+    "rejected": [],
+    "redundant": [
+      "test_existing_test_uses_string_hash_not_real_sha is redundant — it just verifies H='a'*64 is valid hex, which is trivially true.",
+      "test_existing_test_path_traversal_is_correct overlaps with TestPathAndHashValidation.test_absolute_or_traversing_path_rejects but uses the existing test's exact paths."
+    ],
+    "implementation_coupled": [
+      "test_late_published uses replace() which triggers __post_init__ at construction — this is implementation-coupled because the invariant is enforced at construction time, not at plan creation. However, the existing test does the same, so this is consistent with the implementation's design."
+    ]
+  },
+  "environment_notes": [
+    "The OOS evidence files are uncommitted in the primary repository at C:\\Users\\fjone\\hyperliquid-trading-bot.",
+    "The Hermes worktree at b45d866 does not contain these files — they were temporarily copied for testing and removed before commit.",
+    "The worktree's test_specifications.py expects 11 schema files; adding the OOS schema makes 12. The primary repo's modified test_specifications.py expects 12. This count mismatch causes 1 test failure in the worktree that is NOT a production defect — it's a version mismatch between the worktree and the uncommitted primary changes.",
+    "Full repo: 27 failures (26 pre-existing futures_data/ + 1 schema count mismatch). The 26 pre-existing failures are unrelated to OOS evidence."
+  ]
+}

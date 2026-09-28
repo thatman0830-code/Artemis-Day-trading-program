@@ -1,0 +1,36 @@
+{
+  "audit_assignment": "AUDIT-ES-NQ-SESSION-GAP-RECONCILIATION",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "bfdc692ec2b0d7d1b5651a97f17dbd34d76adf38",
+  "parent_sha": "30f66e6b8a987b03f4ed007120e357c9bdc7575b",
+  "defects": [],
+  "duplicate_open_ambiguity_verdict": {
+    "finding": "The retained real ES schedule contains a duplicate-open ambiguity. The reconciler correctly rejects this with SessionGapError('duplicate schedule event') at line 96. This is an authoritative-evidence blocker — it is NOT normalized to a valid session.",
+    "classification": "CORRECT_FAIL_CLOSED_BEHAVIOR",
+    "tested_by": "TestDuplicateOpenAmbiguity"
+  },
+  "observations": [
+    {"id": "OBS-001", "location": "session_gap_reconciler.py:116-126", "description": "Exact schedule/manifest SHA-256 binding: manifest raw_sha256 must match sha256(schedule_bytes), raw_bytes must match len(schedule_bytes). Tampered schedule (extra byte) rejects.", "tested_by": "TestHashBinding"},
+    {"id": "OBS-002", "location": "session_gap_reconciler.py:56-63", "description": "Repository-relative path containment: no absolute, drive letter, or parent traversal. resolve(strict=True) catches nonexistent. Must be a file inside repository.", "tested_by": "TestPathContainment"},
+    {"id": "OBS-003", "location": "session_gap_reconciler.py:89,113", "description": "ES/NQ-only market (BTC rejects). XCME-only venue (OTHER rejects). NQ accepted with correct manifest.", "tested_by": "TestMarketVenue"},
+    {"id": "OBS-004", "location": "session_gap_reconciler.py:87,113", "description": "Exact product_name binding: must match schedule records, must be non-empty, manifest root must match market.", "tested_by": "TestProductBinding"},
+    {"id": "OBS-005", "location": "session_gap_reconciler.py:82-83", "description": "Complete non-paginated: status==OK, results is list, no next_url. Missing/non-list results reject.", "tested_by": "TestScheduleCompleteness"},
+    {"id": "OBS-006", "location": "session_gap_reconciler.py:91-97,101", "description": "Unique pre_open/open/close events (duplicate rejects). Strict UTC chronology (pre_open<=open<close). Missing events and unknown events reject. Overlapping sessions reject. Non-UTC and naive timestamps reject. Invalid session dates reject.", "tested_by": "TestEventUniqueness"},
+    {"id": "OBS-007", "location": "session_gap_reconciler.py:139-141", "description": "Classification: SCHEDULED_NON_TRADING_INTERVAL (0 overlap), MISSING_OPEN_SESSION_DATA (full overlap), MIXED_REQUIRES_SPLIT (partial overlap). Deterministic by overlap_seconds vs gap_seconds.", "tested_by": "TestClassification"},
+    {"id": "OBS-008", "location": "session_gap_reconciler.py:131", "description": "Gaps outside schedule coverage (start<schedule_start or end>schedule_end) reject. Non-1m timeframe rejects.", "tested_by": "TestGapCoverage"},
+    {"id": "OBS-009", "location": "session_gap_reconciler.py:17-20, ARCHIVE_SCANNER_IMPLEMENTATION.md", "description": "No maintenance/weekend/holiday subtype. Only 3 GapClassification values. Documentation states 'does not guess' subtype.", "tested_by": "TestNoSubtype"},
+    {"id": "OBS-010", "location": "session_gap_reconciler.py:145-148", "description": "Deterministic immutable: reconciliation_id=canonical_fingerprint, replay produces identical result, frozen dataclass, version constant.", "tested_by": "TestDeterminism"},
+    {"id": "OBS-011", "location": "session_gap_reconciler.py:53", "description": "trading_authority=False always, even with empty gaps.", "tested_by": "TestTradingAuthority"},
+    {"id": "OBS-012", "location": "session_gap_reconciler.py:1-12", "description": "No network/credential/trading imports. Only dataclass, datetime, enum, hashlib, json, pathlib used.", "tested_by": "TestNoProhibitedImports"},
+    {"id": "OBS-013", "location": "session_gap_reconciler.py:96", "description": "Duplicate-open ambiguity: duplicate event for same session date rejects with 'duplicate schedule event'. Correctly treated as authoritative-evidence blocker, NOT normalized.", "tested_by": "TestDuplicateOpenAmbiguity"},
+    {"id": "OBS-014", "location": "session_gap_reconciler.py:119-126", "description": "Manifest verification: endpoint_class==futures_schedules, http_status==200, automatic_retry==False, raw_relative_path must endswith manifest path, missing manifest fields reject.", "tested_by": "TestManifestVerification"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_closed_open_and_mixed_classification", "test_exact_hashes_and_determinism", "test_incomplete_or_conflicting_schedule_rejects", "test_tampered_schedule_rejects", "test_outside_coverage_and_wrong_timeframe_reject", "test_wrong_product_or_market_rejects"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial tests overlap with existing on tampered schedule, outside coverage, wrong timeframe, wrong product/market"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

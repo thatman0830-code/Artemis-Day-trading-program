@@ -1,0 +1,14 @@
+{
+  "audit_assignment": "AUDIT-PAPER-EXCHANGE-ADAPTER",
+  "date": "2026-09-01",
+  "checkpoint": "62ba57cfc22add9de59d4fc29087a990081cdfdd",
+  "filesystem_sha256": {
+    "execution/paper_exchange_adapter_v1.py": "8a4368ef0d37e429b50ba8e69ce1c495012d2aae391c40abfea68cfc7e6f8652",
+    "execution/test_paper_exchange_adapter_v1.py": "d83654221db11c9cbd837ae1abafc2e42d2b1bd12d07cbaf1e32d0da76718d60"
+  },
+  "canonical_git_object_hashes": {
+    "execution/paper_exchange_adapter_v1.py": "5599d2a9fcc7c59488e1edd35bf220c5649676cd",
+    "execution/test_paper_exchange_adapter_v1.py": "ce2fa66fbb0aba173a7cd1070a2fc57832481c4c"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files; canonical Git-object hashes are blob SHA-1 hashes provided by the assignment. Distinguished per audit requirements."
+}

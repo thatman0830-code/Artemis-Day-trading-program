@@ -1,0 +1,18 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-WORKFLOW",
+  "date": "2026-09-01",
+  "checkpoint": "3de3262787eeded38c067c7a5be37b795259b135",
+  "filesystem_sha256": {
+    "execution/paper_exchange_adapter_v1.py": "8e619872e9640005399fea48e1033f039b4e49e9c2dcdc78e9ce743cf239751c",
+    "execution/paper_exchange_adapter_checkpoint_v1.py": "b387e314f08be8866dc357e9da86a9c4da2456708a58b2ec49bcf93180e41f4d",
+    "execution/supervised_paper_workflow_v1.py": "7f29658777fab9a2d06ed7543214e94a7688a51a6ab6be0085f65e5399dcf17f",
+    "execution/test_supervised_paper_workflow_v1.py": "c5fb6ab893c8cc03e089b4a1708a722f1cf1a0290394c9331c3135487c67ba56"
+  },
+  "canonical_git_object_hashes": {
+    "execution/paper_exchange_adapter_v1.py": "3a893e07db16ac3483d0b9ddbc351638aee2eda1",
+    "execution/paper_exchange_adapter_checkpoint_v1.py": "111ef2c2a588344235c9e2f52a3aa0d8f9037ad6",
+    "execution/supervised_paper_workflow_v1.py": "454be865750fce98f73aa56c79d858302d91ad6b",
+    "execution/test_supervised_paper_workflow_v1.py": "2557e63a67ca68cdd82536f4f99439d20a039ec8"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files; canonical Git-object hashes are blob SHA-1 hashes provided by the assignment. Distinguished per audit requirements."
+}

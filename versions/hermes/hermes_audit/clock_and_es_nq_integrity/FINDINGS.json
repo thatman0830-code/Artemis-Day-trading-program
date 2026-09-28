@@ -1,0 +1,36 @@
+{
+  "audit_assignment": "AUDIT-CLOCK-AND-ES-NQ-INTEGRITY",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-30",
+  "checkpoint": "73fdf80bfeb46fef8fa075d5aa25df686cef89fc",
+  "parent_sha": "e4008a9db66c88f968ef6bf9be7b0690aeb2b2df",
+  "defects": [],
+  "superseding_assertion_review": {
+    "assertion_1_clock_skew": {
+      "location": "test_hermes_owner_context_live_evidence_adversarial.py:455-456",
+      "old": "assert '[int]::MaxValue' in source",
+      "new": "assert 'w32tm.exe' in source and 'clockEvidence.clock_skew_seconds' in source; assert 'VerifiedClockSkewSeconds' not in source",
+      "verdict": "LEGITIMATE_SUPERSEDING_CORRECTION — old hardcoded MaxValue replaced with actual w32tm.exe evidence derivation. Strictly stronger."
+    },
+    "assertion_2_es_nq_integrity": {
+      "location": "test_hermes_owner_context_live_evidence_adversarial.py:484-486",
+      "old": "assert 'archive_integrity_verified=$false' in source",
+      "new": "assert 'futures_data.forward_archive_integrity' in source; assert 'esAudit.state -ne VERIFIED' in source; assert 'archive_integrity_verified=$true' in source",
+      "verdict": "LEGITIMATE_SUPERSEDING_CORRECTION — old hardcoded false replaced with actual forward_archive_integrity verifier. Strictly stronger."
+    }
+  },
+  "observations": [
+    {"id": "OBS-001", "location": "forward_archive_integrity.py:36-98", "description": "ES/NQ inventory match: manifests stems matched against raw, normalized, pending, checkpoints. Missing/extra/duplicate/rename all fail.", "tested_by": "TestInventoryMatch, TestArtifactAttacks"},
+    {"id": "OBS-002", "location": "forward_archive_integrity.py:37-38", "description": "Archive root must be inside repository; traversal outside data/futures_forward fails.", "tested_by": "TestPathAttacks"},
+    {"id": "OBS-003", "location": "forward_archive_integrity.py:74-78", "description": "SHA-256 links: raw_sha256 in manifest+pending, normalized_sha256 in manifest, manifest_sha256 in checkpoint. All verified against actual file hashes.", "tested_by": "TestChecksumAndIdentity"},
+    {"id": "OBS-004", "location": "forward_archive_integrity.py:84-91", "description": "Normalized JSONL: strictly increasing timestamps (<= rejects), identity per row, accumulated volume matches manifest.", "tested_by": "TestChronologyAttacks, TestVolumeAndGaps"},
+    {"id": "OBS-005", "location": "forward_archive_integrity.py:97", "description": "Audit identity is SHA-256 content-addressed over (version, ordered artifacts, sessions, rows, bytes, gaps). Deterministic replay.", "tested_by": "TestAuditIdentity"},
+    {"id": "OBS-006", "location": "forward_archive_integrity.py:1-7", "description": "No os/subprocess/socket/requests/httpx/ctypes imports. Read-only verifier.", "tested_by": "TestVerifierReadOnly"},
+    {"id": "OBS-007", "location": "scripts/collect_owner_context_health_facts.ps1:12-36", "description": "Get-WindowsTimeEvidence: w32tm.exe /query /status /verbose. Parses Source, Leap Indicator, Stratum, Phase Offset, Last Sync. Rejects Local CMOS, free-running, nonzero leap, stratum<1/>15, stale>24h, future sync.", "tested_by": "TestWindowsTimeParser, TestPhaseOffsets"},
+    {"id": "OBS-008", "location": "scripts/collect_owner_context_health_facts.ps1:35", "description": "clock_skew_seconds = [Math]::Ceiling([Math]::Abs(phaseValue)). No caller-provided value can override. VerifiedClockSkewSeconds not present.", "tested_by": "TestClockNoOverride"},
+    {"id": "OBS-009", "location": "scripts/collect_owner_context_health_facts.ps1:16-17", "description": "Raw Windows Time output retained (WriteAllText to .clock-status.txt) and hashed (Get-Sha256).", "tested_by": "TestRawClockRetention"},
+    {"id": "OBS-010", "location": "scripts/collect_owner_context_health_facts.ps1:109-119", "description": "ES/NQ integrity: python -m futures_data.forward_archive_integrity called. Exit code checked. state==VERIFIED and trading_authority==false checked. archive_integrity_verified=$true only after verification.", "tested_by": "TestEsNqIntegrityGate"},
+    {"id": "OBS-011", "location": "scripts/collect_owner_context_health_facts.ps1:109-113", "description": "Python execution anchored to repository: Push-Location $repository, .venv\\Scripts\\python.exe, existence checked.", "tested_by": "TestRepositoryAnchoring"},
+    {"id": "OBS-012", "location": "scripts/collect_owner_context_health_facts.ps1:1-4", "description": "PowerShell: #requires 5.1, CmdletBinding, ErrorActionPreference=Stop, Mandatory OutputPath. All failure paths throw.", "tested_by": "TestPowerShellSyntax"}
+  ]
+}

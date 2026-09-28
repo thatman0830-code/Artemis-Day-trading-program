@@ -1,0 +1,9 @@
+#requires -Version 5.1
+[CmdletBinding()]param()
+$ErrorActionPreference='Stop';$taskName='Trading Brain Obsidian Continuity Backup';$repository=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$runner=Join-Path $repository 'scripts\run_obsidian_continuity_backup.ps1';$task=Get-ScheduledTask -TaskName $taskName -TaskPath '\' -ErrorAction Stop;$info=Get-ScheduledTaskInfo -TaskName $taskName -TaskPath '\'
+$action=@($task.Actions)[0];$trigger=@($task.Triggers)[0];$owner=[Security.Principal.WindowsIdentity]::GetCurrent().Name;$leaf=$owner.Split('\')[-1]
+$exe="$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe";$args="-NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$runner`""
+$checks=[ordered]@{actions=(@($task.Actions).Count-eq 1);triggers=(@($task.Triggers).Count-eq 1);owner=($task.Principal.UserId-eq$owner-or$task.Principal.UserId-eq$leaf);level=([string]$task.Principal.RunLevel-eq'Limited');executable=($action.Execute-eq$exe);arguments=($action.Arguments-eq$args);working_directory=($action.WorkingDirectory-eq$repository);instances=([string]$task.Settings.MultipleInstances-eq'IgnoreNew');limit=([string]$task.Settings.ExecutionTimeLimit-eq'PT10M');interval=([string]$trigger.Repetition.Interval-eq'PT6H');start_when_available=($task.Settings.StartWhenAvailable-eq$true);runner=(Test-Path -LiteralPath $runner -PathType Leaf)}
+if($checks.Values-contains$false){throw "Continuity task safety policy rejected the definition: $($checks|ConvertTo-Json -Compress)"}
+[ordered]@{task_name=$task.TaskName;state=[string]$task.State;last_result=[int]$info.LastTaskResult;next_run_time=$info.NextRunTime.ToUniversalTime().ToString('o');owner_matches=$true;run_level='Limited';execution_time_limit='PT10M';repetition_interval='PT6H';action_verified=$true;trading_authority=$false}|ConvertTo-Json -Compress

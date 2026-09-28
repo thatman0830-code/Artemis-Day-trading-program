@@ -1,0 +1,31 @@
+{
+  "audit_assignment": "AUDIT-PAPER-SESSION-RECOVERY-DRILLS",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-31",
+  "checkpoint": "ce3b62156f8f46556d5aaf85b1f295d0851cd5bf",
+  "parent_sha": "1da42a02eecfdbc71685bc825720980e506b0ea9",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "paper_session_drills_v1.py:1-7", "description": "No network/credential/live/scheduler imports. Only dataclass, datetime, hashlib, json, pathlib, paper_gateway, paper_session_supervisor used. trading_authority=False in DrillReportV1 default and all run_recovery_drills output.", "tested_by": "TestOfflinePaperOnly"},
+    {"id": "OBS-002", "location": "paper_session_drills_v1.py:17-26", "description": "Bounded runner: executes exact cycles when healthy, stops on first non-HEALTHY (break), empty cycles rejects with ValueError, no false success after halt.", "tested_by": "TestBoundedRunner"},
+    {"id": "OBS-003", "location": "paper_session_drills_v1.py:21", "description": "Context-manager: supervisor __enter__/__exit__ releases lock on success and exception. No cross-delete (second owner cannot release first owner's lock).", "tested_by": "TestContextManager"},
+    {"id": "OBS-004", "location": "paper_session_drills_v1.py:9-15,60-61", "description": "DrillReportV1 is frozen, observations in deterministic execution order, report_id=sha256(payload), observation name/passed/reason participate in identity, changing material observation changes report_id, replay identical.", "tested_by": "TestDeterministicReporting"},
+    {"id": "OBS-005", "location": "paper_session_drills_v1.py:30-32", "description": "Healthy-cycle drill: runs a bounded healthy cycle and verifies state is HEALTHY. Health file confirms HEALTHY state.", "tested_by": "TestHealthyCycleDrill"},
+    {"id": "OBS-006", "location": "paper_session_drills_v1.py:33-38", "description": "Stale/future drills: stale input (6s ago) halts with kill_switch+disconnect, future input (1us ahead) halts with kill_switch. Both produce persisted kill_switch in health file.", "tested_by": "TestStaleFutureDrills"},
+    {"id": "OBS-007", "location": "paper_session_drills_v1.py:39-41", "description": "Restart: first session runs healthy, second session with different ID loads existing checkpoint → connected=False, reconciliation_required=True. Checkpoint file confirms.", "tested_by": "TestRestart"},
+    {"id": "OBS-008", "location": "paper_session_drills_v1.py:42-47", "description": "Ownership contention: second owner acquire() rejected, first owner's lock intact, contention not represented as passing healthy.", "tested_by": "TestOwnershipContention"},
+    {"id": "OBS-009", "location": "paper_session_drills_v1.py:48-52", "description": "Controlled stop: stop request bound to session '5'*32, stop=True+trading_authority=False, final state is STOPPED, checkpoint and health evidence retained.", "tested_by": "TestControlledStop"},
+    {"id": "OBS-010", "location": "paper_session_drills_v1.py:53-59", "description": "Corrupted checkpoint: writing corrupt bytes then loading rejects with exception, not assumed clean. Drill observation passed=True means rejection was correctly detected.", "tested_by": "TestCorruptedCheckpoint"},
+    {"id": "OBS-011", "location": "paper_session_drills_v1.py:17-26,29-61", "description": "Failure injection: lock failure (pre-existing lock) raises, cycle failure (stale input) produces non-HEALTHY, no success after exception, all paths in drill root.", "tested_by": "TestFailureInjection, TestPathContainment"},
+    {"id": "OBS-012", "location": "paper_session_drills_v1.py:29,17-26", "description": "Path containment: all subdirectories under root. Pre-existing root rejects (mkdir without exist_ok). Repeated deterministic execution produces identical results.", "tested_by": "TestPathContainment"},
+    {"id": "OBS-013", "location": "paper_session_drills_v1.py:23-24", "description": "Invalid timestamps: naive now rejects (PaperSessionError UTC), non-UTC now rejects, naive observed rejects. All via supervisor.cycle _utc validation.", "tested_by": "TestInvalidTimestamps"},
+    {"id": "OBS-014", "location": "paper_session_drills_v1.py:60-61", "description": "No skipped/short-circuited passed: all observations have reason and bool passed. Corrupt-checkpoint drill passed=True means rejection correctly detected (not silently assumed clean).", "tested_by": "TestNoSkippedPassed"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_bounded_runner_runs_exact_cycles_and_releases_lock", "test_bounded_runner_stops_after_first_halt", "test_empty_run_rejects", "test_recovery_drills_all_pass_and_are_deterministic", "test_no_network_credentials_schedulers_or_live_submission"],
+    "accepted_after_correction": ["test_observations_ordered (corrected: observations in deterministic execution order, not sorted — verify same order across runs)", "test_pre_existing_root_rejects (corrected: run_recovery_drills calls mkdir without exist_ok — pre-existing root correctly rejects with FileExistsError)", "test_report_immutable (corrected: use tmp_path instead of static path that persists across runs)"],
+    "redundant": ["Some adversarial tests overlap with existing on bounded runner, empty cycles, no network, determinism"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

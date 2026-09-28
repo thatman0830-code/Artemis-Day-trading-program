@@ -1,0 +1,251 @@
+{
+  "cadence_valid_definition": "Within one exact listed contract and explicit source session, consecutive observations have exactly 60 elapsed seconds. The first observation in each session is a boundary, not a pair and is excluded from cadence-pair denominator.",
+  "closures_and_boundaries": "Session boundaries, contract roll boundaries, and exchange-calendar closures are not treated as missing bars; checks never cross exact session/contract groups.",
+  "dataset_manifest_sha256": "e03e02906c8033d825d39844aaf4cf9aa3184b613e5c10974c23722531e92b67",
+  "date_range_inclusive": [
+    "2025-06-02",
+    "2026-08-26"
+  ],
+  "es_nq_exact_alignment": {
+    "alignment_requires_same_session_and_exact_timestamp": true,
+    "es_aligned_percent": 99.96582154746362,
+    "exact_session_timestamp_matches": 438723,
+    "no_forward_fill": true,
+    "nq_aligned_percent": 99.98108503530034,
+    "unmatched_es": 150,
+    "unmatched_nq": 83
+  },
+  "expected_cadence_seconds": 60,
+  "markets": {
+    "ES": {
+      "archive_source_quality_gap_count": 53,
+      "archive_source_quality_gap_sizes": {
+        "1": 46,
+        "11": 1,
+        "47": 1,
+        "51": 1,
+        "615": 1,
+        "7": 1,
+        "720": 2
+      },
+      "archive_source_quality_missing_minutes": 2217,
+      "archive_source_quality_reason_codes": {
+        "SPARSE_NO_ELIGIBLE_TRADE_AGGREGATE": 53
+      },
+      "archive_source_quality_sessions_affected": 36,
+      "boundary_first_observations_not_counted_as_pairs": 322,
+      "cadence_invalid_adjacent_pairs": 48,
+      "cadence_valid_observations_after_first_in_session": 438503,
+      "checked_adjacent_pairs": 438551,
+      "expected_cadence_seconds": 60,
+      "expected_calendar_closure_crossings_excluded": 9,
+      "feature_rows_eligible_all_registered_features": 436303,
+      "feature_rows_eligible_percent": 99.41440917987664,
+      "feature_unavailability_reason_codes": {
+        "FEATURE_WINDOW_GAP": 1857,
+        "INSUFFICIENT_HISTORY": 1565,
+        "REQUIRED_FEATURE_UNAVAILABLE": 166,
+        "SYNCHRONIZATION_UNAVAILABLE": 612
+      },
+      "gap_count": 48,
+      "gap_reason_codes": {
+        "MISSING_INTERVALS": 48
+      },
+      "gap_sizes_missing_minutes_to_gap_count": {
+        "1": 46,
+        "11": 1,
+        "47": 1
+      },
+      "missing_interval_count_from_observed_timestamps": 104,
+      "sequence_windows_by_horizon_length_8": {
+        "15": {
+          "eligible": 420715,
+          "eligible_percent": 96.34356350845695,
+          "possible": 436682,
+          "rejection_reason_codes": {
+            "INVALID_TARGET": 11805,
+            "REQUIRED_FEATURE_UNAVAILABLE": 3769,
+            "SEQUENCE_GAP": 393
+          }
+        },
+        "30": {
+          "eligible": 415374,
+          "eligible_percent": 95.12047668555151,
+          "possible": 436682,
+          "rejection_reason_codes": {
+            "INVALID_TARGET": 17146,
+            "REQUIRED_FEATURE_UNAVAILABLE": 3769,
+            "SEQUENCE_GAP": 393
+          }
+        },
+        "5": {
+          "eligible": 424290,
+          "eligible_percent": 97.16223705121804,
+          "possible": 436682,
+          "rejection_reason_codes": {
+            "INVALID_TARGET": 8230,
+            "REQUIRED_FEATURE_UNAVAILABLE": 3769,
+            "SEQUENCE_GAP": 393
+          }
+        }
+      },
+      "sessions_affected_by_timestamp_gaps": 33,
+      "source_gap_semantics_caveat": "SPARSE_NO_ELIGIBLE_TRADE_AGGREGATE does not distinguish no eligible trade from missing source/feed observation; no inference is made.",
+      "targets_by_horizon": {
+        "15": {
+          "eligible_percent": 96.2581430163168,
+          "invalid_reason_codes": {
+            "FUTURE_WINDOW_GAP": 832,
+            "INSUFFICIENT_FUTURE_DATA": 4695,
+            "INSUFFICIENT_VOLATILITY_REFERENCE": 9390,
+            "VOLATILITY_REFERENCE_GAP": 1603
+          },
+          "total": 438873,
+          "valid": 422451
+        },
+        "30": {
+          "eligible_percent": 95.03136442661089,
+          "invalid_reason_codes": {
+            "FUTURE_WINDOW_GAP": 1603,
+            "INSUFFICIENT_FUTURE_DATA": 9390,
+            "INSUFFICIENT_VOLATILITY_REFERENCE": 9390,
+            "VOLATILITY_REFERENCE_GAP": 1603
+          },
+          "total": 438873,
+          "valid": 417067
+        },
+        "5": {
+          "eligible_percent": 97.0827551478446,
+          "invalid_reason_codes": {
+            "FUTURE_WINDOW_GAP": 281,
+            "INSUFFICIENT_FUTURE_DATA": 1565,
+            "INSUFFICIENT_VOLATILITY_REFERENCE": 9390,
+            "VOLATILITY_REFERENCE_GAP": 1603
+          },
+          "total": 438873,
+          "valid": 426070
+        }
+      },
+      "total_archive_observations": 438873
+    },
+    "NQ": {
+      "archive_source_quality_gap_count": 101,
+      "archive_source_quality_gap_sizes": {
+        "1": 91,
+        "11": 1,
+        "18": 1,
+        "2": 3,
+        "47": 1,
+        "56": 1,
+        "615": 1,
+        "720": 2
+      },
+      "archive_source_quality_missing_minutes": 2284,
+      "archive_source_quality_reason_codes": {
+        "SPARSE_NO_ELIGIBLE_TRADE_AGGREGATE": 101
+      },
+      "archive_source_quality_sessions_affected": 29,
+      "boundary_first_observations_not_counted_as_pairs": 322,
+      "cadence_invalid_adjacent_pairs": 97,
+      "cadence_valid_observations_after_first_in_session": 438387,
+      "checked_adjacent_pairs": 438484,
+      "expected_cadence_seconds": 60,
+      "expected_calendar_closure_crossings_excluded": 9,
+      "feature_rows_eligible_all_registered_features": 436303,
+      "feature_rows_eligible_percent": 99.42958847417765,
+      "feature_unavailability_reason_codes": {
+        "FEATURE_WINDOW_GAP": 1905,
+        "INSUFFICIENT_HISTORY": 1565,
+        "REQUIRED_FEATURE_UNAVAILABLE": 166,
+        "SYNCHRONIZATION_UNAVAILABLE": 545
+      },
+      "gap_count": 97,
+      "gap_reason_codes": {
+        "MISSING_INTERVALS": 97
+      },
+      "gap_sizes_missing_minutes_to_gap_count": {
+        "1": 91,
+        "11": 1,
+        "2": 3,
+        "47": 1,
+        "56": 1
+      },
+      "missing_interval_count_from_observed_timestamps": 211,
+      "sequence_windows_by_horizon_length_8": {
+        "15": {
+          "eligible": 420216,
+          "eligible_percent": 96.24405941160977,
+          "possible": 436615,
+          "rejection_reason_codes": {
+            "INVALID_TARGET": 12304,
+            "REQUIRED_FEATURE_UNAVAILABLE": 3427,
+            "SEQUENCE_GAP": 668
+          }
+        },
+        "30": {
+          "eligible": 414752,
+          "eligible_percent": 94.99261362985698,
+          "possible": 436615,
+          "rejection_reason_codes": {
+            "INVALID_TARGET": 17768,
+            "REQUIRED_FEATURE_UNAVAILABLE": 3427,
+            "SEQUENCE_GAP": 668
+          }
+        },
+        "5": {
+          "eligible": 423880,
+          "eligible_percent": 97.08324267375149,
+          "possible": 436615,
+          "rejection_reason_codes": {
+            "INVALID_TARGET": 8640,
+            "REQUIRED_FEATURE_UNAVAILABLE": 3427,
+            "SEQUENCE_GAP": 668
+          }
+        }
+      },
+      "sessions_affected_by_timestamp_gaps": 27,
+      "source_gap_semantics_caveat": "SPARSE_NO_ELIGIBLE_TRADE_AGGREGATE does not distinguish no eligible trade from missing source/feed observation; no inference is made.",
+      "targets_by_horizon": {
+        "15": {
+          "eligible_percent": 96.06181319307393,
+          "invalid_reason_codes": {
+            "FUTURE_WINDOW_GAP": 1291,
+            "INSUFFICIENT_FUTURE_DATA": 4695,
+            "INSUFFICIENT_VOLATILITY_REFERENCE": 9390,
+            "VOLATILITY_REFERENCE_GAP": 2296
+          },
+          "total": 438806,
+          "valid": 421525
+        },
+        "30": {
+          "eligible_percent": 94.80385409497592,
+          "invalid_reason_codes": {
+            "FUTURE_WINDOW_GAP": 2296,
+            "INSUFFICIENT_FUTURE_DATA": 9390,
+            "INSUFFICIENT_VOLATILITY_REFERENCE": 9390,
+            "VOLATILITY_REFERENCE_GAP": 2296
+          },
+          "total": 438806,
+          "valid": 416005
+        },
+        "5": {
+          "eligible_percent": 96.91002401972627,
+          "invalid_reason_codes": {
+            "FUTURE_WINDOW_GAP": 490,
+            "INSUFFICIENT_FUTURE_DATA": 1565,
+            "INSUFFICIENT_VOLATILITY_REFERENCE": 9390,
+            "VOLATILITY_REFERENCE_GAP": 2296
+          },
+          "total": 438806,
+          "valid": 425247
+        }
+      },
+      "total_archive_observations": 438806
+    }
+  },
+  "method": "Feature and target eligibility only; sequence construction is a deterministic eligibility audit. No baselines or neural models are fitted, no predictions or performance metrics are generated, and no OOS scoring is performed.",
+  "no_synthetic_market_data": true,
+  "schema_version": "bot2-phase5c-cadence-eligibility-report-v1",
+  "source_archive": "Promoted Databento Pass B v3 normalized OHLCV minute bars; exchange close timestamps; no receipt timestamps",
+  "trading_authority": false
+}

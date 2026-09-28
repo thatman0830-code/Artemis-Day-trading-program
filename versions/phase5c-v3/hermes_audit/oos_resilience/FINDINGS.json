@@ -1,0 +1,24 @@
+{
+  "audit_assignment": "AUDIT-OOS-AND-OPERATIONAL-RESILIENCE",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-08-30",
+  "starting_head": "b45d866f76f736a595c5f3ba7000242072152d34",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "oos_evidence.py:157", "description": "Market isolation: only BTC, ES, NQ accepted. Unknown markets raise INVALID_MARKET.", "tested_by": "TestOOSMarketIsolation"},
+    {"id": "OBS-002", "location": "oos_evidence.py:66-69", "description": "Path traversal: absolute, Windows drive, and parent-directory traversal rejected.", "tested_by": "TestOOSPathsAndHashes"},
+    {"id": "OBS-003", "location": "oos_evidence.py:179-183", "description": "Missing intervals intersecting UNTOUCHED_OOS (half-open) are rejected with OOS_GAP. Training/validation gaps retained.", "tested_by": "TestOOSMissingInterval"},
+    {"id": "OBS-004", "location": "oos_evidence.py:195-205", "description": "Authority coverage sweep: each required kind must cover entire OOS interval. Contiguous authorities accepted, gaps rejected.", "tested_by": "TestOOSAuthority"},
+    {"id": "OBS-005", "location": "operational_resilience.py:160-210", "description": "evaluate_operational_readiness checks: missing component, future observation, stale heartbeat, task not running, duplicate instance, restart budget, data gap, integrity, storage, clock skew, trading authority, open incidents, RTO breach. All fail closed to UNHEALTHY.", "tested_by": "TestResilienceControls"},
+    {"id": "OBS-006", "location": "operational_resilience.py:196-197", "description": "trading_authority=True in any observation always blocks readiness with UNAUTHORIZED_TRADING_AUTHORITY. The readiness result itself always has trading_authority=False.", "tested_by": "TestResilienceTradingAuthority"},
+    {"id": "OBS-007", "location": "operational_resilience.py:198-203", "description": "Open incidents block readiness (INCIDENT_OPEN). If detected_at > RTO seconds ago, RECOVERY_RTO_BREACH is also added. Resolved incidents do not block.", "tested_by": "TestRTOBreach, TestResilienceIncidents"},
+    {"id": "OBS-008", "location": "operational_resilience.py:80-81", "description": "Policy validation: RPO, RTO, and minimum storage must be positive (>0). Zero values rejected. This ensures non-trivial operational boundaries.", "tested_by": "TestResiliencePolicy"}
+  ],
+  "test_assumptions": {
+    "accepted": ["All existing tests pass (16 OOS + 15 resilience = 31).", "Market isolation: BTC/ES/NQ only.", "All records are frozen dataclasses.", "trading_authority is always False in readiness results.", "RPO/RTO boundaries are strict half-open (> comparison)."],
+    "corrected": ["policy() helper doesn't accept required_components kwarg — test uses ResiliencePolicyV1.create() directly."],
+    "rejected": [],
+    "redundant": ["OOS tests overlap with previous OOS audit (test_hermes_oos_evidence_adversarial.py) but are independently re-verified here."],
+    "implementation_coupled": []
+  }
+}

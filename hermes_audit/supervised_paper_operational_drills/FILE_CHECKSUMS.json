@@ -1,0 +1,14 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-OPERATIONAL-DRILLS",
+  "date": "2026-09-01",
+  "checkpoint": "401fb830e80f11fd612bb044a7a1d2117867ed8e",
+  "filesystem_sha256": {
+    "execution/supervised_paper_operational_drills_v1.py": "394810fa41edfa4632348fba8fcbb6b79ef9264264849f8f9ff3c35fd5cbde30",
+    "execution/test_supervised_paper_operational_drills_v1.py": "5d6ad7a5ab1a1b2803455f6298870bd0b5c369beae8fef49c7e2bbf5c1cf3320"
+  },
+  "canonical_git_object_hashes": {
+    "execution/supervised_paper_operational_drills_v1.py": "454be865750fce98f73aa56c79d858302d91ad6b",
+    "execution/test_supervised_paper_operational_drills_v1.py": "2557e63a67ca68cdd82536f4f99439d20a039ec8"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files. Git-object SHA-1 hashes are blob hashes from the primary repository. Distinguished per audit requirements."
+}

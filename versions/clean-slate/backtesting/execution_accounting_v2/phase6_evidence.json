@@ -1,0 +1,30 @@
+{
+  "schema_version": "phase6-evidence-v2-1",
+  "phase": "V2_PHASE6_ROLLOVER_AND_FUNDING",
+  "starting_checkpoint": "6edb0390311d6564878cf99cb667165351e310a4",
+  "self_excluded": true,
+  "simulation_only": true,
+  "network_accessed": false,
+  "operational_controls_accessed": false,
+  "tests": {
+    "focused_phase6": "26 passed in 0.95s",
+    "complete_v2": "489 passed in 2.07s",
+    "full_repository": "1620 passed in 42.77s",
+    "git_diff_check": "passed"
+  },
+  "sha256": {
+    "backtesting/execution_accounting_v2/__init__.py": "6ef79abdc100ddb405cffad97c364150ec4f71861c754760d921a39f4e0db71f",
+    "backtesting/execution_accounting_v2/PHASE6_CHANGED_FILE_INVENTORY.md": "7f14291522ae4e0fbf35cb8ede02126f4b5f1cdc363f02dc45c080ce69b608bb",
+    "backtesting/execution_accounting_v2/PHASE6_IMPLEMENTATION_REPORT.md": "8de6f2b7b6b52ed891ec97a5714432a0c94beed2b943b07e90e05cc39ca66ab6",
+    "backtesting/execution_accounting_v2/PHASE6_INVARIANT_MATRIX.md": "1374d516a3e67c4d7f3da4595394f429fa282a6925711614657b2f61387162f2",
+    "backtesting/execution_accounting_v2/PHASE6_REASON_CODE_CATALOG.md": "3fc285c411cd65072f80aa13773f17637e75ed2f951fb2d89fd258d25673ecd1",
+    "backtesting/execution_accounting_v2/PHASE6_TEST_INVENTORY.md": "0708391995259ec27086954db24af1fcb17c9c50b466d1b49abb0d01d4c29e2e",
+    "backtesting/execution_accounting_v2/PHASE6_TEST_RESULTS.md": "f27f002eabbee8e02c1d75ae248c011a2ab204439f29c81f33a172e86170e36c",
+    "backtesting/execution_accounting_v2/PUBLIC_API_SCHEMA_REFERENCE.md": "c8e99cf28bb91f863f75d52137fae3f403c4aadc33ca080dd670f9ffb230e68f",
+    "backtesting/execution_accounting_v2/REASON_CODE_CATALOG.md": "dff707c04fce527e85f1b0bf2aeac89241e01077e81cdf0f24c04a67e2dadce8",
+    "backtesting/execution_accounting_v2/rollover_funding.py": "d6cb2538776cd519338a192918ecba39c26a83dd34c60a5800a97a2f83f82da9",
+    "backtesting/execution_accounting_v2/schemas/rollover-funding-v2.schema.json": "bbef424c12c2a51684e75f7878876745e73aa36a5bf8c0f2270ff3be3b2ba334",
+    "backtesting/execution_accounting_v2/test_rollover_funding.py": "276088fb9ddb635f7904aeb22ab42039e782c26a949486ccf0d7c41384212296",
+    "backtesting/execution_accounting_v2/test_specifications.py": "a6031207fbb8fd061050e6f6059e8a89b1df7163ae88ada1e821f7d951818167"
+  }
+}

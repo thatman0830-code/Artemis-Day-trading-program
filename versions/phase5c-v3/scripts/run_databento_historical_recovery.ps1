@@ -1,0 +1,8 @@
+[CmdletBinding()]param([Parameter(Mandatory=$true)][string]$Day)
+$ErrorActionPreference='Stop';$repository=Split-Path -Parent $PSScriptRoot;$python=Join-Path $repository '.venv\Scripts\python.exe';$credential=Join-Path $env:LOCALAPPDATA 'Hermes\Databento\es-nq-historical\credential.dpapi';$root=Join-Path $repository 'data\databento_recovery_staging';$pointer=[IntPtr]::Zero;$plain=$null
+try{
+ $secure=(Get-Content -LiteralPath $credential -Raw)|ConvertTo-SecureString;$pointer=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure);$plain=[Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+ $info=[Diagnostics.ProcessStartInfo]::new();$info.FileName=$python;$info.WorkingDirectory=$repository;$info.Arguments='-m futures_data.databento_historical_recovery --day "'+$Day+'" --root "'+$root+'"';$info.UseShellExecute=$false;$info.RedirectStandardInput=$true;$info.RedirectStandardOutput=$true;$info.RedirectStandardError=$true;$info.CreateNoWindow=$true
+ $process=[Diagnostics.Process]::new();$process.StartInfo=$info;if(!$process.Start()){throw 'Unable to start recovery.'};$process.StandardInput.WriteLine($plain);$process.StandardInput.Close();$plain=$null;$process.WaitForExit();$stdout=$process.StandardOutput.ReadToEnd();$stderr=$process.StandardError.ReadToEnd().Trim()
+ if($process.ExitCode-ne 0){$safe=@($stderr-split '\r?\n'|Where-Object{$_.StartsWith('DATABENTO_RECOVERY_FAILED_SANITIZED:')}|Select-Object -First 1);if($safe.Count-eq 1){throw $safe[0]};throw 'DATABENTO_RECOVERY_FAILED_SANITIZED:UNKNOWN'};$stdout
+}finally{if($pointer-ne[IntPtr]::Zero){[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)};$plain=$null;$secure=$null}

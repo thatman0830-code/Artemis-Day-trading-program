@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rollover-funding-v2.schema.json",
+  "title": "Execution and Accounting v2 Phase 6 records",
+  "type": "object",
+  "required": ["schema_version"],
+  "properties": {
+    "schema_version": {"enum": ["roll-specification-v2-1", "rollover-instruction-v2-1", "rollover-event-v2-1", "rollover-state-v2-1", "funding-requirement-v2-1", "funding-application-v2-1", "phase6-event-v2-1", "phase6-ledger-v2-1", "phase6-checkpoint-v2-1", "phase6-reconciliation-v2-1"]}
+  },
+  "additionalProperties": true,
+  "x-economic-number-type": "Decimal string only",
+  "x-event-priority": ["DATA_SESSION", "SETTLEMENT", "FUNDING", "ROLLOVER_OUTGOING", "ROLLOVER_INCOMING", "MARKET_DATA", "STRATEGY", "PRE_TRADE_RISK", "FILLS", "ACCOUNTING", "POST_ACCOUNTING_RISK", "REPORTING"],
+  "x-equal-time-equal-priority": "always reject with PRIORITY_AMBIGUITY before event-id ordering",
+  "x-authority": "simulation facts and instructions only; no fill or order submission"
+}

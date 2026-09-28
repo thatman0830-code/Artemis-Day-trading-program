@@ -1,0 +1,18 @@
+{
+  "schema_version":"v2-core-capability-matrix-1",
+  "status":"ACCEPTED_FOR_OFFLINE_RESEARCH_AND_OOS_VALIDATION",
+  "phases":{
+    "phase1":{"contracts":true,"validation":true,"external_authority":false},
+    "phase2":{"order_ledger":true,"submission":false},
+    "phase3":{"conservative_ohlc_execution":true,"live_execution":false},
+    "phase4":{"instrument_accounting":true,"account_mutation":false},
+    "phase5":{"advisory_risk_sessions":true,"liquidation_execution":false},
+    "phase6":{"rollover_funding_facts":true,"provider_lookup":false},
+    "phase7":{"reporting_validation":true,"promotion_authority":false}
+  },
+  "invariants":["deterministic_replay","utc_chronology","no_lookahead","immutable_identity","decimal_economics","scope_isolation","duplicate_economic_event_prevention","stable_reason_codes","cross_ledger_reconciliation","evidence_partition_isolation","fail_closed_missing_authority"],
+  "inaccessible":["provider","credential","wallet","broker","exchange","signing","order_submission","collector_control","recorder_control","scheduled_task_control"],
+  "core_v1":"separate_and_reproducible",
+  "profitability_guarantee":false,
+  "operational_authority":false
+}

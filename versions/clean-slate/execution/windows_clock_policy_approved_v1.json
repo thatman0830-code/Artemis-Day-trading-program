@@ -1,0 +1,1 @@
+{"allowed_sources":["time.windows.com,0x8"],"approval_state":"OWNER_APPROVED","drift_ns_per_second":15000,"local_uncertainty_ns":100000000,"policy_id":"a979d00c9b9342a3e276b84f7aac9ad02c97868fcb8f0ef8fd0429bac33976a7","schema_version":"windows-paper-clock-policy-v1","trading_authority":false}

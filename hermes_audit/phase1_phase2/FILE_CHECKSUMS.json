@@ -1,0 +1,20 @@
+{
+  "audit_id": "AUDIT-V2-PHASE1-PHASE2",
+  "audit_date": "2026-08-27",
+  "auditor": "Hermes Agent (independent)",
+  "workspace": "C:\\Users\\fjone\\hyperliquid-trading-bot-hermes",
+  "branch": "hermes/audit-lane",
+  "head": "76fdc05cf0b587e874bcb24bf2f0788e82de7a55",
+  "scope": "Original Hermes audit-worktree bytes (Windows CRLF source checkout) and original committed test file; the corrected integration is authenticated separately by CODEX_RECONCILIATION.md",
+  "line_ending_note": "Production source hashes authenticate the audited Windows working-tree bytes, not normalized Git blob bytes",
+  "files": {
+    "backtesting/execution_accounting_v2/contracts.py": "f4a9811a1ab8c96c7379c84623834235ab99d5b815037ffdf888a54552e5de37",
+    "backtesting/execution_accounting_v2/specifications.py": "8f17e909c1c6ecc2901f69e1405bcd1074cabec471ac9c9c13845ca07d9533f1",
+    "backtesting/execution_accounting_v2/validation.py": "d06455d5181928bdeff64f57127c0b2a2668c990342d0ce3e4856a96cedd367c",
+    "backtesting/execution_accounting_v2/eligibility.py": "506be2ad183a0cf775b9558a6f5709491f74c7b6ca1843ac9612912636e02cc5",
+    "backtesting/execution_accounting_v2/order_ledger.py": "1a973da6b582398d7dcd442fc3335c6add05876228532b2460bde9687d13f92c",
+    "backtesting/execution_accounting_v2/REASON_CODES.json": "7183c1cbf122b29b43e084d654a03bcc8dd01711aa7d61df7536e380ddaa6e71",
+    "backtesting/execution_accounting_v2/__init__.py": "995943d706f6363793e2229a1fcd1f449f0ef45da5bd2081df33bdba28be4815",
+    "original_commit:backtesting/execution_accounting_v2/test_hermes_phase1_phase2_adversarial.py": "49b98a46946c227703d755c0828eada7444eb518fdcf2a802ecaa3b4bcab4acc"
+  }
+}

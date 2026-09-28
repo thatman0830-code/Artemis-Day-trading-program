@@ -1,0 +1,38 @@
+# Secrets
+.env
+.env.*
+.envt
+!.env.example
+!.env.example.txt
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+wallet*.json
+seed*.txt
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Runtime data
+logs/
+outputs/
+data/
+config/es_nq_forward_current.json
+config/es_nq_forward_sessions.json
+config/es_nq_forward_sessions.manifest.json
+hermes_worker/reports/
+*.log
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

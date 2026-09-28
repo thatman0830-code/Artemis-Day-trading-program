@@ -1,0 +1,33 @@
+{
+  "audit_assignment": "AUDIT-CONTROLLED-STALE-ALERT-DRILL",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "a0ad9c7cdf85117db631af98e2b6e99b449f1dc3",
+  "parent_sha": "6391b9af8cb336dfa40ff65e984778f6f4701039",
+  "defects": [],
+  "observations": [
+    {"id": "OBS-001", "location": "invoke_controlled_stale_alert_drill.ps1:3-8,87-92", "description": "PREFLIGHT_ONLY is default. -Execute switch required for physical execution. Mode field distinguishes. Preflight exits before Stop-ScheduledTask.", "tested_by": "TestPreflightDefault"},
+    {"id": "OBS-002", "location": "invoke_controlled_stale_alert_drill.ps1:11-14,96,111,133", "description": "Only BTC task stopped/started. ES-NQ, watchdog, and delivery tasks never stopped, started, enabled, disabled, registered, or unregistered.", "tested_by": "TestBtcOnlyControl"},
+    {"id": "OBS-003", "location": "invoke_controlled_stale_alert_drill.ps1:71-81", "description": "Preflight: BTC Running, ES/NQ Ready, watchdog Ready, delivery Ready, all single-action IgnoreNew, ES/NQ last_result=0 + no missed runs, BTC fresh poll (<90s), zero gaps.", "tested_by": "TestPreflightRequirements"},
+    {"id": "OBS-004", "location": "invoke_controlled_stale_alert_drill.ps1:73-75", "description": "All four tasks checked for single action and IgnoreNew in foreach loop.", "tested_by": "TestWatchdogDeliveryBoundaries"},
+    {"id": "OBS-005", "location": "invoke_controlled_stale_alert_drill.ps1:5", "description": "Stale hold bounded 91-180 seconds (default 95). Recovery timeout 60-600 seconds (default 180).", "tested_by": "TestStaleHoldBounded"},
+    {"id": "OBS-006", "location": "invoke_controlled_stale_alert_drill.ps1:98-105", "description": "Real watchdog runner produces UNHEALTHY transition with btc-recorder in reasons and STALE_HEARTBEAT or TASK_NOT_RUNNING. Unhealthy alert state verified.", "tested_by": "TestUnhealthyTransition"},
+    {"id": "OBS-007", "location": "invoke_controlled_stale_alert_drill.ps1:107-110", "description": "Unhealthy alert delivered via delivery runner, read back from OneDrive inbox, envelope SHA-256 recorded, event_id recorded.", "tested_by": "TestUnhealthyDelivery"},
+    {"id": "OBS-008", "location": "invoke_controlled_stale_alert_drill.ps1:111-116", "description": "Recovery: BTC started, Running state required, post poll must be genuinely newer than pre poll.", "tested_by": "TestRecovery"},
+    {"id": "OBS-009", "location": "invoke_controlled_stale_alert_drill.ps1:117-120", "description": "Recovery watchdog produces HEALTHY transition for both status and alert.", "tested_by": "TestRecoveryHealthy"},
+    {"id": "OBS-010", "location": "invoke_controlled_stale_alert_drill.ps1:121-123", "description": "Recovery alert delivered, read back from OneDrive, envelope SHA-256 and event_id recorded.", "tested_by": "TestRecoveryDelivery"},
+    {"id": "OBS-011", "location": "invoke_controlled_stale_alert_drill.ps1:124-126", "description": "BTC gap count must remain unchanged. ES/NQ state, result, run time, missed runs, and evidence must remain unchanged. es_nq_collector_operated=false.", "tested_by": "TestUnchangedEvidence"},
+    {"id": "OBS-012", "location": "invoke_controlled_stale_alert_drill.ps1:131-135", "description": "Failure: DRILL_FAILED recorded, failure_reason captured, BTC recovery attempted, evidence written, rethrows.", "tested_by": "TestFailureHandling"},
+    {"id": "OBS-013", "location": "invoke_controlled_stale_alert_drill.ps1:22-27,56-65,87-91", "description": "Evidence: repository-contained, atomic (WriteAllText+Move-Item), content-addressed (SHA256 report_id), trading_authority=false, schema=controlled-stale-alert-drill-v1.", "tested_by": "TestEvidenceIntegrity"},
+    {"id": "OBS-014", "location": "invoke_controlled_stale_alert_drill.ps1:1-137", "description": "No credentials, provider SDKs, wallet, broker, exchange, signing, live trading, or paper order submission.", "tested_by": "TestNoProhibited"},
+    {"id": "OBS-015", "location": "invoke_controlled_stale_alert_drill.ps1:83-85,49-55", "description": "OneDrive sink: env resolution (process then user), TradingSystem\\AlertEvidence path, sink-manifest.json checked, delivery path computed from sink_id + event_id.", "tested_by": "TestOneDriveSink"},
+    {"id": "OBS-016", "location": "invoke_controlled_stale_alert_drill.ps1:87-130", "description": "Report fields: schema_version, mode, started_at, completed_at, result (PREFLIGHT_VERIFIED/STALE_ALERT_AND_RECOVERY_VERIFIED), stale_observed, recovery_observed, btc_pre/post_poll, btc_pre/post_gap, es_nq_pre/post, unhealthy/healthy event_id and envelope_sha256.", "tested_by": "TestReportFields"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_preflight_is_default_and_exits_before_recorder_control", "test_only_btc_is_stopped_and_started", "test_stale_interval_and_recovery_are_bounded", "test_real_watchdog_transitions_are_required", "test_both_alert_transitions_require_onedrive_envelopes", "test_es_nq_and_gap_counts_must_remain_unchanged", "test_failure_attempts_btc_recovery_and_writes_evidence", "test_no_trading_or_sensitive_control_surface"],
+    "accepted_after_correction": [],
+    "redundant": ["Some adversarial tests overlap with existing on preflight default, BTC-only control, bounded intervals, watchdog transitions, OneDrive envelopes, ES/NQ unchanged, failure handling, no trading"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

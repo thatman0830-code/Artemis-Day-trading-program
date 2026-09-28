@@ -1,0 +1,18 @@
+{
+  "schema_version": "phase4-invariant-matrix-v1",
+  "accounting_version": "INSTRUMENT_ACCOUNTING_V2_PHASE4_1",
+  "invariants": [
+    {"id":"P4-CASH-EQUITY","rule":"equity equals cash plus authoritative marked position value or futures unrealized PnL","enforcement":"AccountingSnapshotPhase4V2.__post_init__","tests":["test_mark_unrealized_equity_and_favorable_adverse_moves","test_btc_spot_base_quantity_quote_cash_and_no_funding"]},
+    {"id":"P4-POSITION-CONSERVATION","rule":"signed position equals ordered signed accepted fill quantities","enforcement":"InstrumentAccountingLedgerV2.apply","tests":["test_weighted_add_partial_reduce_complete_close_and_conservation"]},
+    {"id":"P4-REVERSAL-ORDER","rule":"a reversal realizes the old side before opening residual opposite quantity at the new reference basis","enforcement":"InstrumentAccountingLedgerV2.apply","tests":["test_reversal_closes_then_opens_residual_at_new_basis"]},
+    {"id":"P4-PNL-DECOMPOSITION","rule":"gross_result equals realized plus settlement transfers plus funding; net equals gross_result minus costs","enforcement":"AccountingSnapshotPhase4V2.__post_init__","tests":["test_cost_attribution_applied_once_and_gross_minus_costs_is_net"]},
+    {"id":"P4-COST-ATTRIBUTION","rule":"commission, exchange fee, and accepted-fill slippage sum exactly and each immutable economic identity applies once","enforcement":"FillEconomicsV2 and InstrumentAccountingLedgerV2.apply","tests":["test_cost_attribution_applied_once_and_gross_minus_costs_is_net","test_same_economic_fact_under_new_event_identity_rejects"]},
+    {"id":"P4-SETTLEMENT-EQUITY","rule":"verified variation settlement moves unrealized PnL to cash and resets basis without changing equity","enforcement":"InstrumentAccountingLedgerV2.apply SETTLEMENT","tests":["test_variation_settlement_preserves_equity_and_resets_basis_multiple_times"]},
+    {"id":"P4-FUNDING-ONCE","rule":"funding is perpetual-only, synchronized, lineage-verified, and applied once","enforcement":"InstrumentAccountingLedgerV2.apply FUNDING","tests":["test_perpetual_capability_and_verified_funding_exactly_once"]},
+    {"id":"P4-DECIMAL-GRID","rule":"all economic values are finite Decimal and fills/marks/settlements use verified tick and quantity grids","enforcement":"record constructors and InstrumentAccountingLedgerV2.apply","tests":["test_invalid_fill_inputs_fail_closed","test_no_float_economic_boundaries"]},
+    {"id":"P4-MARGIN-FACTS","rule":"effective clearing and customer margin remain separately attributed; breach facts create no orders","enforcement":"MarginSpecificationV2 and AccountingSnapshotPhase4V2","tests":["test_margin_calculation_distinguishes_clearing_customer_and_exposes_breach"]},
+    {"id":"P4-DETERMINISM","rule":"identical ordered event bytes produce identical snapshot bytes and checkpoint resume state","enforcement":"canonical fingerprints, replay, checkpoint, verify_integrity","tests":["test_replay_checkpoint_determinism_immutability_and_tamper_detection"]},
+    {"id":"P4-ISOLATION","rule":"one ledger cannot mix markets, instruments, contracts, currencies, effective versions, or v1 fills","enforcement":"InstrumentAccountingLedgerV2.create/apply","tests":["test_invalid_fill_inputs_fail_closed","test_identity_chronology_and_stale_margin_reject"]},
+    {"id":"P4-RESIDUAL","rule":"an open end-of-data position remains explicit and fails the completed-run gate","enforcement":"InstrumentAccountingLedgerV2.validate_end_of_data","tests":["test_replay_checkpoint_determinism_immutability_and_tamper_detection"]}
+  ]
+}

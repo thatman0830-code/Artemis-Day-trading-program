@@ -1,0 +1,14 @@
+{
+  "audit_assignment": "AUDIT-V2-PAPER-GATEWAY-FOUNDATION",
+  "date": "2026-08-31",
+  "checkpoint": "0999a22291aee900ba33b8a756facd4ad9a0925c",
+  "filesystem_sha256": {
+    "execution/paper_gateway_v2.py": "fee6e3ef4732bb7c4b918e5505ea597a996a4f197cb9e1c55306d8384620dd30",
+    "execution/test_paper_gateway_v2.py": "cee4e5756c35643b2bf68f77b9a195813b4e7479662092d0f39a725accd31a67"
+  },
+  "canonical_git_object_hashes": {
+    "execution/paper_gateway_v2.py": "f0e031dffc74bf62b6740999bb247829e36a1c94",
+    "execution/test_paper_gateway_v2.py": "1bbd9450fcdc4be5947d49f97b608d6ee9cbf2a2"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files; canonical Git-object hashes are the blob SHA-1 hashes provided by the assignment. Distinguished per audit requirements."
+}

@@ -1,0 +1,14 @@
+{
+  "audit_commit":"0090029afc7a6a91f08efcae1bfa5dd61e8e855b",
+  "parent":"e4297483f97622560fb4f0bb4ed601ad2dee5d5c",
+  "submitted_tests":103,
+  "accepted_unchanged":100,
+  "accepted_after_correction":0,
+  "rejected_redundant":2,
+  "rejected_implementation_coupled":1,
+  "rejected_incorrect_or_misleading":0,
+  "rejected":{"redundant":["test_reason_codes_all_unique","test_stress_all_kinds_present"],"implementation_coupled":["test_no_provider_or_submission"]},
+  "production_corrections":["non-lowerable 200-trade floor","cross-partition relabel/overlap validator","required stress/ruin evidence gates"],
+  "canonical_checksum_claims":{"submitted":11,"mismatched":10},
+  "runtime_access":false
+}

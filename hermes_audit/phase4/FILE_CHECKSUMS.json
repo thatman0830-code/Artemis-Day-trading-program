@@ -1,0 +1,23 @@
+{
+  "schema_version": "codex-hermes-phase4-reconciliation-1",
+  "source_commit": "7abb545c313c942f0e90b6e07e73a12d912df147",
+  "starting_head": "be5e13927f33cefaae69cfd9706f7421764f165e",
+  "hash_basis": "canonical Git object bytes at starting_head; integrated test uses repository file bytes",
+  "original_checksum_claims_corrected": true,
+  "files": {
+    "backtesting/execution_accounting_v2/accounting.py": "2b277417ba6ef888348f113ec3337f43f89ecfa707188d2a4d24e25d23a1478a",
+    "backtesting/execution_accounting_v2/test_accounting.py": "6555823cdbc61c0338555811f7fa939de153bfecec10d4e24437f525c8bb5f3f",
+    "backtesting/execution_accounting_v2/ohlc_execution.py": "029a4ad9a2527fdb36208ef201dd1261711dfd373167a434210384b27acddeca",
+    "backtesting/execution_accounting_v2/order_ledger.py": "f9176ade2ad01d37edce520a66abecb38adc2c789e441b11687d67f258746fdb",
+    "backtesting/execution_accounting_v2/contracts.py": "0ef1debc68def82040658ca38f53f161d3c439942d2d3e3309ff9068dea08d0a",
+    "backtesting/execution_accounting_v2/specifications.py": "a7b156c44d7acc718663b22180fb49c9ee0a8700fe641da59a772cf42b682007",
+    "backtesting/execution_accounting_v2/validation.py": "6eafb9a3e3495a58393596cd9604108523fed4d7bab8de8a2cf6c3c1d116a22b",
+    "backtesting/execution_accounting_v2/__init__.py": "698a43b3c2a7500e3ee415930b57cdf54968fdde3d2a326a10bc310455067e20",
+    "backtesting/execution_accounting_v2/PHASE4_IMPLEMENTATION_REPORT.md": "8b78c29f24992bcc7f31a6434ad026037f6bb1c7f1a6041fb1d1fb3425487185",
+    "backtesting/execution_accounting_v2/PHASE4_CHANGED_FILE_INVENTORY.md": "cba4130032506c5497767baad36c40d2535943c12162b84735bce109da1d3750",
+    "backtesting/execution_accounting_v2/PHASE4_TEST_RESULTS.md": "3e2837740fb6df8c179b93a3301a729cf4ff81d30d5ab65205042d07f1985f41",
+    "backtesting/execution_accounting_v2/PHASE4_INVARIANT_MATRIX.json": "fd8fcd7b23f2785ce5fce8cc2ee461513c0a4ff7c08dabd43583aced5032d114",
+    "backtesting/execution_accounting_v2/schemas/instrument-accounting-v2.schema.json": "52544ec9e58a5ba1a2b7e758eb4b1e7ea6a9f51c745d5f652192d3c4c12b08d5",
+    "backtesting/execution_accounting_v2/test_hermes_phase4_adversarial.py": "554fd202fc518a33148d86854231596ac87c6e5f30c3571912e3bbd8088945b8"
+  }
+}

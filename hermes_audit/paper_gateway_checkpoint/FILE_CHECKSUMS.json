@@ -1,0 +1,16 @@
+{
+  "audit_assignment": "AUDIT-V2-PAPER-GATEWAY-CHECKPOINT",
+  "date": "2026-08-31",
+  "checkpoint": "c4ec8b6dc8b13a969c77777da9ae9ce0e6353148",
+  "filesystem_sha256": {
+    "execution/paper_gateway_v2.py": "ff7af7af54052e3e207243896b9d8216df7e980a0d2a8597e7eb72c9ec18ad3e",
+    "execution/paper_gateway_checkpoint_v1.py": "37b0be7e52b557aca323c450efdbc28c0c69195daaf5d3f274be05ff6a1b4ede",
+    "execution/test_paper_gateway_checkpoint_v1.py": "d2bacc9c9abebf5a7406ce691b0a42f3648b263e8bf7dc9f19c427c5a749effa"
+  },
+  "canonical_git_object_hashes": {
+    "execution/paper_gateway_v2.py": "e83904acd0d5cc30a2e1593df05ee8fe8e01ba3c",
+    "execution/paper_gateway_checkpoint_v1.py": "7b38ecbdcad5bfafb5cc60f12b65457695240636",
+    "execution/test_paper_gateway_checkpoint_v1.py": "7f20f6f197c68943dc91d6e76d8ffc0b80befa71"
+  },
+  "verification": "Reconciled primary hashes after resolving PF-001 by normalizing decimal.InvalidOperation to PaperCheckpointError and adding regression coverage."
+}

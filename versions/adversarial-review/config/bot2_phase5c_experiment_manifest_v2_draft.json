@@ -1,0 +1,35 @@
+{
+  "schema_version": "bot2-phase5c-experiment-manifest-v2-draft",
+  "status": "DRAFT_NOT_FROZEN",
+  "evaluation_permitted": false,
+  "purpose": "Record pre-OOS protocol remediation requirements found during the Phase 5C v1 architecture/data preflight. This is not executable and does not replace v1.",
+  "preserves_authoritative_v1_manifest_sha256": "5a1249607d12dd303b0f72210868e984b5791e8bfc8af5b9535bd6e4079d003b",
+  "source_dataset_manifest_sha256": "e03e02906c8033d825d39844aaf4cf9aa3184b613e5c10974c23722531e92b67",
+  "pinned_target_version": "bot2-future-market-state-v3",
+  "pinned_feature_version": "bot2-feature-registry-v2",
+  "preflight_blockers": [
+    "Separate architecture review required by v1 has no recorded approval.",
+    "Real feature and sequence path does not enforce exact one-minute cadence across sparse archive gaps.",
+    "A1/A2 architecture and training details are underspecified for exact reproduction.",
+    "Walk-forward windows, feature ablations, shuffled-label control, class-imbalance treatment, calibration bins, abstention thresholds, and time-series uncertainty method are not frozen in v1.",
+    "A comparable multiclass logistic/statistical baseline is not specified in v1."
+  ],
+  "decisions_required_before_freeze": {
+    "separate_architecture_review": "REQUIRED; independent written approval must be recorded before OOS scoring.",
+    "gap_and_sequence_eligibility": "Define and test exact timestamp cadence, maximum permissible gaps, contract/session boundaries, and reason-coded exclusions on the real archive.",
+    "walk_forward_windows": "PRE_REGISTER_EXPLICIT_DATES_AND_PURGE_EMBARGO; do not infer from Phase 5A without review.",
+    "feature_ablations": "PRE_REGISTER_EXACT_FAMILIES_AND_ORDER; do not mine features post hoc.",
+    "shuffled_label_control": "PRE_REGISTER_SEED, permutation unit, which split is shuffled, and fail/stop threshold.",
+    "class_imbalance": "PRE_REGISTER_NONE_OR_A_SPECIFIC_TRAIN_ONLY_METHOD; no OOS-informed reweighting or resampling.",
+    "class_index_mapping": "FREEZE_EXACT_ORDER_FOR_DIRECTION_VOLATILITY_STRUCTURE_AND_HANDLE_INVALID_LABELS.",
+    "A1_training": "FREEZE_HIDDEN_WIDTH_INITIALIZATION_OPTIMIZER_LOSS_UPDATE_ORDER_EPOCHS_LEARNING_RATE_AND_EARLY_STOPPING_POLICY.",
+    "A2_architecture": "RECONCILE_FIXED_CAUSAL_SEQUENCE_TRANSFORM_WITH_TEMPORAL_CONVOLUTION_DESCRIPTION; freeze exact transform/head and parameterization.",
+    "additional_statistical_baseline": "DECIDE_Whether a multiclass logistic comparator is required; if yes, freeze regularization, optimizer, stopping, and probability output protocol.",
+    "calibration": "FREEZE_VALIDATION_ONLY_FIT_METHOD_AND_RELIABILITY_BIN_COUNT.",
+    "abstention_and_uncertainty": "FREEZE_ENTROPY_FORMULA_DISAGREEMENT_RULE_AND_COVERAGE_POINTS_BEFORE_EVALUATION.",
+    "uncertainty_estimation": "SELECT_TIME_SERIES_BLOCK_OR_SESSION_CLUSTER_METHOD_AND_BLOCK_LENGTH_OR_EXPLICITLY_MARK_UNAVAILABLE.",
+    "evaluation_row_intersection": "FREEZE_ONE_IDENTICAL_ELIGIBLE_OOS_OBSERVATION_SET_FOR_ALL_BASELINES_AND_NEURAL_CANDIDATES."
+  },
+  "no_results_generated": true,
+  "trading_authority": false
+}

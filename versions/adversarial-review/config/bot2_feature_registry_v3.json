@@ -1,0 +1,30 @@
+{
+  "schema_version": "bot2-feature-registry-v3",
+  "feature_schema": "bot2-feature-row-v3",
+  "expected_interval_seconds": 60,
+  "temporal_semantics": "ELAPSED_TIME_STRICT_CADENCE",
+  "sequence_length": 8,
+  "features": [
+    "price", "log_return_1m", "log_return_3m", "log_return_5m",
+    "rolling_price_range_3m", "rolling_price_range_5m", "realized_volatility_3m", "realized_volatility_5m",
+    "session_open_distance", "session_high_distance", "session_low_distance", "cumulative_volume_session",
+    "relative_volume_3m", "volume_acceleration_1m", "session_vwap", "price_to_session_vwap",
+    "seconds_since_session_open", "session_phase", "time_sin", "time_cos",
+    "cross_market_log_return_1m", "cross_market_relative_return_1m", "cross_market_rolling_correlation_5m",
+    "cross_market_divergence_1m"
+  ],
+  "feature_semantics": {
+    "log_return_Nm": "Close-to-close log return from exact T-N minutes to T; all intervening one-minute bars must be present.",
+    "rolling_price_range_Nm": "Max-minus-min close across exact T-N through T, requiring N+1 consecutive one-minute observations.",
+    "realized_volatility_Nm": "Root mean square of exactly N consecutive one-minute log returns ending at T.",
+    "relative_volume_3m": "Current volume divided by mean volume of exact T-3 through T-1 one-minute observations.",
+    "volume_acceleration_1m": "Current volume relative to the exact T-1 one-minute observation.",
+    "cross_market_features": "Use same-session exact timestamps only; rolling correlation requires five complete synchronized one-minute return pairs ending at T. Missing pairs remain unavailable."
+  },
+  "session_aggregates": "Session open/high/low, observed-volume sum, and VWAP summarize observed source bars in the same explicit exchange session; no synthetic zero-volume bars are added.",
+  "missing_data_policy": "No fill or interpolation. Missing required feature windows emit null values and machine-readable reasons; any selected required null excludes the row from model inputs.",
+  "categorical_encoding": {"session_phase": {"OPENING": 0, "EARLY": 1, "LATE": 2}},
+  "normalization": "Fit each feature mean and population standard deviation on TRAIN eligible rows only; freeze and reuse for validation, calibration, walk-forward test, and OOS.",
+  "future_information_in_features": false,
+  "trading_authority": false
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "backtest-engine-core-v1-event",
+  "type": "object",
+  "required": ["id", "event_type", "event_time", "market", "instrument_id", "source_id", "source_checksum", "sequence", "schema_version"],
+  "properties": {
+    "id": {"type": "string"}, "event_type": {"type": "string"},
+    "event_time": {"type": "string", "pattern": "Z$"}, "market": {"type": "string"},
+    "instrument_id": {"type": "string"}, "contract_id": {"type": ["string", "null"]},
+    "source_id": {"type": "string"}, "source_checksum": {"type": "string"},
+    "sequence": {"type": "integer", "minimum": 0}, "schema_version": {"const": "backtest-engine-core-v1"}
+  },
+  "additionalProperties": false
+}

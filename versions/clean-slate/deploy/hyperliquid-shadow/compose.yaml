@@ -1,0 +1,30 @@
+services:
+  hyperliquid-recorder:
+    build:
+      context: ../..
+      dockerfile: deploy/hyperliquid-shadow/Dockerfile
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    volumes:
+      - hyperliquid-data:/data
+      - hyperliquid-logs:/logs
+    environment:
+      TRADING_AUTHORITY: "false"
+      ACCOUNT_ACCESS: "false"
+      ORDER_ENDPOINTS_ENABLED: "false"
+    healthcheck:
+      test: ["CMD", "python", "/app/research/vps_recorder_health_v1.py", "/data/hyperliquid_btc/archive_manifest.json"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+volumes:
+  hyperliquid-data:
+  hyperliquid-logs:

@@ -1,0 +1,14 @@
+{
+  "audit_assignment": "AUDIT-PAPER-SESSION-RECOVERY-DRILLS",
+  "date": "2026-08-31",
+  "checkpoint": "ce3b62156f8f46556d5aaf85b1f295d0851cd5bf",
+  "filesystem_sha256": {
+    "execution/paper_session_drills_v1.py": "c9e12fa4ce4f979329c0498f9cedd9d36938a1e3107cac153b7b8c022eaa27e4",
+    "execution/test_paper_session_drills_v1.py": "0a8be2ecc8ad1bef8f72ce9f4add4064930a59a63def3bbfa5fc774f4f94214b"
+  },
+  "canonical_git_object_hashes": {
+    "execution/paper_session_drills_v1.py": "ce3b2b2be789bfdaed6227c181bdb50f61a7ecb0",
+    "execution/test_paper_session_drills_v1.py": "9b8dba0b3e76801811dd00316aaaff1deaa3ab2a"
+  },
+  "verification": "Filesystem SHA-256 computed from primary uncommitted files; canonical Git-object hashes are blob SHA-1 hashes provided by the assignment. Distinguished per audit requirements."
+}

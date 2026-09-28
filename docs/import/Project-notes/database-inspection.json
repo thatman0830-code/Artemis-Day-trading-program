@@ -1,0 +1,38 @@
+[
+  {
+    "path": "C:\\Users\\fjone\\hyperliquid-trading-bot\\database\\execution_integration_test.db",
+    "bytes": 28672,
+    "tables": {
+      "trades": 1,
+      "sqlite_sequence": 1
+    },
+    "symbols": [
+      [
+        "BTC"
+      ]
+    ],
+    "date_range": [
+      "2026-08-21T21:12:09.963220+00:00",
+      "2026-08-21T21:12:09.963220+00:00"
+    ],
+    "integrity": "ok"
+  },
+  {
+    "path": "C:\\Users\\fjone\\hyperliquid-trading-bot\\database\\trade_ledger_test.db",
+    "bytes": 28672,
+    "tables": {
+      "trades": 1,
+      "sqlite_sequence": 1
+    },
+    "symbols": [
+      [
+        "BTC"
+      ]
+    ],
+    "date_range": [
+      "2026-08-21T21:09:19.946852+00:00",
+      "2026-08-21T21:09:19.946852+00:00"
+    ],
+    "integrity": "ok"
+  }
+]

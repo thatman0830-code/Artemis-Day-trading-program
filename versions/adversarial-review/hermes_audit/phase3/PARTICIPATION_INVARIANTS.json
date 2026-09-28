@@ -1,0 +1,103 @@
+{
+  "invariants": [
+    {
+      "id": "PI-001",
+      "name": "bar_budget_reconciliation",
+      "invariant": "initial_bar_budget == consumed_bar_budget + remaining_bar_budget",
+      "location": "ohlc_execution.py:266-267 (ExecutionEvaluationV2.__post_init__)",
+      "tested_by": "test_budget_reconciliation_in_evaluation, test_shared_volume_budget_basic",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-002",
+      "name": "combined_fills_never_exceed_budget",
+      "invariant": "sum(fill.quantity for fill in fills) <= initial_bar_budget",
+      "location": "ohlc_execution.py:428-455 (allocation loop decrements remaining_budget)",
+      "tested_by": "test_combined_fills_never_exceed_budget",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-003",
+      "name": "consumed_equals_sum_of_fills",
+      "invariant": "consumed_bar_budget == sum(fill.quantity for fill in fills)",
+      "location": "ohlc_execution.py:482 (consumed = initial_budget - remaining_budget)",
+      "tested_by": "test_consumed_budget_equals_sum_of_fill_quantities",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-004",
+      "name": "priority_ordering",
+      "invariant": "ExecutionPriority: RISK_SESSION_END_LIQUIDATION(10) < ROLLOVER_OUTGOING_CLOSE(20) < ORDINARY_POSITION_REDUCING(30) < STRATEGY_EXIT(40) < ENTRY_OR_ROLLOVER_INCOMING(50)",
+      "location": "ohlc_execution.py:26-31 (ExecutionPriority IntEnum), 421-427 (sort key)",
+      "tested_by": "test_priority_ordering_forced_exit_before_entry, test_priority_ordering_rollover_before_reduction, test_priority_ordering_strategy_exit_before_entry, test_execution_priority_ordering",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-005",
+      "name": "stable_tie_break",
+      "invariant": "Same priority → sort by (activation_at, submitted_at, order_id)",
+      "location": "ohlc_execution.py:424-427 (sort key after int(priority))",
+      "tested_by": "test_stable_tie_break_by_activation_then_submission_then_id",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-006",
+      "name": "order_participation_cap",
+      "invariant": "order_participation_cap == floor(bar_volume * instruction.participation_rate, quantity_step)",
+      "location": "ohlc_execution.py:430-431",
+      "tested_by": "test_order_participation_cap_is_per_order",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-007",
+      "name": "initial_bar_budget",
+      "invariant": "initial_bar_budget == floor(bar_volume * policy.maximum_participation_rate, quantity_step)",
+      "location": "ohlc_execution.py:414-415",
+      "tested_by": "test_shared_volume_budget_basic",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-008",
+      "name": "zero_volume_no_fill",
+      "invariant": "bar.volume == 0 → no fill (budget = 0)",
+      "location": "ohlc_execution.py:353-354 (volume=None rejects), 414-415 (budget floored to 0)",
+      "tested_by": "test_zero_volume_no_fill",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-009",
+      "name": "missing_volume_rejects",
+      "invariant": "bar.volume is None → MISSING_VOLUME rejection",
+      "location": "ohlc_execution.py:353-354",
+      "tested_by": "test_missing_volume_rejects",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-010",
+      "name": "partial_fill_quantity_conservation",
+      "invariant": "accepted_quantity == filled_quantity + remaining_quantity (at every transition)",
+      "location": "order_ledger.py:167-168, 203-204, 313-315; ohlc_execution.py:432-433",
+      "tested_by": "test_partial_fills_conserve_quantity",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-011",
+      "name": "participation_rate_cannot_exceed_global",
+      "invariant": "instruction.participation_rate > policy.maximum_participation_rate → INVALID_POLICY",
+      "location": "ohlc_execution.py:361-362",
+      "tested_by": "test_participation_rate_exceeding_global_rejects",
+      "status": "PASS"
+    },
+    {
+      "id": "PI-012",
+      "name": "fill_quantity_floored_to_step",
+      "invariant": "fill.quantity == floor(min(remaining, order_cap, budget), quantity_step)",
+      "location": "ohlc_execution.py:432-434",
+      "tested_by": "test_partial_fills_conserve_quantity, test_order_participation_cap_is_per_order",
+      "status": "PASS"
+    }
+  ],
+  "total_invariants": 12,
+  "passing_invariants": 12,
+  "failing_invariants": 0
+}

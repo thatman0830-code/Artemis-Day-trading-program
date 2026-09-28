@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0.0",
+  "created_utc": "2026-09-20T00:00:00Z",
+  "research_cutoff": "2026-09-20",
+  "purpose": "Machine-readable ES/NQ strategy research specification",
+  "default_deployment_status": "research_only",
+  "principles": [
+    "Trader ideas are hypotheses, not performance guarantees",
+    "Unknown details must remain unknown and may not be inferred",
+    "Broker position is authoritative",
+    "Risk and integrity controls override entries",
+    "No live deployment without human-reviewed promotion"
+  ],
+  "evidence_grades": {
+    "A": "Official competition, regulatory, audited, clearing, or independently checkable transaction evidence",
+    "B": "Primary-source method or documented professional history without a complete audited return series",
+    "C": "Self-reported, interview, educator, public-call, or prop-profile evidence",
+    "D": "Uncorroborated secondary claim or undisclosed method"
+  },
+  "traders": [
+    {"name":"Linda Bradford Raschke","markets":["futures","equity_index_futures"],"method_tags":["momentum","pullback","failed_break","volatility_expansion"],"evidence_grade":"B","bot_use":"high_priority_method_source","performance_claim_policy":"do_not_assume_audited_returns"},
+    {"name":"Stefano Serafini","markets":["futures"],"method_tags":["statistical_arbitrage_claimed"],"verified_evidence":{"event":"2022 World Cup Championship of Futures Trading","place":2,"net_percent":19.9},"evidence_grade":"A/D","bot_use":"hold_until_rules_verified","unknown_fields":["entry_rules","exit_rules","risk_rules","claimed_136_percent_record"]},
+    {"name":"Kyle Verhagen","markets":["ES","NQ"],"method_tags":["multi_timeframe_structure","sweep","equilibrium"],"evidence_grade":"C","bot_use":"research_hypothesis_only","performance_claim_policy":"funded_profile_is_not_audited_track_record"},
+    {"name":"Andrea Unger","markets":["futures"],"method_tags":["systematic","multi_strategy","portfolio"],"evidence_grade":"A/B","bot_use":"ensemble_architecture"},
+    {"name":"Kevin Davey","markets":["futures","stock_index_futures"],"method_tags":["system_development","walk_forward","monte_carlo","incubation"],"evidence_grade":"A/B","bot_use":"validation_governance"},
+    {"name":"Larry Williams","markets":["futures"],"method_tags":["seasonality","COT","volatility","momentum"],"evidence_grade":"A/B","bot_use":"context_features_only","prohibited_copy":"competition_leverage"},
+    {"name":"Al Brooks","markets":["ES"],"method_tags":["price_action","trend_range","second_entry","failed_breakout"],"evidence_grade":"B/C","bot_use":"regime_and_trigger_features"},
+    {"name":"John F. Carter","markets":["futures","options"],"method_tags":["volatility_compression","squeeze","momentum"],"evidence_grade":"B/C","bot_use":"compression_release_candidate"},
+    {"name":"Mark B. Fisher","markets":["futures","stocks"],"method_tags":["opening_range","ACD","breakout","reversal"],"evidence_grade":"B","bot_use":"opening_range_architecture"},
+    {"name":"Adam Grimes","markets":["futures","equities","currencies"],"method_tags":["regime","trend_integrity","failure_test","relative_volume"],"evidence_grade":"B/C","bot_use":"context_and_falsification"},
+    {"name":"Jim Dalton","markets":["futures"],"method_tags":["market_profile","auction","acceptance","rejection"],"evidence_grade":"B/C","bot_use":"auction_context"},
+    {"name":"Peter Davies","markets":["futures"],"method_tags":["order_flow","DOM","absorption","execution"],"evidence_grade":"B/C","bot_use":"execution_confirmation_only"},
+    {"name":"Tom Hougaard","markets":["indices","FX"],"method_tags":["price_action","journaling","behavioral_execution"],"evidence_grade":"C","bot_use":"error_taxonomy_and_pyramiding_research"},
+    {"name":"Rob Hoffman","markets":["futures","forex","stocks","options","ETF"],"method_tags":["order_flow_claimed","inventory_retracement_claimed"],"evidence_grade":"C/D","bot_use":"none_until_verified"},
+    {"name":"David Trullas Vila","markets":["futures_day_trading"],"method_tags":[],"evidence_grade":"A/D","bot_use":"none_method_undisclosed","performance_claim_policy":"official_competition_results_do_not_reveal_edge_or_scalability"}
+  ],
+  "strategies": [
+    {
+      "id": "OR-1",
+      "name": "Opening Range Continuation",
+      "deployment_status": "research_only",
+      "instruments": ["ES", "NQ"],
+      "session_timezone": "America/New_York",
+      "session_start": "09:30:00",
+      "opening_range_minutes_candidates": [5, 15, 30],
+      "required_features": ["or_high","or_low","or_width","atr_1m_20","vwap","vwap_slope","relative_volume","overnight_high","overnight_low","prior_day_high","prior_day_low","prior_value_area","es_nq_confirmation","event_lockout"],
+      "long_trigger": "completed_bar_close > or_high + k*atr_1m_20 AND next_completed_bar_close >= or_high AND vwap_slope > 0 AND relative_volume >= rv_min",
+      "short_trigger": "symmetric",
+      "stop": "structural_or_atr_within_max_risk",
+      "exits": ["return_inside_opening_range","time_stop","one_R_partial_candidate","structure_trail","session_flatten"],
+      "no_trade": ["data_integrity_fail","event_lockout","abnormal_or_width","slippage_breaker","spread_breaker","conflicting_cross_index_state"]
+    },
+    {
+      "id": "OR-2",
+      "name": "Failed Opening Range Breakout",
+      "deployment_status": "research_only",
+      "instruments": ["ES", "NQ"],
+      "precondition": "volatility_normalized_break_outside_OR",
+      "trigger": "close_back_inside_OR_within_M_bars AND failed_follow_through",
+      "entry": "failed_side_retest_or_opposite_micro_structure_break",
+      "targets": ["OR_midpoint","VWAP","opposite_OR_boundary_if_value_migrates"],
+      "stop": "beyond_failed_break_extreme_plus_buffer",
+      "abort": ["strong_trend_day","acceptance_outside_OR","expanding_volume_in_breakout_direction"]
+    },
+    {
+      "id": "TP-1",
+      "name": "Trend Pullback Resumption",
+      "deployment_status": "research_only",
+      "instruments": ["ES", "NQ"],
+      "trend_vote_minimum": 3,
+      "trend_votes": ["vwap_slope","directional_efficiency","5_15_60m_structure_alignment","outside_prior_value","cumulative_delta_slope","range_volume_expansion"],
+      "pullback_bars_min": 2,
+      "pullback_bars_max": 8,
+      "retracement_fraction_candidates": [[0.25,0.65]],
+      "trigger": "micro_swing_break_with_range_volume_reexpansion",
+      "stop": "beyond_pullback_extreme",
+      "exits": ["one_R_partial_candidate","confirmed_swing_trail","vwap_band_trail","time_stop","session_flatten"]
+    },
+    {
+      "id": "AR-1",
+      "name": "Auction Rejection Acceptance",
+      "deployment_status": "research_only",
+      "instruments": ["ES", "NQ"],
+      "reference_levels": ["prior_VAH","prior_VAL","prior_POC","overnight_high","overnight_low","initial_balance_high","initial_balance_low","weekly_VWAP"],
+      "rejection_definition": "excursion_then_return_with_low_time_and_volume_outside",
+      "acceptance_definition": "minimum_time_or_volume_outside_with_value_migration",
+      "responsive_target": "VWAP_or_POC",
+      "initiative_entry": "first_controlled_pullback_after_acceptance",
+      "order_flow_role": "confirmation_only"
+    },
+    {
+      "id": "SQ-1",
+      "name": "Compression Expansion",
+      "deployment_status": "research_only",
+      "instruments": ["ES", "NQ"],
+      "features": ["bollinger_width","keltner_width","realized_volatility_percentile","range_compression","relative_volume","momentum","higher_timeframe_trend"],
+      "trigger": "completed_bar_release_from_compression_with_volume_and_momentum_confirmation",
+      "exits": ["failed_release","momentum_decay","ATR_trail","session_flatten"],
+      "anti_lookahead": "completed_bars_only"
+    },
+    {
+      "id": "MS-1",
+      "name": "Multi-Timeframe Sweep To Equilibrium",
+      "deployment_status": "research_only",
+      "instruments": ["ES", "NQ"],
+      "context_timeframes": ["1D","4H","1H"],
+      "execution_timeframes": ["30m","5m","1m"],
+      "swing_rule": "causal_confirmed_pivot",
+      "trigger": "sweep_confirmed_swing_then_close_back_and_opposite_micro_structure_break",
+      "entry": "confirmation_close_or_first_retest",
+      "targets": ["active_range_midpoint","VWAP_or_POC_if_aligned"],
+      "stop": "beyond_sweep_extreme_plus_volatility_buffer"
+    }
+  ],
+  "risk_engine": {
+    "bypass_allowed": false,
+    "starting_risk_per_trade_percent_range": [0.10, 0.25],
+    "daily_stop": {"R": 3.0, "equity_percent": 0.75, "operator": "minimum"},
+    "max_consecutive_full_risk_losses": 3,
+    "correlation_policy": "ES_and_NQ_not_diversified_during_stress",
+    "position_size_formula": "floor(risk_budget_dollars / (stop_points*point_value + estimated_round_trip_cost))",
+    "reject_if_contracts_below_one": true,
+    "force_tighter_stop_to_increase_size": false,
+    "mandatory_breakers": ["event","slippage","spread","stale_data","sequence_gap","clock_drift","missing_bar","feed_disagreement","daily_loss","duplicate_order_risk"],
+    "broker_position_authoritative": true,
+    "overnight_allowed": false
+  },
+  "operations": {
+    "state_machine": ["BOOT","WARMUP","READY","ARMED","POSITION_OPEN","EXITING","RECONCILING","SAFE_HALT"],
+    "required_heartbeats": ["primary_market_data","backup_market_data","broker_gateway","strategy_process","recorder","clock_sync","storage","risk_engine"],
+    "integrity_failure_actions": ["freeze_entries","query_broker_state","reconcile_orders","apply_emergency_policy","persist_incident","bounded_restart_backoff","warmup_before_rearm"],
+    "order_idempotency_required": true,
+    "append_only_event_log_required": true
+  },
+  "validation": {
+    "required": ["unit_tests","realistic_costs","sensitivity_grid","walk_forward","purged_or_embargoed_validation","regime_segmentation","monte_carlo","paper_exact_codepath","shadow_mode","micro_contract_canary"],
+    "prohibited": ["lookahead_pivots","future_bar_values","unmodeled_same_bar_close_fills","silent_reoptimization","holdout_reuse","ignoring_partial_fills"],
+    "promotion_requires_human_review": true,
+    "promotion_metrics": ["net_expectancy","profit_factor_interval","sharpe_interval","sortino","calmar","max_drawdown","drawdown_duration","parameter_stability","trade_count","profit_concentration","slippage_fit","reliability_tests"]
+  },
+  "sources": [
+    {"id":"WCC_CURRENT","url":"https://www.worldcupchampionships.com/world-cup-trading-championship-standings"},
+    {"id":"WCC_HISTORICAL","url":"https://www.worldcupchampionships.com/world-cup-trading-championship-historical-standings"},
+    {"id":"RASCHKE_OFFICIAL","url":"https://lindaraschke.net/"},
+    {"id":"VERHAGEN_PROFILE","url":"https://joinprop.com/one-prop-trader-a-day/one-prop-trader-a-day-kyle-verhagen/"},
+    {"id":"FTM_2026","url":"https://www.financialtradermagazine.com/articles/top-10-traders-2026","warning":"secondary claims require independent corroboration"},
+    {"id":"UNGER_OFFICIAL","url":"https://ungeracademy.com/"},
+    {"id":"DAVEY_OFFICIAL","url":"https://kjtradingsystems.com/"},
+    {"id":"FISHER_ACD_SUMMARY","url":"https://www.investopedia.com/articles/technical/04/032404.asp"},
+    {"id":"GRIMES_HOW_I_TRADE","url":"https://www.adamhgrimes.com/how-i-trade-part-1-of-2/"},
+    {"id":"GRIMES_STAY_OUT","url":"https://www.adamhgrimes.com/when-to-trade-and-when-to-stay-out/"},
+    {"id":"GRIMES_SP500","url":"https://www.adamhgrimes.com/patterns-context-and-a-clean-long-in-the-s-p/"},
+    {"id":"JIGSAW_OFFICIAL","url":"https://www.jigsawtrading.com/"},
+    {"id":"TRADERTOM_OFFICIAL","url":"https://tradertom.com/"},
+    {"id":"HOFFMAN_OFFICIAL","url":"https://www.becomeabettertrader.com/"}
+  ]
+}

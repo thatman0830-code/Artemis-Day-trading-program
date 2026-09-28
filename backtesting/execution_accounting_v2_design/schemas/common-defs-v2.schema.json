@@ -1,0 +1,10 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"common-defs-v2.schema.json",
+  "$defs":{
+    "id":{"type":"string","pattern":"^[a-f0-9]{64}$"},
+    "decimal":{"type":"string","pattern":"^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"},
+    "positiveDecimal":{"type":"string","pattern":"^(0\\.[0-9]*[1-9][0-9]*|[1-9][0-9]*(\\.[0-9]+)?)$"},
+    "utc":{"type":"string","format":"date-time","pattern":"Z$"},
+    "version":{"type":"string","minLength":1,"maxLength":128}
+  }
+}

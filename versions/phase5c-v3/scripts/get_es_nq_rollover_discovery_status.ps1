@@ -1,0 +1,3 @@
+#requires -Version 5.1
+$repository=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path;$plan=Join-Path $repository 'data\backtests\es_nq_rollover_discovery_plan_3\plan.json';$stage=Join-Path $repository 'data\backtests\es_nq_rollover_discovery_staging_1'
+if(!(Test-Path $plan)){Write-Output 'PASS_A_PLAN_MISSING';exit 0};$p=Get-Content $plan -Raw|ConvertFrom-Json;$completed=if(Test-Path $stage){@(Get-ChildItem $stage -Recurse -Filter '*.json'|Where-Object{$_.DirectoryName-like'*\checkpoints'}).Count}else{0};[pscustomobject]@{state=if(Test-Path $stage){'STAGED_PARTIAL_OR_COMPLETE'}else{'NOT_STARTED'};plan_id=$p.id;completed_requests=$completed;total_requests=$p.combined_pass_a.requests}|ConvertTo-Json -Compress

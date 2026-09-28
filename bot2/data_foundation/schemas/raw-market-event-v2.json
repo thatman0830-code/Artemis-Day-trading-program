@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bot2-raw-market-event-v2",
+  "type": "object",
+  "required": ["schema_version", "instrument", "venue", "event_type", "event_timestamp", "receive_timestamp", "receive_timestamp_available", "timestamp_source", "price", "volume"],
+  "properties": {
+    "schema_version": {"const": "bot2-raw-market-event-v2"},
+    "instrument": {"type": "string", "minLength": 1},
+    "venue": {"type": "string", "minLength": 1},
+    "event_type": {"type": "string", "minLength": 1},
+    "event_timestamp": {"type": "string", "format": "date-time"},
+    "receive_timestamp": {"type": ["string", "null"], "format": "date-time"},
+    "receive_timestamp_available": {"type": "boolean"},
+    "timestamp_source": {"enum": ["HISTORICAL_EXCHANGE_EVENT", "LIVE_PROVIDER_CAPTURE", "TEST_FIXTURE", "UNSPECIFIED"]},
+    "exchange_time": {"type": "string", "format": "date-time"},
+    "receipt_time": {"type": ["string", "null"]},
+    "price": {"type": "number", "exclusiveMinimum": 0},
+    "volume": {"type": "number", "minimum": 0},
+    "sequence": {"type": ["integer", "null"]},
+    "event_id": {"type": ["string", "null"]},
+    "session_id": {"type": ["string", "null"]},
+    "contract_id": {"type": ["string", "null"]}
+  }
+}

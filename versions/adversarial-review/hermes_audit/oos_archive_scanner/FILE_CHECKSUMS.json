@@ -1,0 +1,12 @@
+{
+  "audit_assignment": "AUDIT-OOS-ARCHIVE-SCANNER",
+  "date": "2026-08-31",
+  "checkpoint": "857cab2aadb0333cf8613c75716f64c424a20f5c",
+  "files": {
+    "backtesting/execution_accounting_v2/archive_scanner.py": "29a8e01b863c37066c50b06b3980ae0541a4d7632a6f2267988d8757f0cd689f",
+    "backtesting/execution_accounting_v2/test_archive_scanner.py": "40447b56b03db0c3679e8e5a8cbfb94f1c5eddd3efcb0059250eb0522e34b9cf",
+    "backtesting/execution_accounting_v2/ARCHIVE_SCANNER_IMPLEMENTATION.md": "13d45239f742621b5da8a7d305a0052cf240c8e9a8a3c756fe5d93caaaccba63",
+    "backtesting/execution_accounting_v2/__init__.py": "cb515ca1fd8cd07edbd49e10fbef58aa150be99564b722019ef982284da8db55"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-31."
+}

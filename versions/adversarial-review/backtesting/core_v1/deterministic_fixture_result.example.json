@@ -1,0 +1,11 @@
+{
+  "advisory_acceptance": "INSUFFICIENT_EVIDENCE",
+  "dataset_fingerprints": ["fp-ES"],
+  "finalized_trade_count": 0,
+  "oos_trade_count_by_market": [["ES", 0]],
+  "result_identity": "74e62eaa1ec9d588565cf8875cefe9486b6e15837f9fe386e7cc06d92726edd4",
+  "result_version": "core-v1-result-1",
+  "run_id": "run",
+  "runtime_excluded_from_identity": true,
+  "simulation_only": true
+}

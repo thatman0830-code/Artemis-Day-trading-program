@@ -1,0 +1,14 @@
+{
+  "schema_version": "provider-neutral-paper-authority-v1",
+  "scope": "ES_NQ_SUPERVISED_PAPER",
+  "starting_equity_usd": "50000",
+  "profiles": ["CONSERVATIVE", "MODERATE", "AGGRESSIVE"],
+  "paper_execution_permitted": true,
+  "live_trading_permitted": false,
+  "trading_authority": false,
+  "baseline_qualification_threshold": 0.75,
+  "trial_max_sessions": 15,
+  "manual_stop_required": true,
+  "max_concurrent_positions": 1,
+  "adaptive_lane_risk_fraction": "0.25R"
+}

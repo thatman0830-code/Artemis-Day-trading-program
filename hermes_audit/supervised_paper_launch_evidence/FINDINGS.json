@@ -1,0 +1,35 @@
+{
+  "audit_assignment": "AUDIT-SUPERVISED-PAPER-LAUNCH-EVIDENCE",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "4cc0e4c18a1f32d8d9e729cb24b0555301c008a2",
+  "parent_sha": "1798e7aeed570bc7c82001da5ff6959a98e88d55",
+  "defects": [
+    {"id": "DEF-001", "severity": "high", "description": "Direct dataclass construction could set trading_authority=true, bypassing the create() factory invariant.", "resolution": "Added fail-closed __post_init__ validation to both launch-evidence and owner-confirmation records; direct construction with authority now rejects."}
+  ],
+  "observations": [
+    {"id": "OBS-001", "location": "supervised_paper_launch_evidence_v1.py:106-141", "description": "Evidence parsing: exact schema (22 keys), exact key set, JSON object, trading_authority=false. Extra/missing fields reject. Wrong schema rejects.", "tested_by": "TestEvidenceParsing"},
+    {"id": "OBS-002", "location": "supervised_paper_launch_evidence_v1.py:122-125", "description": "Evidence identity = SHA-256 of canonical body excluding evidence_id. Wrong identity rejects. Identity is lowercase SHA-256.", "tested_by": "TestEvidenceIdentity"},
+    {"id": "OBS-003", "location": "supervised_paper_launch_evidence_v1.py:118-121", "description": "Source hashes: nonempty, unique, lowercase SHA-256. Empty/duplicate/malformed/uppercase all reject.", "tested_by": "TestSourceHashes"},
+    {"id": "OBS-004", "location": "supervised_paper_launch_evidence_v1.py:126-127", "description": "All SHA-256 identifiers (repository_checkpoint, watchdog_report_id, recovery/stale drill report_ids) validated.", "tested_by": "TestShaIdentifiers"},
+    {"id": "OBS-005", "location": "supervised_paper_launch_evidence_v1.py:29-34,133-136", "description": "UTC timestamps mandatory. Naive and non-UTC offset reject.", "tested_by": "TestUtcTimestamps"},
+    {"id": "OBS-006", "location": "supervised_paper_launch_evidence_v1.py:128-129", "description": "Boolean fields (repository_clean, unhealthy/healthy_alert_delivered) reject integers/non-booleans.", "tested_by": "TestBooleanFields"},
+    {"id": "OBS-007", "location": "supervised_paper_launch_evidence_v1.py:130-132", "description": "Counts are integers, reject booleans, required counts nonnegative. Clock skew must be integer (rejects bool).", "tested_by": "TestCounts"},
+    {"id": "OBS-008", "location": "supervised_paper_launch_evidence_v1.py:80-103", "description": "Evidence immutable (frozen dataclass). Source hashes stored as tuple.", "tested_by": "TestEvidenceImmutable"},
+    {"id": "OBS-009", "location": "supervised_paper_launch_evidence_v1.py", "description": "Owner confirmation and launch evidence are immutable and reject trading_authority=true through every construction path.", "tested_by": "TestConfirmationImmutable, TestNoTradingAuthority"},
+    {"id": "OBS-010", "location": "supervised_paper_launch_evidence_v1.py:63-66", "description": "Confirmation expires <= 5 minutes. confirmed_at < expires_at. Over 5 minutes rejects. Not-current rejects. Expiry is exclusive (as_of < expires_at).", "tested_by": "TestConfirmationExpiry"},
+    {"id": "OBS-011", "location": "supervised_paper_launch_evidence_v1.py:149-155", "description": "Confirmation checkpoint must match both evidence and policy. Risk limits (session, commands, notional, gross) must match policy exactly. Smaller/larger/different limits reject.", "tested_by": "TestConfirmationMatch"},
+    {"id": "OBS-012", "location": "supervised_paper_launch_evidence_v1.py:156-163", "description": "Missing owner supervision/stop control → ineligible gate decision (2 reasons). Owner confirmation cannot grant trading authority.", "tested_by": "TestOwnerAssertions, TestNoTradingAuthority"},
+    {"id": "OBS-013", "location": "supervised_paper_launch_evidence_v1.py:156-164", "description": "Adapter preserves all evidence fields exactly when constructing launch facts. Gate remains advisory-only, BTC-only, unable to submit.", "tested_by": "TestAdapterPreservation"},
+    {"id": "OBS-014", "location": "supervised_paper_launch_evidence_v1.py:1-14", "description": "No os/sys/subprocess/git/socket/network/credential/live/task-mutation imports. Only dataclass, datetime, decimal, hashlib, json, pathlib, launch_gate used.", "tested_by": "TestNoProhibited"},
+    {"id": "OBS-015", "location": "supervised_paper_launch_evidence_v1.py:1", "description": "No owner-approval/profitability/OOS/deployment/unattended claim in module. Docstring: 'Strict evidence and owner-confirmation adapter'.", "tested_by": "TestNoFalseClaims"},
+    {"id": "OBS-016", "location": "supervised_paper_launch_evidence_v1.py:16-17", "description": "Version constants: EVIDENCE_VERSION='supervised-paper-launch-evidence-v1', CONFIRMATION_VERSION='supervised-paper-owner-confirmation-v1'.", "tested_by": "TestConfirmationVersion"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_canonical_evidence_and_current_confirmation_produce_eligible_decision", "test_evidence_is_strict_content_addressed_and_immutable", "test_malformed_or_authority_evidence_rejects", "test_confirmation_is_short_lived_checkpoint_and_limit_bound", "test_missing_owner_assertions_block_through_gate", "test_module_has_no_environment_or_submission_surface"],
+    "accepted_after_correction": ["test_confirmation_trading_authority_true_rejects (corrected to exercise direct construction after DEF-001 hardening)"],
+    "redundant": ["Some adversarial tests overlap with existing on content addressing, malformed evidence, confirmation limits, no environment surface"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": []
+  }
+}

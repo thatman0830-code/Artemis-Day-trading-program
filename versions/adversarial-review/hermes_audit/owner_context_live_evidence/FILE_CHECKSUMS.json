@@ -1,0 +1,20 @@
+{
+  "audit_assignment": "AUDIT-OWNER-CONTEXT-LIVE-EVIDENCE-BRIDGE",
+  "date": "2026-08-30",
+  "checkpoint": "b4b73d1f9986a2727e03fc2eec040536336efcd6",
+  "files": {
+    "monitoring/owner_context_health_report.py": "09be9b37563b831169691db1a1577d028111e1ead6a9e8aa8e405cb1849a684d",
+    "monitoring/test_owner_context_collector.py": "a42ab0b885c445dbde7e3b8a81d6fdd31c646b75bb091a63b567456d96402cdc",
+    "monitoring/test_owner_context_health_report.py": "c568bc42cb8bb110add2ba6aaa5d8864fa215206187dffb57719266dfc717e2d",
+    "monitoring/OWNER_CONTEXT_LIVE_CONNECTION_STATUS.md": "a3de3937b4fa8977da4b4ffc2cc5978636ce85d79dfa1b50c49a66d08768076c",
+    "monitoring/__init__.py": "f38517c680fb1fdf85898818ecdc038e1830dfe8bf498fa631910f4ea648755d",
+    "monitoring/operational_resilience.py": "b9270d3a6f87b4773b38589b19a84b0613b2dd1feab8b865235318c8cba8b2ea",
+    "monitoring/owner_context_health_adapter.py": "9686be233987232bd4d42173490914c67994034df9534034106dca633c4a425d",
+    "monitoring/test_operational_resilience.py": "a9b22f41381f75fd511ca44160afc6cec0e057b50331e6a9d191a7cec41cdcf4",
+    "monitoring/test_owner_context_health_adapter.py": "e7772e3f457024b7962c71a98dfaf289501fca2699659ae39d4403ebb7c78e03",
+    "scripts/collect_owner_context_health_facts.ps1": "1be3fa15e1d19dc5cfa4ed6f17656081b2af32ea020081043f26f937db5645a2",
+    "backtesting/execution_accounting_v2/__init__.py": "a87d55a9444076c4483a32a49c070f523dd0cd865d49edc0eea1ddde7ea3975b",
+    "backtesting/execution_accounting_v2/test_specifications.py": "a53e3ee1b3c9f604d48409c31391b2ff26e78a96d3a4bd0fa2eeba37e191b5f8"
+  },
+  "verification": "SHA-256 checksums computed from primary repository uncommitted files on 2026-08-30."
+}

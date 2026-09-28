@@ -1,0 +1,9 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"risk-inputs-v2.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","risk_specification_id","effective_from","effective_to","currency","starting_capital","maximum_gross_exposure","maximum_net_exposure","maximum_position_by_instrument","maximum_exposure_by_market","daily_session_loss_limit","drawdown_threshold","maximum_leverage","maximum_margin_utilization","session_flatten_buffer_seconds","rollover_participation_limit","owner_approved"],
+  "properties":{
+    "schema_version":{"const":"risk-inputs-v2-1"},"risk_specification_id":{"type":"string","minLength":1},"effective_from":{"type":"string","format":"date-time","pattern":"Z$"},"effective_to":{"type":["string","null"],"format":"date-time"},"currency":{"type":"string","minLength":1},"starting_capital":{"$ref":"#/$defs/positive"},"maximum_gross_exposure":{"$ref":"#/$defs/positive"},"maximum_net_exposure":{"$ref":"#/$defs/nonnegative"},"maximum_position_by_instrument":{"type":"object","additionalProperties":{"$ref":"#/$defs/positive"}},"maximum_exposure_by_market":{"type":"object","additionalProperties":{"$ref":"#/$defs/positive"}},"daily_session_loss_limit":{"$ref":"#/$defs/positive"},"drawdown_threshold":{"$ref":"#/$defs/rate"},"maximum_leverage":{"$ref":"#/$defs/positive"},"maximum_margin_utilization":{"$ref":"#/$defs/rate"},"session_flatten_buffer_seconds":{"type":"integer","minimum":0},"rollover_participation_limit":{"$ref":"#/$defs/rate"},"owner_approved":{"type":"boolean"}
+  },
+  "$defs":{"positive":{"type":"string","pattern":"^(0\\.[0-9]*[1-9][0-9]*|[1-9][0-9]*(\\.[0-9]+)?)$"},"nonnegative":{"type":"string","pattern":"^(0|[1-9][0-9]*)(\\.[0-9]+)?$"},"rate":{"type":"string","pattern":"^(0(\\.[0-9]+)?|1(\\.0+)?)$"}}
+}

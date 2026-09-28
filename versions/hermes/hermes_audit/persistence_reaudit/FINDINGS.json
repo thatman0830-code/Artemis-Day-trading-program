@@ -1,0 +1,54 @@
+{
+  "audit_assignment": "PERSISTENCE_REAUDIT",
+  "auditor": "Hermes Agent (independent, read-only)",
+  "date": "2026-09-01",
+  "checkpoint": "bc4dae95f120dd49d91c66c19de49eaf40c5d65c",
+  "parent_sha": "3b7d0eeaa8ab334aa328667b97a2124d8c0af383",
+  "prior_corrective_audit": "d52d15957376ff1746b316dea5c21ce7a5bcc1b8",
+  "defects": [],
+  "fixes_verified": [
+    {
+      "id": "FIX-A",
+      "name": "Future-mark rejection",
+      "location": "supervised_paper_performance_v1.py:89-92",
+      "description": "cycle() now checks closed_mark.observed_at > cycle.now or closed_mark.available_at > cycle.now and raises SupervisedPaperPerformanceError('future or unavailable mark evidence'). Accounting bytes remain unchanged. Equality boundaries (observed_at == cycle.now, available_at == cycle.now) accepted.",
+      "verified_by": ["test_future_observed_at_rejected", "test_future_available_at_rejected", "test_observed_at_equal_to_now_accepted", "test_available_at_equal_to_now_accepted", "test_future_mark_halted_durable"]
+    },
+    {
+      "id": "FIX-B",
+      "name": "Startup reconciliation",
+      "location": "supervised_paper_performance_v1.py:67-69",
+      "description": "start() now calls ledger.reconcile_gateway(adapter.gateway) before initialize, which detects fill mismatches. Missing performance checkpoint with retained gateway fills rejects with SupervisedPaperPerformanceError('startup reconciliation failed'). Gateway fill evidence preserved. Durable halt activated.",
+      "verified_by": ["test_missing_perf_with_retained_fill_rejects", "test_existing_perf_missing_retained_fill_rejects", "test_preserve_gateway_fill_evidence"]
+    },
+    {
+      "id": "FIX-C",
+      "name": "PaperPerformanceHaltUnconfirmedError + latched coordinator",
+      "location": "supervised_paper_performance_v1.py:30-31,52,58,87,119,130-133,142-143",
+      "description": "PaperPerformanceHaltUnconfirmedError raised when halt write fails. Coordinator latches via _failed flag; _assert_not_failed() rejects further start/cycle with 'latched' error.",
+      "verified_by": ["test_halt_unconfirmed_error", "test_latched_after_failure"]
+    }
+  ],
+  "observations": [
+    {"id": "OBS-001", "description": "Checkpoints are individually atomically replaced — adapter and performance stores have separate lock files and paths.", "tested_by": "test_adapter_and_performance_separate_locks"},
+    {"id": "OBS-002", "description": "Replay through disconnect/reconnect preserves exact fill counts, costs, and quantities. No duplicate accounting.", "tested_by": "test_replay_no_duplicate_after_reconnect, test_replay_after_additional_order, test_exact_fill_count_and_costs"},
+    {"id": "OBS-003", "description": "Health and alert content verified with specific assertions: HALTED_PERFORMANCE_PERSISTENCE state, kill_switch_active, disconnected, alert session_id and gateway_snapshot_id.", "tested_by": "test_specific_health_and_alert_content, test_future_mark_halted_durable"},
+    {"id": "OBS-004", "description": "No network/credential/live-order imports. trading_authority=false, advisory_only=true, live_trading_permitted=false.", "tested_by": "test_no_network_imports, test_no_credentials, test_trading_authority_false"}
+  ],
+  "test_disposition": {
+    "accepted_unchanged": ["test_start_creates_atomic_performance_checkpoint", "test_verified_fill_and_closed_mark_persist_and_reconcile", "test_accepted_fill_without_evidence_halts_durably", "test_checkpoint_write_conflict_halts_adapter", "test_restart_reconciles_both_checkpoints", "test_module_has_no_network_credentials_or_live_submission", "test_future_mark_rejected_without_persisting", "test_mark_equal_to_cycle_time_is_accepted", "test_startup_missing_accounted_fill_halts", "test_power_loss_between_checkpoints_requires_restart_reconciliation", "test_failed_halt_is_explicit_and_coordinator_latched", "test_replay_after_gateway_change_never_duplicates_accounting", "test_write_error_before_or_after_replace_publishes_halt"],
+    "accepted_after_correction": ["test_available_at_equal_to_now_accepted (corrected: observed_at must be >= margin effective_from, not T-5min)", "test_existing_perf_missing_retained_fill_rejects (corrected: error message is 'startup reconciliation failed', not 'mismatch|reconcile|fill')"],
+    "redundant": ["Some adversarial tests overlap with existing on future mark, startup, replay, lock conflict, halt unconfirmed"],
+    "implementation_coupled": [],
+    "incorrect_or_misleading": ["Prior audit 3b7d0ee incorrectly reported 0 defects. Corrective audit d52d159 confirmed 2 defects. This re-audit confirms both defects are now fixed."]
+  },
+  "baseline_comparison": {
+    "codex_bridge": "17 passed",
+    "hermes_bridge": "17 passed",
+    "codex_bridge_plus_supervisor": "28 passed",
+    "hermes_bridge_plus_supervisor": "28 passed",
+    "codex_full_repo": "4,491 passed, 8 skipped",
+    "hermes_full_repo": "4,490 passed, 9 skipped",
+    "difference": "1 fewer pass / 1 more skip due to symlink test requiring Windows admin (consistent across all prior audits)"
+  }
+}

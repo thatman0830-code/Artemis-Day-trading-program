@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bot2-instrument-identity-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "root_symbol", "contract_symbol", "expiry", "venue", "instrument_id"],
+  "properties": {
+    "schema_version": {"const": "bot2-instrument-identity-v1"},
+    "root_symbol": {"enum": ["ES", "NQ"]},
+    "contract_symbol": {"type": "string", "pattern": "^(ES|NQ)[FGHJKMNQUVXZ][0-9]{1,2}$"},
+    "expiry": {"type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"},
+    "venue": {"type": "string", "minLength": 1},
+    "instrument_id": {"type": "string", "minLength": 1}
+  }
+}

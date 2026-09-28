@@ -1,0 +1,14 @@
+{
+  "schema_version": "hermes-worker-budgets-v1",
+  "wall_clock_minutes": 360,
+  "maximum_agent_turns": 80,
+  "maximum_tool_calls": 300,
+  "maximum_provider_cost_usd": "5.00",
+  "maximum_workspace_disk_bytes": 1073741824,
+  "maximum_network_bytes": 52428800,
+  "command_timeout_seconds": 900,
+  "approval_timeout_seconds": 60,
+  "package_install_allowed": false,
+  "automatic_updates_allowed": false,
+  "fail_closed": true
+}
