@@ -30,8 +30,11 @@ def load_portfolio_configs(path: Path = DEFAULT_PORTFOLIOS) -> dict[str, PilotCo
     start = float(spec["starting_equity_usd"])
     floor = float(spec["initial_floor_usd"])
     allowance = float(spec["drawdown_allowance_usd"])
+    reserve = float(spec["execution_reserve_usd"])
     if start != 100000 or allowance <= 0 or abs(start - floor - allowance) > 1e-9:
         raise ValueError("100K starting equity and a coherent initial trailing floor are required")
+    if reserve < 0 or reserve >= allowance:
+        raise ValueError("execution reserve must be nonnegative and below the drawdown allowance")
     configs = {}
     spec_hash = sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest()
     for name in NAMES:
@@ -43,6 +46,7 @@ def load_portfolio_configs(path: Path = DEFAULT_PORTFOLIOS) -> dict[str, PilotCo
             "static_synthetic_floor_usd": floor,
             "synthetic_floor_model": "INTRADAY_TRAILING",
             "synthetic_drawdown_allowance_usd": allowance,
+            "execution_reserve_usd": reserve,
             **limits,
         }, "paper_portfolio": {"id": name, "spec_hash": spec_hash,
                                "status": spec["model_status"]}}

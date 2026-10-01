@@ -6,6 +6,7 @@
   "starting_equity_usd": 100000,
   "initial_floor_usd": 97000,
   "drawdown_allowance_usd": 3000,
+  "execution_reserve_usd": 200,
   "profiles": {
     "CONSERVATIVE": {
       "max_contracts": 1,

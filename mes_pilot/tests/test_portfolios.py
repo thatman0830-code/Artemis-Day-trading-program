@@ -18,6 +18,7 @@ def test_three_profiles_share_strategy_but_have_separate_100k_trailing_books(tmp
     assert {cfg.risk.starting_equity for cfg in configs.values()} == {100000}
     assert {cfg.risk.floor_model for cfg in configs.values()} == {"INTRADAY_TRAILING"}
     assert {cfg.risk.drawdown_allowance for cfg in configs.values()} == {3000}
+    assert {cfg.risk.execution_reserve for cfg in configs.values()} == {200}
     assert [configs[n].risk.max_contracts for n in NAMES] == [1, 2, 3]
 
     # One hand-built, causally identical qualifying setup reaches each book.

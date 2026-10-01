@@ -14,6 +14,7 @@ Only the versioned risk settings differ.
 
 These are **provisional synthetic paper settings** in
 `config/mes_paper_portfolios_v1.json`, not a configured Apex account. The
+paper execution reserve is $200 per book. The
 intraday floor tracks peak liquidation-side equity, including open P&L and
 estimated entry/exit fees, and never moves down. Touching the floor latches a
 paper breach, closes open simulated positions at the next executable quote,
