@@ -232,12 +232,15 @@ class LiveFeed:
         self.contract: str | None = None
         self.last_quote: Quote | None = None
         self.last_bar: Bar | None = None
+        self._pending_ohlcv: deque[Bar] = deque()
         self._builder = _M1Builder()
         self._stale_quote_logged = False
         self._bar_stale_logged_for: datetime | None = None
         self.events: deque = deque(maxlen=2000)
         self.deliveries: deque = deque(maxlen=2000)
-        self.stats = {"quotes": 0, "invalid_quotes": 0, "bars_delivered": 0, "bars_late": 0, "bars_rejected": 0,
+        self.stats = {"quotes": 0, "invalid_quotes": 0, "delayed_quotes": 0,
+                      "max_quote_transport_delay_s": 0.0, "bars_delivered": 0,
+                      "bars_late": 0, "bars_rejected": 0, "bars_held_until_close": 0,
                       "duplicate_bars": 0, "late_trades": 0, "gaps": 0, "unexpected_gap_minutes": 0,
                       "stale_quote_bars": 0, "reconnects": 0, "heartbeats": 0, "errors": 0}
 
@@ -324,8 +327,15 @@ class LiveFeed:
             else:
                 self.last_quote = Quote(ts_event, bid, ask, LIVE_QUOTE_SOURCE, receive_ts=received_at)
                 self.stats["quotes"] += 1
-                self._stale_quote_logged = False
-                if self.on_quote is not None and self.quote_status(received_at)[0] in ("FRESH", "WIDE_SPREAD"):
+                transport_delay = (received_at - ts_event).total_seconds()
+                if transport_delay > self.cfg.max_quote_age_s:
+                    self.stats["delayed_quotes"] += 1
+                    self.stats["max_quote_transport_delay_s"] = max(
+                        self.stats["max_quote_transport_delay_s"], round(transport_delay, 3))
+                quote_state, _ = self.quote_status(received_at)
+                if quote_state != "STALE":
+                    self._stale_quote_logged = False
+                if self.on_quote is not None and quote_state in ("FRESH", "WIDE_SPREAD"):
                     q = self.last_quote if self.pass_receive_ts else replace(self.last_quote, receive_ts=None)
                     try:
                         self.on_quote(q)
@@ -336,6 +346,7 @@ class LiveFeed:
                 for bar in self._builder.advance(ts_event):
                     self._deliver(bar, received_at)
         elif name == "OHLCVMsg" and self.cfg.bar_schema == "ohlcv-1m":
+            self._flush_pending_ohlcv(received_at)
             start = ts_event
             bar = Bar(start, start + ONE_MIN, _px(rec.open), _px(rec.high), _px(rec.low), _px(rec.close),
                       float(getattr(rec, "volume", 0)), contract, 1)
@@ -346,8 +357,14 @@ class LiveFeed:
                 self._log("BAR_RECEIVED_BEFORE_CLOSE", bar_start=bar.start, received_at=received_at)
                 return
             if early_s > 0:
-                self._log("CLOCK_SKEW_SUSPECTED", bar_end=bar.end, received_at=received_at)
-            self._deliver(bar, received_at)
+                # Do not let an early provider bar influence a decision before its
+                # stated close. A later quote or the next feed tick releases it.
+                self._pending_ohlcv.append(bar)
+                self.stats["bars_held_until_close"] += 1
+                self._log("BAR_HELD_UNTIL_CLOSE", bar_end=bar.end, received_at=received_at,
+                          early_ms=round(early_s * 1000, 3))
+            else:
+                self._deliver(bar, received_at)
         elif name == "TradeMsg" and self.cfg.bar_schema == "trades":
             done, accepted = self._builder.add(ts_event, _px(rec.price), float(getattr(rec, "size", 0)), contract)
             if not accepted:
@@ -358,6 +375,7 @@ class LiveFeed:
     def tick(self, now: datetime | None = None):
         """Clock-driven checks: close a due trades-bar, flag stale bar feed / quotes."""
         now = now or self.clock()
+        self._flush_pending_ohlcv(now)
         if self.cfg.bar_schema == "trades":
             for bar in self._builder.due(now, self.cfg.bar_grace_s):
                 self._deliver(bar, now)
@@ -369,7 +387,17 @@ class LiveFeed:
         state, age = self.quote_status(now)
         if state == "STALE" and not self._stale_quote_logged:
             self._stale_quote_logged = True
-            self._log("QUOTE_STALE", age_s=round(age, 3))
+            q = self.last_quote
+            transport_delay = ((q.receive_ts or q.ts) - q.ts).total_seconds()
+            self._log("QUOTE_STALE", age_s=round(age, 3),
+                      exchange_to_receipt_s=round(transport_delay, 3),
+                      cause="TRANSPORT_DELAY" if transport_delay > self.cfg.max_quote_age_s else "AGE_SINCE_RECEIPT",
+                      delayed_quotes_total=self.stats["delayed_quotes"])
+
+    def _flush_pending_ohlcv(self, now: datetime):
+        while self._pending_ohlcv and self._pending_ohlcv[0].end <= now:
+            # The decision/eligible receipt time is now, never the early arrival.
+            self._deliver(self._pending_ohlcv.popleft(), now)
 
     # ------------------------------------------------------------------ delivery
     def _deliver(self, bar: Bar, received_at: datetime):

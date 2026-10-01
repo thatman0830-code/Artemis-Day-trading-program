@@ -268,7 +268,9 @@ def test_loader_sorts_dedupes_and_rejects_conflicts(tmp_path):
 def test_loader_on_real_forward_archive():
     sessions = load_archive_sessions([FORWARD])
     _check_real(sessions)
-    assert sessions[0].session_date == date(2026, 8, 27) and sessions[-1].session_date == date(2026, 9, 29)
+    # The forward archive is append-only; newer sessions must not break this loader check.
+    assert sessions[0].session_date == date(2026, 8, 27)
+    assert sessions[-1].session_date >= date(2026, 9, 29)
     assert {s.contract for s in sessions if s.session_date >= date(2026, 9, 21)} == {"ESZ6"}
 
 

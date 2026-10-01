@@ -66,6 +66,20 @@ Each ledger file holds exactly one evidence label (`SYNTHETIC_TEST`,
 prints SOURCE ENGINE BENCHMARK / CURRENT BOT RESULT / TARGET separately.
 `PROTECTED_OOS` (2026-06-01..2026-08-26) is refused by the replay CLI.
 
+## Live feed timing and session health
+
+An OHLCV minute bar received up to one second before its stated close is held
+until the local clock reaches that close; it cannot cause an early decision.
+Bars received more than one second early are rejected. Quotes whose exchange
+timestamp is too old or that have aged past the two-second limit cannot trigger
+new entries. A delayed-quote burst produces one `QUOTE_STALE` event per episode,
+with exchange-to-receipt delay and a session-level delayed-quote count.
+
+Each live run writes `live-feed-summary.json` beside its ledger and report.
+If the feed ends with any status other than `COMPLETED`, the launcher exits with
+an error after finalizing the ledger. Review the summary and `live-feed.jsonl`
+alongside the paper report before treating a session as valid evidence.
+
 Session classes: `TRADED`, `NO_VALID_SETUP`, `SETUPS_CONFIRMED_BUT_NOT_TAKEN`,
 `CALENDAR_UNAVAILABLE_OPERATIONAL_LIMITATION`, `OPERATIONAL_FAULT`,
 `NO_SESSION_DATA_IN_WINDOW`. A calendar outage is never counted as a

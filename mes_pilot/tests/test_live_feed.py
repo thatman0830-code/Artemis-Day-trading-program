@@ -4,10 +4,12 @@ capability, dry-run replay. No network, no real API key."""
 from __future__ import annotations
 
 import inspect
+import importlib.util
 import subprocess
 import sys
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -157,6 +159,29 @@ def test_quote_with_old_exchange_timestamp_is_stale_and_crossed_is_rejected():
     assert feed.quote_status()[0] == "WIDE_SPREAD" and feed.executable_quote() is not None
 
 
+def test_delayed_quote_burst_is_blocked_and_logged_once_per_episode():
+    feed, _, _, clock = make_feed()
+    feed.handle_record(MAP[1], MAP[0])
+    start = et(10, 0)
+    for n in range(5):
+        clock.now = start + timedelta(milliseconds=n)
+        feed.handle_record(mbp1(7, clock.now - timedelta(seconds=10), 6500.0, 6500.25), clock.now)
+        assert feed.executable_quote(clock.now) is None
+        feed.tick(clock.now)
+    stale = [e for e in feed.events if e["kind"] == "QUOTE_STALE"]
+    assert len(stale) == 1
+    assert stale[0]["cause"] == "TRANSPORT_DELAY" and stale[0]["exchange_to_receipt_s"] == 10.0
+    assert feed.stats["delayed_quotes"] == 5 and feed.stats["max_quote_transport_delay_s"] == 10.0
+
+    clock.now = start + timedelta(seconds=1)
+    feed.handle_record(mbp1(7, clock.now, 6500.0, 6500.25), clock.now)
+    assert feed.executable_quote(clock.now) is not None
+    clock.now += timedelta(seconds=1)
+    feed.handle_record(mbp1(7, clock.now - timedelta(seconds=10), 6500.0, 6500.25), clock.now)
+    feed.tick(clock.now)
+    assert len([e for e in feed.events if e["kind"] == "QUOTE_STALE"]) == 2
+
+
 def test_records_for_unmapped_instruments_ignored():
     feed, got, _, clock = make_feed()
     feed.handle_record(SymbolMappingMsg(9, "ES.c.0", "ESZ6"), et(9))
@@ -182,6 +207,24 @@ def test_ohlcv_bar_delivered_once_complete_with_fresh_quote():
     feed.handle_record(ohlcv(7, bar(et(10, 0))), clock.now)
     feed.handle_record(ohlcv(7, bar(et(10, 1))), et(10, 1, 30))
     assert len(got) == 1 and feed.stats["duplicate_bars"] == 1 and feed.stats["bars_rejected"] == 1
+
+
+def test_slightly_early_ohlcv_bar_waits_until_its_stated_close():
+    feed, got, _, clock = make_feed()
+    feed.handle_record(MAP[1], MAP[0])
+    clock.now = et(10, 0, 59, 800)
+    feed.handle_record(ohlcv(7, bar(et(10, 0))), clock.now)
+    feed.tick(clock.now)
+    assert got == [] and feed.stats["bars_held_until_close"] == 1
+    assert any(e["kind"] == "BAR_HELD_UNTIL_CLOSE" for e in feed.events)
+
+    clock.now = et(10, 0, 59, 999)
+    feed.tick(clock.now)
+    assert got == []
+    clock.now = et(10, 1, 0, 50)
+    feed.tick(clock.now)
+    assert len(got) == 1 and feed.deliveries[-1]["decision_ts"] == clock.now.isoformat()
+    assert feed.deliveries[-1]["bar_close_ts"] <= feed.deliveries[-1]["decision_ts"]
 
 
 def test_late_bar_delivered_without_quote():
@@ -381,3 +424,36 @@ def test_on_quote_hook_receives_only_fresh_quotes():
     feed.handle_record(mbp1(7, et(10, 0, 0), 6500.0, 6500.25), et(10, 0, 0, 100))
     feed.handle_record(mbp1(7, et(10, 0, 1), 6500.0, 6500.25), et(10, 0, 4))      # 3 s in transit: stale
     assert [q.ts for q in seen] == [et(10, 0, 0)] and seen[0].source == "LIVE_MBP1"
+
+
+def test_live_cli_reports_feed_failure_after_finalizing_ledger(tmp_path, monkeypatch):
+    spec = importlib.util.spec_from_file_location("mes_pilot_cli_test", REPO / "scripts" / "run_mes_paper_pilot.py")
+    cli = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cli)
+    finished = []
+
+    class Engine:
+        def __init__(self, *_args, **_kwargs):
+            self.warmup = False
+            _kwargs["out_dir"].mkdir(parents=True, exist_ok=True)
+
+        def end_warmup(self):
+            pass
+
+        def finish(self):
+            finished.append(True)
+
+    cfg = SimpleNamespace(splits=SimpleNamespace(protected_oos=(date(2026, 6, 1), date(2026, 8, 26))),
+                          strategy=SimpleNamespace(volatility_sessions=60))
+    monkeypatch.setattr(cli, "load_config", lambda: cfg)
+    monkeypatch.setattr(cli, "PilotEngine", Engine)
+    monkeypatch.setattr(cli, "load_archive_sessions", lambda *_a, **_kw: [])
+    monkeypatch.setattr(cli, "_print_report", lambda *_a: None)
+    monkeypatch.setattr(cli, "OUT", tmp_path)
+    monkeypatch.setattr(cli, "CAL_DIR", tmp_path / "missing-calendar")
+    monkeypatch.setattr(lf, "run_session", lambda *_a, **_kw: {"status": "ABORTED_FatalFeedError", "stats": {}})
+
+    with pytest.raises(RuntimeError, match="ABORTED_FatalFeedError"):
+        cli.cmd_live(SimpleNamespace(mode="PAPER_AUTO", prop_dry_run=False))
+    assert finished == [True]
+    assert (tmp_path / "autonomous_paper" / "live-feed-summary.json").exists()

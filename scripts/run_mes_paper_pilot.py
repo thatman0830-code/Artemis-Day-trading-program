@@ -164,9 +164,16 @@ def cmd_live(args):
         for bar in s.bars:
             eng.process_bar(bar)
     eng.end_warmup()
-    live_feed.run_session(eng, cfg)
-    eng.finish()
-    _print_report(out, cfg)
+    feed_result = None
+    try:
+        feed_result = live_feed.run_session(eng, cfg)
+    finally:
+        # Finalize the ledger even when the feed raises unexpectedly.
+        eng.finish()
+        _print_report(out, cfg)
+    (out / "live-feed-summary.json").write_text(json.dumps(feed_result, indent=1, default=str), encoding="utf-8")
+    if feed_result["status"] != "COMPLETED":
+        raise RuntimeError(f"MES paper feed did not complete: {feed_result['status']}")
 
 
 # ---------------------------------------------------------------------------------- admin
