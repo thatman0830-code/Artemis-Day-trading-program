@@ -1,6 +1,6 @@
 {
   "schema_version": "mes-paper-pilot-config-v1",
-  "strategy_version": "mes-pilot-v1.0.0",
+  "strategy_version": "mes-pilot-v1.1.0",
   "spec_reference": {
     "document": "Trading-bot-code-master.pdf v1.2 (29 Sep 2026)",
     "sha256": "8296c98ef807f1342023629dec0b2732b8461251ad1be1f3ecce8fa01cbc0fce",

@@ -79,6 +79,8 @@ class Costs:
 class RiskConfig:
     starting_equity: float
     static_floor: float
+    floor_model: str
+    drawdown_allowance: float
     execution_reserve: float
     max_trade_budget: float
     capacity_fraction: float
@@ -252,6 +254,10 @@ def parse_config(raw: dict) -> PilotConfig:
     risk = RiskConfig(
         starting_equity=_positive("starting_equity", r["synthetic_starting_equity_usd"]),
         static_floor=_positive("static_floor", r["static_synthetic_floor_usd"]),
+        floor_model=str(r.get("synthetic_floor_model", "STATIC")),
+        drawdown_allowance=_positive("synthetic_drawdown_allowance_usd",
+                                     r.get("synthetic_drawdown_allowance_usd",
+                                           r["synthetic_starting_equity_usd"] - r["static_synthetic_floor_usd"])),
         execution_reserve=_non_negative("reserve", r["execution_reserve_usd"]),
         max_trade_budget=_positive("max_trade_budget", r["max_new_trade_budget_usd"]),
         capacity_fraction=_positive("capacity_fraction", r["capacity_fraction"]),
@@ -268,6 +274,12 @@ def parse_config(raw: dict) -> PilotConfig:
     )
     if risk.static_floor >= risk.starting_equity:
         raise ConfigError("floor must be below starting equity")
+    if risk.floor_model not in ("STATIC", "INTRADAY_TRAILING"):
+        raise ConfigError("synthetic_floor_model must be STATIC or INTRADAY_TRAILING")
+    if risk.floor_model == "INTRADAY_TRAILING" and abs(
+        risk.drawdown_allowance - (risk.starting_equity - risk.static_floor)
+    ) > 1e-9:
+        raise ConfigError("trailing allowance must match starting equity minus initial floor")
     if risk.max_contracts < 1 or risk.max_contracts > u["max_micro_contracts_future_profile"]:
         raise ConfigError("max_contracts outside Frank's 1-3 micro range")
     if risk.capacity_fraction > 1:

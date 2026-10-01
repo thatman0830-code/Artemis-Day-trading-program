@@ -15,7 +15,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
+import uuid
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
@@ -28,6 +30,7 @@ from mes_pilot.engine import PilotEngine  # noqa: E402
 from mes_pilot.events import EventCalendar  # noqa: E402
 from mes_pilot.modes import LiveAutoDisabled, OperatingMode  # noqa: E402
 from mes_pilot.report import build_report, render_text  # noqa: E402
+from mes_pilot.portfolios import PortfolioGroup, load_portfolio_configs, NAMES  # noqa: E402
 
 OUT = ROOT / "outputs" / "mes_pilot"
 CAL_DIR = ROOT / "data" / "mes_pilot" / "calendar"
@@ -176,6 +179,49 @@ def cmd_live(args):
         raise RuntimeError(f"MES paper feed did not complete: {feed_result['status']}")
 
 
+def cmd_live_portfolios(args):
+    """One read-only MES feed, three isolated synthetic paper ledgers."""
+    configs = load_portfolio_configs()
+    cfg = configs[NAMES[0]]
+    from mes_pilot import live_feed
+
+    calendar = EventCalendar.load_for_live(CAL_DIR) if CAL_DIR.exists() else EventCalendar.empty()
+    out = OUT / "autonomous_paper_portfolios"
+    group = PortfolioGroup(configs, out_dir=out, calendar=calendar,
+                           data_source="Databento GLBX.MDP3 MES.c.0 live (read-only)")
+    sp = cfg.splits
+    hist = [s for s in load_archive_sessions(ARCHIVES, start=date.today() - timedelta(days=400))
+            if not (sp.protected_oos[0] <= s.session_date <= sp.protected_oos[1])]
+    group.start_warmup()
+    for session in hist[-cfg.strategy.volatility_sessions:]:
+        for bar in session.bars:
+            group.process_bar(bar)
+    group.end_warmup()
+    feed_result = None
+    try:
+        feed_result = live_feed.run_session(group, cfg)
+    finally:
+        group.finish()
+        comparison = group.comparison()
+        print(json.dumps({"same_signal_ids": comparison["same_signal_ids"],
+                          "shared_signal_count": comparison["shared_signal_count"],
+                          "portfolio_results": comparison["portfolio_results"]}, indent=1))
+    (out / "live-feed-summary.json").write_text(json.dumps(feed_result, indent=1, default=str), encoding="utf-8")
+    if feed_result["status"] != "COMPLETED":
+        raise RuntimeError(f"MES portfolio feed did not complete: {feed_result['status']}")
+
+
+def cmd_portfolio_kill(args):
+    root = OUT / "autonomous_paper_portfolios"
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / "group-kill-switch.json"
+    tmp = path.with_name(f".group-kill.{uuid.uuid4().hex}.tmp")
+    tmp.write_text(json.dumps({"active": args.state == "on", "reason": args.reason,
+                               "at_utc": datetime.now(UTC).isoformat()}), encoding="utf-8")
+    os.replace(tmp, path)
+    print(f"Three-portfolio paper kill switch {'ACTIVE' if args.state == 'on' else 'cleared'}")
+
+
 # ---------------------------------------------------------------------------------- admin
 def _engine_for_dir(directory: Path, cfg):
     led = sorted(directory.glob("*-ledger.jsonl"))
@@ -227,6 +273,12 @@ def main(argv=None):
     lv.add_argument("--mode", choices=["PAPER_AUTO", "PROP_MANUAL_ALERTS", "LIVE_AUTO"], default="PAPER_AUTO")
     lv.add_argument("--prop-dry-run", action="store_true", help="emit alerts marked DRY RUN while no prop profile is configured")
     lv.set_defaults(fn=cmd_live)
+    lp = sub.add_parser("live-portfolios", help="run three $100K synthetic PAPER_AUTO accounts on one MES feed")
+    lp.set_defaults(fn=cmd_live_portfolios)
+    pk = sub.add_parser("portfolio-kill-switch", help="halt and flatten all three paper books")
+    pk.add_argument("state", choices=["on", "off"])
+    pk.add_argument("--reason", default="operator")
+    pk.set_defaults(fn=cmd_portfolio_kill)
     rp = sub.add_parser("report")
     rp.add_argument("--dir", required=True)
     rp.set_defaults(fn=cmd_report)

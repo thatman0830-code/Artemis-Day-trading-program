@@ -42,15 +42,26 @@ TFS = (1, 5, 15, 60, 240)
 def git_commit(root: Path) -> str:
     """Read HEAD without spawning processes (keeps this package free of subprocess use)."""
     try:
-        head = (root / ".git" / "HEAD").read_text(encoding="utf-8").strip()
+        gitdir = root / ".git"
+        if gitdir.is_file():
+            location = gitdir.read_text(encoding="utf-8").strip()
+            if not location.startswith("gitdir: "):
+                return "UNKNOWN"
+            gitdir = (root / location[8:]).resolve()
+        common = gitdir
+        if (gitdir / "commondir").exists():
+            common = (gitdir / (gitdir / "commondir").read_text(encoding="utf-8").strip()).resolve()
+        head = (gitdir / "HEAD").read_text(encoding="utf-8").strip()
         if head.startswith("ref: "):
             ref = head[5:]
-            loose = root / ".git" / ref
+            loose = common / ref
             if loose.exists():
                 return f"{loose.read_text(encoding='utf-8').strip()} ({ref})"
-            for line in (root / ".git" / "packed-refs").read_text(encoding="utf-8").splitlines():
-                if line.endswith(" " + ref):
-                    return f"{line.split()[0]} ({ref})"
+            packed = common / "packed-refs"
+            if packed.exists():
+                for line in packed.read_text(encoding="utf-8").splitlines():
+                    if line.endswith(" " + ref):
+                        return f"{line.split()[0]} ({ref})"
         return head
     except OSError:
         return "UNKNOWN"
@@ -114,11 +125,18 @@ class PilotEngine:
                            instrument={"root": cfg.instrument.root, "tick_size": tick, "tick_value": cfg.instrument.tick_value,
                                        "price_proxy": cfg.raw["instrument"]["price_proxy_root"]},
                            account_profile=getattr(account_profile, "profile_id", "UNCONFIGURED"),
+                           paper_portfolio=cfg.raw.get("paper_portfolio"),
                            cost_model=cfg.raw["costs"], clock_policy="UTC internal; America/New_York session labels")
         self._reconcile_on_start()
 
     # ------------------------------------------------------------------ kill switch
     def kill_switch_active(self) -> bool:
+        if self.risk.state.kill_switch_latched:
+            return True
+        if self.cfg.raw.get("paper_portfolio"):
+            group_kill = self.out_dir.parent / "group-kill-switch.json"
+            if group_kill.exists() and bool(json.loads(group_kill.read_text(encoding="utf-8")).get("active")):
+                return True
         if not self.kill_path.exists():
             return False
         return bool(json.loads(self.kill_path.read_text(encoding="utf-8")).get("active"))
@@ -228,7 +246,10 @@ class PilotEngine:
                    "decisions": dict(st["decisions"]), "skip_reasons": dict(st["reasons"]),
                    "entries": st["entries"], "positions": st["positions"], "net_pnl": round(st["net_pnl"], 2),
                    "faults": st["faults"][:20], "max_m1_gap_minutes_in_window": st["max_gap_min"],
-                   "equity_after": self.risk.state.cash}
+                   "equity_after": self.risk.state.cash,
+                   "paper_floor": self.risk.state.floor_usd,
+                   "paper_peak_equity": self.risk.state.peak_equity,
+                   "paper_floor_breached": self.risk.state.floor_breached}
         self.session_summaries.append(summary)
         self.ledger.append("SESSION_SUMMARY", dedupe_key=f"SESSION:{self.session}:{self.run_id}", **summary)
 
@@ -306,6 +327,13 @@ class PilotEngine:
             for pos in self.simulator.on_bar(bar):
                 self._record_close(pos)
             self._time_exits(bar)
+            if self.quote_mode == "MODELED":
+                edge = self.cfg.costs.spread_ticks * self.cfg.instrument.tick_size
+                mark = Quote(bar.end, bar.close - edge, bar.close + edge, "MODELED_BAR_CLOSE")
+            else:
+                mark = live_quote
+            if mark is not None:
+                self._mark_paper_equity(mark)
         # 4. setups confirmed by this M1 close
         confirmed = self.detector.on_m1(bar)
         self._log_terminal_setups(bar)
@@ -321,8 +349,42 @@ class PilotEngine:
     def process_quote(self, quote: Quote):
         """Live quotes between bars: fill queued intents/exits at the first quote after their decision."""
         self.last_quote = quote
+        if self.simulator is not None:
+            for pos in self.simulator.on_quote(quote):
+                self._record_close(pos)
+            open_positions = self.simulator.open_positions()
+            if open_positions and self.kill_switch_active():
+                for pos in open_positions:
+                    closed = self.simulator.close(pos.position_id, quote, "KILL_SWITCH_FLATTEN")
+                    if closed:
+                        self._record_close(closed)
         if self.simulator is not None and (self.pending or self.pending_exits):
             self._execute_pending(quote, None)
+        if self.simulator is not None:
+            self._mark_paper_equity(quote)
+
+    def _mark_paper_equity(self, quote: Quote):
+        """Track liquidation-side equity, including open P&L and both sides' fees."""
+        equity = self.risk.state.cash
+        for pos in self.simulator.open_positions():
+            exit_px = quote.bid if pos.side == "LONG" else quote.ask
+            points = (exit_px - pos.entry_price) if pos.side == "LONG" else (pos.entry_price - exit_px)
+            equity += points * self.cfg.instrument.point_value * pos.quantity
+            equity -= pos.entry_fees + self.cfg.costs.commission_per_side * pos.quantity
+        mark = self.risk.mark_equity(round(equity, 2))
+        if not mark["new_breach"]:
+            return
+        self.blocked = "PAPER_TRAILING_FLOOR_BREACH"
+        self.risk.engage_kill_switch(self.blocked)
+        for intent, _ in self.pending:
+            self.simulator.cancel(intent.intent_id, self.blocked)
+            self.risk.release(intent.intent_id)
+        self.pending.clear()
+        self.ledger.append("PAPER_FLOOR_BREACH", at=quote.ts, quote_source=quote.source, **mark)
+        for pos in list(self.simulator.open_positions()):
+            closed = self.simulator.close(pos.position_id, quote, self.blocked)
+            if closed:
+                self._record_close(closed)
 
     def _execute_pending(self, quote: Quote, bar: Bar | None):
         for pos_id, reason in list(self.pending_exits.items()):

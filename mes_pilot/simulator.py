@@ -238,6 +238,33 @@ class PaperSimulator:
             self.save()
         return closed
 
+    def on_quote(self, quote: Quote) -> list[Position]:
+        """Apply protective paper exits on the live quote stream between bars.
+
+        The bid/ask is the executable liquidation side. A target needs the
+        executable side at least one tick through its limit; stop markets pay
+        the configured adverse slippage from the worse of stop and quote.
+        """
+        closed = []
+        slip = self.cfg.costs.stop_slippage_ticks * self.tick
+        for pos in self.open_positions():
+            if quote.ts <= pos.entry_time:
+                continue
+            if pos.side == "LONG":
+                stop_hit = quote.bid <= pos.stop
+                target_hit = quote.bid >= pos.target + self.tick - 1e-9
+                fill = min(pos.stop, quote.bid) - slip if stop_hit else pos.target
+            else:
+                stop_hit = quote.ask >= pos.stop
+                target_hit = quote.ask <= pos.target - self.tick + 1e-9
+                fill = max(pos.stop, quote.ask) + slip if stop_hit else pos.target
+            if stop_hit or target_hit:
+                self._finalize(pos, fill, quote.ts, "STOP" if stop_hit else "TARGET")
+                closed.append(pos)
+        if closed:
+            self.save()
+        return closed
+
     def _track_excursion(self, pos: Position, bar: Bar):
         if pos.side == "LONG":
             adverse, favorable = pos.entry_price - bar.low, bar.high - pos.entry_price

@@ -73,6 +73,9 @@ def per_trade_ceiling(cfg: PilotConfig) -> float:
 @dataclass
 class AccountState:
     cash: float
+    peak_equity: float = 0.0
+    floor_usd: float = 0.0
+    floor_breached: bool = False
     session_day: str | None = None
     day_start_cash: float = 0.0
     day_realized_net: float = 0.0
@@ -126,6 +129,12 @@ class PilotRiskManager:
         if self.state_path and self.state_path.exists():
             # Fail closed: a corrupt or unknown-schema state file raises rather than resetting capacity.
             self.state = AccountState(**json.loads(self.state_path.read_text(encoding="utf-8")))
+        if self.state.peak_equity == 0.0:
+            self.state.peak_equity = max(r.starting_equity, self.state.cash)
+        if self.state.floor_usd == 0.0:
+            self.state.floor_usd = max(effective_floor(cfg),
+                                       self.state.peak_equity - r.drawdown_allowance
+                                       if r.floor_model == "INTRADAY_TRAILING" else effective_floor(cfg))
         self.outer = PreTradeAuthorization(
             risk_engine=RiskEngine(max_risk_per_trade_pct=r.user_trade_pct_max, max_notional_pct=100.0,
                                    # BTC-tuned 0.05% minimum would block ~15-tick MES stops; 0 keeps the
@@ -200,8 +209,31 @@ class PilotRiskManager:
     def capacity(self) -> float:
         with self._lock:
             r, s = self.cfg.risk, self.state
-            return (s.cash - effective_floor(self.cfg) - r.execution_reserve
+            return (s.cash - s.floor_usd - r.execution_reserve
                     - sum(s.open_risk.values()) - sum(s.reservations.values()))
+
+    def mark_equity(self, equity: float) -> dict:
+        """Persist a paper equity mark; open-P&L peaks raise an intraday floor.
+
+        A breach latches until a new, explicitly isolated paper account is
+        created. The mark is a liquidation-side estimate including fees.
+        """
+        with self._lock:
+            if not math.isfinite(equity):
+                raise ValueError("paper equity mark must be finite")
+            s, r = self.state, self.cfg.risk
+            old_floor = s.floor_usd
+            was_breached = s.floor_breached
+            if r.floor_model == "INTRADAY_TRAILING":
+                s.peak_equity = max(s.peak_equity, equity)
+                s.floor_usd = max(s.floor_usd, s.peak_equity - r.drawdown_allowance)
+            if equity <= s.floor_usd + _EPS:
+                s.floor_breached = True
+            if s.floor_usd != old_floor or s.floor_breached != was_breached:
+                self.save()
+            return {"equity": round(equity, 2), "peak": round(s.peak_equity, 2),
+                    "floor": round(s.floor_usd, 2), "breached": s.floor_breached,
+                    "new_breach": s.floor_breached and not was_breached}
 
     def daily_headroom(self) -> float:
         with self._lock:
@@ -272,6 +304,7 @@ class PilotRiskManager:
         check("open_positions_and_pending", open_count < r.max_open_positions, open_count, r.max_open_positions)
         daily_stop_hit = s.day_realized_net <= -r.daily_stop + _EPS
         check("daily_net_stop_not_hit", not daily_stop_hit, round(s.day_realized_net, 2), -r.daily_stop)
+        check("synthetic_floor_not_breached", not s.floor_breached, s.floor_usd, "unbreached")
 
         C = self.capacity()
         daily = self.daily_headroom()
@@ -357,4 +390,5 @@ class PilotRiskManager:
             if net_pnl < 0 and s.consecutive_losses >= self.cfg.risk.consecutive_loss_pause:
                 s.pause_requires_review = True
                 s.paused_on_day = session_day.isoformat() if session_day is not None else s.session_day
+            self.mark_equity(s.cash)
             self.save()
