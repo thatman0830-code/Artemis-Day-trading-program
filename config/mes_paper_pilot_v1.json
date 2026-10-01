@@ -1,0 +1,140 @@
+{
+  "schema_version": "mes-paper-pilot-config-v1",
+  "strategy_version": "mes-pilot-v1.0.0",
+  "spec_reference": {
+    "document": "Trading-bot-code-master.pdf v1.2 (29 Sep 2026)",
+    "sha256": "8296c98ef807f1342023629dec0b2732b8461251ad1be1f3ecce8fa01cbc0fce",
+    "handoff": "Trading-bot-Claude-Code-environment.xml v2.1"
+  },
+  "provenance_legend": {
+    "FRANK_REVISED_AUDIT": "Frank's revised answers in the 29 Sep 2026 audit",
+    "MASTER_PROPOSED_PILOT": "Proposed paper-pilot default from the master spec; NOT a source-engine setting",
+    "EXCHANGE_SPEC": "CME published contract specification [W2]",
+    "EXISTING_REPO_CONTROL": "Pre-existing repository safeguard preserved as an outer cap",
+    "ASSUMED_PLACEHOLDER": "Conservative placeholder; replace with measured/scheduled platform values"
+  },
+  "mode": {
+    "value": "PAPER_AUTO",
+    "allowed": ["PAPER_AUTO", "PROP_MANUAL_ALERTS", "LIVE_AUTO"],
+    "live_auto_enabled": false,
+    "provenance": "MASTER_PROPOSED_PILOT"
+  },
+  "instrument": {
+    "root": "MES",
+    "exchange": "CME",
+    "tick_size": 0.25,
+    "tick_value_usd": 1.25,
+    "point_value_usd": 5.0,
+    "price_proxy_root": "ES",
+    "price_proxy_note": "Replay uses ES 1-minute bars as a price proxy for MES (same index, same tick size). Fills are MES-sized. Live mode prefers native MES data.",
+    "provenance": "EXCHANGE_SPEC"
+  },
+  "costs": {
+    "commission_per_side_usd": 0.85,
+    "modeled_spread_ticks": 1,
+    "stop_exit_slippage_ticks": 1,
+    "stressed_slippage_ticks_for_sizing": 3,
+    "margin_per_contract_usd": 2500.0,
+    "provenance": "ASSUMED_PLACEHOLDER"
+  },
+  "risk": {
+    "synthetic_starting_equity_usd": 50000.0,
+    "static_synthetic_floor_usd": 48500.0,
+    "execution_reserve_usd": 100.0,
+    "max_new_trade_budget_usd": 100.0,
+    "capacity_fraction": 0.05,
+    "net_daily_stop_usd": 150.0,
+    "max_contracts": 1,
+    "max_entries_per_session": 3,
+    "consecutive_loss_pause": 3,
+    "max_open_positions": 1,
+    "provenance": "MASTER_PROPOSED_PILOT",
+    "user_ceilings": {
+      "per_trade_nominal_pct_max": 0.5,
+      "daily_loss_nominal_pct": 1.0,
+      "daily_share_of_drawdown_allowance": 0.25,
+      "max_micro_contracts_future_profile": 3,
+      "provenance": "FRANK_REVISED_AUDIT"
+    },
+    "outer_caps": {
+      "max_daily_loss_pct": 1.5,
+      "max_drawdown_pct": 3.0,
+      "provenance": "EXISTING_REPO_CONTROL"
+    }
+  },
+  "session": {
+    "timezone": "America/New_York",
+    "entry_window_start": "09:30",
+    "entry_window_end": "11:30",
+    "flat_by": "11:30",
+    "asia_window": ["19:00", "00:00"],
+    "london_window": ["02:00", "05:00"],
+    "trading_day_rollover": "18:00",
+    "provenance": "MASTER_PROPOSED_PILOT"
+  },
+  "events": {
+    "required": true,
+    "currencies": ["USD"],
+    "impacts": ["High"],
+    "blackout_before_minutes": 10,
+    "blackout_after_minutes": 15,
+    "flatten_before_minutes": 5,
+    "provenance": "MASTER_PROPOSED_PILOT"
+  },
+  "data": {
+    "max_quote_age_seconds_live": 2.0,
+    "max_spread_ticks": 2,
+    "provenance": "MASTER_PROPOSED_PILOT"
+  },
+  "strategy": {
+    "swing_side_bars": 2,
+    "atr_period": 14,
+    "displacement_body_atr_mult": 1.0,
+    "displacement_close_outer_fraction": 0.25,
+    "equal_level_tolerance_ticks": 2,
+    "sweep_min_ticks": 1,
+    "bos_min_ticks": 1,
+    "stop_buffer_ticks": 1,
+    "min_reward_risk_gross": 1.0,
+    "ote_retracement": [0.62, 0.79],
+    "ote_required": false,
+    "setup_expiry_minutes": 15,
+    "intent_lifetime_seconds": 60,
+    "intent_max_drift_ticks": 2,
+    "max_hold_minutes": 30,
+    "efficiency_ratio_period": 20,
+    "continuation_min_efficiency_ratio": 0.35,
+    "volatility_filter_enabled": true,
+    "volatility_lookback_sessions": 60,
+    "volatility_band_percentiles": [10, 90],
+    "planning_win_probability": 0.65,
+    "planning_win_probability_status": "ASSUMPTION_NOT_MEASURED",
+    "provenance": "MASTER_PROPOSED_PILOT"
+  },
+  "accumulation": {
+    "enabled_as_gate": false,
+    "lookback_closes": 21,
+    "max_range_atr_mult": 3.0,
+    "max_efficiency_ratio": 0.25,
+    "stale_after_bars": 36,
+    "provenance": "MASTER_PROPOSED_PILOT"
+  },
+  "evidence": {
+    "initial_review_min_positions": 100,
+    "initial_review_min_sessions": 20,
+    "initial_review_min_calendar_days": 28,
+    "promotion_min_observed_win_rate": 0.70,
+    "higher_objective_win_rate": 0.75,
+    "source_engine_benchmark_win_rate": 0.699,
+    "source_engine_benchmark_label": "SOURCE_ENGINE_REPORT (user-attested; not this bot)",
+    "provenance": "MASTER_PROPOSED_PILOT"
+  },
+  "data_splits": {
+    "note": "Chronological. PROTECTED_OOS must not be replayed until its planned release; the CLI refuses it.",
+    "warmup_start": "2025-06-02",
+    "development": ["2025-06-02", "2026-01-30"],
+    "walk_forward_validation": ["2026-02-02", "2026-05-29"],
+    "protected_oos": ["2026-06-01", "2026-08-26"],
+    "provenance": "MASTER_PROPOSED_PILOT"
+  }
+}
