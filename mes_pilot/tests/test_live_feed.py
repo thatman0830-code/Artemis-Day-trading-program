@@ -395,8 +395,9 @@ def test_run_session_wires_engine_and_enforces_live_calendar(tmp_path):
             self.calendar = EventCalendar([], set(), "x", snapshots=[
                 CalendarSnapshot(date(2026, 9, 27), date(2026, 10, 3), et(9, 0, day=date(2026, 9, 28)), "s", ())])
 
-        def process_bar(self, bar, live_quote=None):
+        def process_bar(self, bar, live_quote=None, **kw):
             self.calls.append((bar, live_quote))
+            self.kw = kw
 
     class Cfg:  # minimal PilotConfig surface used by LiveFeedConfig.from_pilot_config
         class instrument:
@@ -414,6 +415,7 @@ def test_run_session_wires_engine_and_enforces_live_calendar(tmp_path):
     b, q = eng.calls[0]
     assert b.contract == "MESZ6" and q.source == "LIVE_MBP1" and q.receive_ts == et(9, 0, 59, 900)
     assert eng.calendar.point_in_time and eng.calendar.max_snapshot_age == td(days=7)
+    assert eng.kw == {"context": False, "continuity": None, "source": "MES_LIVE"}
     assert (tmp_path / "live-feed.jsonl").exists()
 
 

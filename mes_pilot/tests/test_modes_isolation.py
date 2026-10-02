@@ -19,7 +19,7 @@ FORBIDDEN = (
     "ib_insync", "ibapi", "exchange", "integrations", "execution", "hyperliquid", "aiohttp", "http.client",
     "smtplib", "ftplib", "telnetlib",
 )
-NETWORK_DATA_ALLOWED = {"databento": {"live_feed.py"}}   # read-only market data, live feed module only
+NETWORK_DATA_ALLOWED = {"databento": {"live_feed.py", "history_bridge.py"}}   # read-only market data only
 ORDER_WORDS = ("submit", "place", "order", "modify", "cancel", "buy", "sell", "flatten", "click", "hotkey", "send")
 
 
@@ -144,3 +144,13 @@ def test_import_scanner_catches_known_bad_patterns():
     assert sum(_matches(n, "urllib.request") for n in names) >= 2
     assert any(_matches(n, "exchange") for n in names)
     assert "<dynamic>" in names and "socket" in names and "databento" in names
+
+
+def test_history_bridge_is_read_only_market_data():
+    """The historical context layer exposes no order-capable callable and never imports a broker/exchange."""
+    import mes_pilot.history_bridge as hb
+    from mes_pilot.live_feed import assert_read_only
+    assert_read_only(hb)
+    src = open(hb.__file__, encoding="utf-8").read()
+    for word in ("submit(", "place_order", "cancel_order", "OrderClient", "hyperliquid", "ibapi", "ninjatrader"):
+        assert word not in src

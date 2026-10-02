@@ -65,7 +65,7 @@ def load_portfolio_configs(path: Path = DEFAULT_PORTFOLIOS) -> dict[str, PilotCo
 
 class PortfolioGroup:
     def __init__(self, configs: dict[str, PilotConfig], *, out_dir: Path, calendar,
-                 data_source: str, quote_mode: str = "LIVE"):
+                 data_source: str, quote_mode: str = "LIVE", evidence_label: str = "AUTONOMOUS_PAPER"):
         if set(configs) != set(NAMES):
             raise ValueError("three paper portfolios required")
         self.out_dir = Path(out_dir)
@@ -84,7 +84,7 @@ class PortfolioGroup:
                 raise ValueError(f"{name} persisted account belongs to a different config; refusing to reset it")
             if not identity.exists():
                 identity.write_text(json.dumps(expected, indent=1), encoding="utf-8")
-            self.engines[name] = PilotEngine(cfg, out_dir=path, evidence_label="AUTONOMOUS_PAPER",
+            self.engines[name] = PilotEngine(cfg, out_dir=path, evidence_label=evidence_label,
                                              data_source=data_source, quote_mode=quote_mode, calendar=calendar)
 
     def start_warmup(self):
@@ -95,9 +95,22 @@ class PortfolioGroup:
         for eng in self.engines.values():
             eng.end_warmup()
 
-    def process_bar(self, bar, live_quote=None):
+    def process_bar(self, bar, live_quote=None, **kw):
+        """Same bar (and context/continuity/source flags) to every isolated book."""
         for eng in self.engines.values():
-            eng.process_bar(bar, live_quote=live_quote)
+            eng.process_bar(bar, live_quote=live_quote, **kw)
+
+    def attest_zero_trade(self, minute_start, evidence):
+        for eng in self.engines.values():
+            eng.attest_zero_trade(minute_start, evidence)
+
+    def record_feed_event(self, kind, **fields):
+        for eng in self.engines.values():
+            eng.record_feed_event(kind, **fields)
+
+    @property
+    def last_bar(self):
+        return next(iter(self.engines.values())).last_bar
 
     def process_quote(self, quote):
         for eng in self.engines.values():
@@ -135,6 +148,10 @@ class PortfolioGroup:
                 name: {"config_hash": self.engines[name].cfg.config_hash,
                        "risk_limits": {k: self.engines[name].cfg.raw["risk"][k] for k in RISK_KEYS},
                        "completed_positions": rep["positions"]["completed"],
+                       "eligible_sessions": rep["sessions"]["eligible_dates"],
+                       "session_summary_rows": rep["sessions"]["summary_rows"],
+                       "calendar_days_spanned": rep["sessions"]["eligible_calendar_days_spanned"],
+                       "mixed_ineligible_dates": rep["sessions"]["mixed_ineligible_dates"],
                        "observed_win_rate": rep["comparison"]["CURRENT_BOT_RESULT"]["observed_win_rate"],
                        "net_pnl_usd": rep["pnl"]["net_usd"],
                        "mean_net_r": rep["pnl"]["mean_net_r"],
@@ -144,6 +161,10 @@ class PortfolioGroup:
                        "paper_peak_equity_usd": self.engines[name].risk.state.peak_equity,
                        "paper_floor_breached": self.engines[name].risk.state.floor_breached}
                 for name, rep in reports.items()},
+            "qualification": {name: rep.get("qualification") for name, rep in reports.items()},
+            "latest_session_status_layers": {
+                name: (self.engines[name].ledger.records("SESSION_SUMMARY") or [{}])[-1].get("status_layers")
+                for name in NAMES},
             "interpretation": "Same signals compare sizing and risk only. No win-rate target is presumed achieved.",
         }
         (self.out_dir / "portfolio-comparison.json").write_text(json.dumps(comparison, indent=1), encoding="utf-8")

@@ -185,21 +185,26 @@ def cmd_live_portfolios(args):
     cfg = configs[NAMES[0]]
     from mes_pilot import live_feed
 
+    from mes_pilot.history_bridge import build_context
+
     calendar = EventCalendar.load_for_live(CAL_DIR) if CAL_DIR.exists() else EventCalendar.empty()
     out = OUT / "autonomous_paper_portfolios"
     group = PortfolioGroup(configs, out_dir=out, calendar=calendar,
-                           data_source="Databento GLBX.MDP3 MES.c.0 live (read-only)")
-    sp = cfg.splits
-    hist = [s for s in load_archive_sessions(ARCHIVES, start=date.today() - timedelta(days=400))
-            if not (sp.protected_oos[0] <= s.session_date <= sp.protected_oos[1])]
-    group.start_warmup()
-    for session in hist[-cfg.strategy.volatility_sessions:]:
-        for bar in session.bars:
-            group.process_bar(bar)
-    group.end_warmup()
+                           data_source="Databento GLBX.MDP3 MES.c.0 live (read-only); context: ES archive proxy "
+                                       "+ MES historical (zero-cost guarded) + live intraday replay")
+    # Context bridge: archive -> native MES history -> live intraday replay from the last context bar.
+    bridge = build_context(group, cfg=cfg, archives=ARCHIVES, now=datetime.now(UTC))
+    last_end = datetime.fromisoformat(bridge["last_context_bar_end"]) if bridge["last_context_bar_end"] else None
+    bridge_dir = out / "context-bridge"
+    bridge_dir.mkdir(parents=True, exist_ok=True)
+    (bridge_dir / f"bridge-{datetime.now(UTC):%Y%m%dT%H%M%SZ}.json").write_text(
+        json.dumps(bridge, indent=1, default=str), encoding="utf-8")
+    group.record_feed_event("CONTEXT_BRIDGE_BUILT", last_context_bar_end=bridge["last_context_bar_end"],
+                            mes_historical_status=bridge["mes_historical"]["status"],
+                            fallback_to_archive=bridge["fallback_to_archive"])
     feed_result = None
     try:
-        feed_result = live_feed.run_session(group, cfg)
+        feed_result = live_feed.run_session(group, cfg, replay_start=last_end, last_context_bar_end=last_end)
     finally:
         group.finish()
         comparison = group.comparison()
@@ -209,6 +214,48 @@ def cmd_live_portfolios(args):
     (out / "live-feed-summary.json").write_text(json.dumps(feed_result, indent=1, default=str), encoding="utf-8")
     if feed_result["status"] != "COMPLETED":
         raise RuntimeError(f"MES portfolio feed did not complete: {feed_result['status']}")
+
+
+def cmd_bridge_check(args):
+    """DIAGNOSTIC (non-deployable): build context + a short live intraday-replay connection, report coverage.
+
+    Writes only under outputs/mes_pilot/diagnostic_bridge_check/<stamp>/ with label
+    REPLAY_DIAGNOSTIC_NON_DEPLOYABLE. Never touches the scheduled books. Read-only market data.
+    """
+    from mes_pilot import live_feed
+    from mes_pilot.history_bridge import build_context
+
+    configs = load_portfolio_configs()
+    cfg = configs[NAMES[0]]
+    now = datetime.now(UTC)
+    out = _run_dir("diagnostic_bridge_check")
+    calendar = EventCalendar.load_dir(CAL_DIR) if CAL_DIR.exists() else EventCalendar.empty()
+    eng = PilotEngine(cfg, out_dir=out, evidence_label="REPLAY_DIAGNOSTIC_NON_DEPLOYABLE", quote_mode="LIVE",
+                      calendar=calendar, calendar_policy_label="DIAGNOSTIC",
+                      data_source="bridge-check: ES archive proxy + MES historical + MES live intraday replay")
+    bridge = build_context(eng, cfg=cfg, archives=ARCHIVES, now=now)
+    last_end = datetime.fromisoformat(bridge["last_context_bar_end"]) if bridge["last_context_bar_end"] else None
+    local = now.astimezone(ET)
+    win_start = (local - timedelta(minutes=1)).time().replace(second=0, microsecond=0)
+    win_end = (local + timedelta(minutes=args.minutes)).time().replace(second=0, microsecond=0)
+    feed_cfg = live_feed.LiveFeedConfig.from_pilot_config(cfg, replay_start=last_end, window_start=win_start,
+                                                          window_end=win_end, connect_lead_s=0)
+    summary = live_feed.run_session(eng, cfg, config=feed_cfg, wait_for_window=False, replay_start=last_end,
+                                    last_context_bar_end=last_end, log_path=out / "live-feed.jsonl")
+    eng.finish()
+    readiness = eng._refresh_readiness(eng.last_bar.end if eng.last_bar else now)
+    result = {"label": "REPLAY_DIAGNOSTIC_NON_DEPLOYABLE (bridge-check; not forward evidence)",
+              "bridge": bridge, "feed": summary, "coverage_final": eng.coverage.to_dict(),
+              "readiness_at_last_bar": {"ready": readiness.ready, "reasons": readiness.reasons,
+                                        "details": readiness.details}}
+    (out / "bridge-check.json").write_text(json.dumps(result, indent=1, default=str), encoding="utf-8")
+    print(json.dumps({"out": str(out), "feed_status": summary["status"], "replay": summary.get("replay"),
+                      "mes_historical": {k: bridge["mes_historical"][k] for k in ("status", "bars", "effective",
+                                                                                 "cost_usd", "contracts")},
+                      "archive_last_bar_end": bridge["archive_last_bar_end"],
+                      "last_context_bar_end": bridge["last_context_bar_end"],
+                      "unexpected_gaps": result["coverage_final"]["unexpected_gap_count"],
+                      "ready": readiness.ready, "reasons": readiness.reasons}, indent=1, default=str))
 
 
 def cmd_portfolio_kill(args):
@@ -275,6 +322,9 @@ def main(argv=None):
     lv.set_defaults(fn=cmd_live)
     lp = sub.add_parser("live-portfolios", help="run three $100K synthetic PAPER_AUTO accounts on one MES feed")
     lp.set_defaults(fn=cmd_live_portfolios)
+    bc = sub.add_parser("bridge-check", help="DIAGNOSTIC: context bridge + short live replay; coverage/readiness report")
+    bc.add_argument("--minutes", type=int, default=3)
+    bc.set_defaults(fn=cmd_bridge_check)
     pk = sub.add_parser("portfolio-kill-switch", help="halt and flatten all three paper books")
     pk.add_argument("state", choices=["on", "off"])
     pk.add_argument("--reason", default="operator")

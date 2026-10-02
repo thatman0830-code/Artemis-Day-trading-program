@@ -201,19 +201,56 @@ class TimeframeState:
         "Prior" = bars that ended at/before this candle started, so the candle's
         own range (and anything after it) never enters its threshold, whether or
         not the candle has already been pushed into this state.
+
+        The returned boolean is unchanged from the original predicate; ``info`` is a
+        pure diagnostic: every subcondition is evaluated and recorded (even after an
+        earlier one fails) and ``reason`` names the FIRST failing one in the order
+        NO_PRIOR_ATR, ZERO_RANGE, WRONG_DIRECTION, CLOSE_NOT_IN_OUTER_FRACTION,
+        BODY_BELOW_ATR_MULT (else PASS). ``close_location`` is the distance of the
+        close from the favourable extreme as a fraction of the range (0 = at the
+        high for LONG / at the low for SHORT).
         """
         prior_atr = self.atr_before(bar.start)
         rng = bar.high - bar.low
-        info = {"prior_atr": prior_atr, "body": bar.body, "range": rng}
-        if prior_atr is None or rng <= 0:
-            info["status"] = "UNKNOWN"
-            return False, info
-        if direction == "LONG":
-            ok_dir = bar.bullish and (bar.high - bar.close) <= outer * rng + 1e-9
+        long_side = direction == "LONG"
+        direction_ok = bool(bar.bullish if long_side else bar.bearish)
+        off_extreme = (bar.high - bar.close) if long_side else (bar.close - bar.low)
+        close_location_ok = bool(off_extreme <= outer * rng + 1e-9)
+        required_body = body_mult * prior_atr if prior_atr is not None else None
+        body_ok = bool(bar.body >= body_mult * prior_atr - 1e-9) if prior_atr is not None else None
+        data_available = prior_atr is not None and rng > 0
+        if prior_atr is None:
+            reason = "NO_PRIOR_ATR"
+        elif rng <= 0:
+            reason = "ZERO_RANGE"
+        elif not direction_ok:
+            reason = "WRONG_DIRECTION"
+        elif not close_location_ok:
+            reason = "CLOSE_NOT_IN_OUTER_FRACTION"
+        elif not body_ok:
+            reason = "BODY_BELOW_ATR_MULT"
         else:
-            ok_dir = bar.bearish and (bar.close - bar.low) <= outer * rng + 1e-9
-        ok = ok_dir and bar.body >= body_mult * prior_atr - 1e-9
-        info["status"] = "PASS" if ok else "FAIL"
+            reason = "PASS"
+        ok = reason == "PASS"
+        info = {
+            "candle": {"start": bar.start.isoformat(), "end": bar.end.isoformat(),
+                       "o": bar.open, "h": bar.high, "l": bar.low, "c": bar.close},
+            "direction": direction,
+            "prior_atr": prior_atr,
+            "body": bar.body,
+            "range": rng,
+            "body_atr_ratio": (bar.body / prior_atr) if prior_atr else None,
+            "required_body": required_body,
+            "body_mult": body_mult,
+            "outer_fraction": outer,
+            "close_location": (off_extreme / rng) if rng > 0 else None,
+            "direction_ok": direction_ok,
+            "close_location_ok": close_location_ok,
+            "body_ok": body_ok,
+            "data_available": data_available,
+            "reason": reason,
+            "status": "UNKNOWN" if not data_available else ("PASS" if ok else "FAIL"),
+        }
         return ok, info
 
     def active_gaps(self, direction: str, as_of: datetime) -> list[Gap]:

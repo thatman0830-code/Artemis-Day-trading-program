@@ -17,6 +17,44 @@ import json
 from mes_pilot.config import PilotConfig
 
 
+INELIGIBLE_SESSION_CLASSES = ("OPERATIONAL_FAULT", "CONTEXT_INCOMPLETE", "CALENDAR_UNAVAILABLE_OPERATIONAL_LIMITATION",
+                              "EXCHANGE_HOLIDAY_NO_ENTRIES")
+NO_WINDOW_DATA = "NO_SESSION_DATA_IN_WINDOW"
+_CLASS_PRIORITY = INELIGIBLE_SESSION_CLASSES + ("TRADED", "SETUPS_CONFIRMED_BUT_NOT_TAKEN", "NO_VALID_SETUP", NO_WINDOW_DATA)
+
+
+def collapse_session_dates(sessions: list[dict]) -> dict:
+    """Count evidence by unique trading date, treating mixed-status dates conservatively."""
+    by_date: dict[str, list[dict]] = {}
+    for session in sessions:
+        by_date.setdefault(session["session_date"], []).append(session)
+    dates, eligible, mixed = {}, [], []
+    for day in sorted(by_date):
+        rows = by_date[day]
+        classes = [row.get("classification") for row in rows]
+        bad = [c for c in classes if c in INELIGIBLE_SESSION_CLASSES]
+        healthy = [row for row in rows if row.get("window_bars", 0) > 0
+                   and row.get("classification") not in INELIGIBLE_SESSION_CLASSES + (NO_WINDOW_DATA,)]
+        resolved = next((c for c in _CLASS_PRIORITY if c in classes), classes[0] if classes else None)
+        if bad and healthy:
+            status = "MIXED_INELIGIBLE"
+            mixed.append(day)
+        elif bad:
+            status = "INELIGIBLE"
+        elif healthy:
+            status = "ELIGIBLE"
+            eligible.append(day)
+        else:
+            status = "NO_WINDOW_DATA"
+        dates[day] = {"rows": len(rows), "status": status, "resolved_class": resolved,
+                      "row_classes": sorted(set(c for c in classes if c))}
+    span = ((date.fromisoformat(eligible[-1]) - date.fromisoformat(eligible[0])).days + 1) if eligible else 0
+    return {"dates": dates, "trading_dates": len(dates), "summary_rows": len(sessions),
+            "duplicate_summary_rows": len(sessions) - len(dates), "eligible_dates": eligible,
+            "eligible_count": len(eligible), "eligible_span_days": span, "mixed_dates": mixed,
+            "by_date_class": dict(Counter(d["resolved_class"] for d in dates.values()))}
+
+
 def wilson(wins: int, n: int, z: float = 1.959964) -> tuple[float, float] | None:
     if n == 0:
         return None
@@ -27,7 +65,10 @@ def wilson(wins: int, n: int, z: float = 1.959964) -> tuple[float, float] | None
     return round(centre - half, 4), round(centre + half, 4)
 
 
-def build_report(ledger_path: Path, cfg: PilotConfig) -> dict:
+def build_report(ledger_path: Path, cfg: PilotConfig, corrections: list[dict] | None = None) -> dict:
+    """Evidence report. ``corrections`` defaults to the append-only registry (mes_pilot.evidence)."""
+    from mes_pilot.evidence import apply_corrections, load_corrections, sha256_file
+
     recs = [json.loads(x) for x in Path(ledger_path).read_text(encoding="utf-8").splitlines() if x.strip()]
     labels = {r["evidence_label"] for r in recs}
     if len(labels) > 1:
@@ -50,17 +91,31 @@ def build_report(ledger_path: Path, cfg: PilotConfig) -> dict:
         equity += r["net_pnl"]
         peak = max(peak, equity)
         max_dd = max(max_dd, peak - equity)
-    cls = Counter(s["classification"] for s in sessions)
+    sd_raw = collapse_session_dates(sessions)
+    chain_ok = _verify(recs)
+    if corrections is None:
+        corrections = load_corrections()
+    corrected, applied = apply_corrections(sessions, corrections)
+    sd = collapse_session_dates(corrected)
+    qualified = sd["eligible_count"] if chain_ok else 0
+    qualification = {"raw_eligible_sessions": sd_raw["eligible_count"],
+                     "qualified_eligible_sessions": qualified,
+                     "qualified_eligible_dates": sd["eligible_dates"] if chain_ok else [],
+                     "corrections_applied": applied,
+                     "ledger_chain_verified": chain_ok,
+                     "ledger_sha256": sha256_file(Path(ledger_path)),
+                     "note": ("Qualified counts exclude sessions reclassified by the append-only corrections registry "
+                              "and every date with incomplete context; raw ledgers are unchanged.")}
+    if not chain_ok:
+        qualification["blocked"] = "LEDGER_CHAIN_INVALID"
+    cls = Counter(sd["by_date_class"])
     skip = Counter()
     for s in sessions:
         skip.update(s.get("skip_reasons", {}))
     decisions = Counter(c["decision_state"] for c in cands)
-    days = sorted({s["session_date"] for s in sessions})
-    span = (date.fromisoformat(days[-1]) - date.fromisoformat(days[0])).days + 1 if days else 0
+    span = sd["eligible_span_days"] if chain_ok else 0
     ev = cfg.evidence
-    traded_sessions = sum(1 for s in sessions if s["window_bars"] > 0
-                          and s["classification"] not in ("CALENDAR_UNAVAILABLE_OPERATIONAL_LIMITATION", "OPERATIONAL_FAULT",
-                                                         "EXCHANGE_HOLIDAY_NO_ENTRIES"))
+    traded_sessions = qualified
     return {
         "evidence_label": label,
         "strategy_version": cfg.strategy_version,
@@ -81,22 +136,31 @@ def build_report(ledger_path: Path, cfg: PilotConfig) -> dict:
                      for fam in ("REVERSAL_R1", "CONTINUATION_C1")},
         "decisions": dict(decisions),
         "sessions": {
-            "total": len(sessions),
+            "total": sd["trading_dates"],
+            "summary_rows": sd["summary_rows"],
+            "duplicate_summary_rows": sd["duplicate_summary_rows"],
+            "mixed_ineligible_dates": sd["mixed_dates"],
+            "eligible_dates": sd["eligible_count"],
+            "eligible_calendar_days_spanned": sd["eligible_span_days"],
             "by_classification": dict(cls),
+            "by_classification_rows": dict(Counter(s["classification"] for s in sessions)),
             "calendar_unavailable_operational_limitation": cls.get("CALENDAR_UNAVAILABLE_OPERATIONAL_LIMITATION", 0),
             "no_valid_setup": cls.get("NO_VALID_SETUP", 0),
             "operational_fault": cls.get("OPERATIONAL_FAULT", 0),
+            "context_incomplete": cls.get("CONTEXT_INCOMPLETE", 0),
             "no_session_data": cls.get("NO_SESSION_DATA_IN_WINDOW", 0),
             "exchange_holiday": cls.get("EXCHANGE_HOLIDAY_NO_ENTRIES", 0),
         },
         "skip_reasons": dict(skip.most_common()),
         "evidence_progress": {
             "positions": f"{n}/{ev.min_positions}", "eligible_sessions": f"{traded_sessions}/{ev.min_sessions}",
+            "raw_eligible_sessions": f"{sd_raw['eligible_count']}/{ev.min_sessions}",
             "calendar_days_spanned": f"{span}/{ev.min_calendar_days}",
             "initial_review_floor_met": n >= ev.min_positions and traded_sessions >= ev.min_sessions and span >= ev.min_calendar_days,
             "note": "Review floor only; not proof of a 70% population win probability.",
         },
-        "ledger_chain_verified": _verify(recs),
+        "qualification": qualification,
+        "ledger_chain_verified": chain_ok,
     }
 
 
@@ -141,6 +205,9 @@ def render_text(rep: dict) -> str:
         f"Decisions {rep['decisions']}",
         f"Top skip reasons {dict(list(rep['skip_reasons'].items())[:8])}",
         f"Evidence progress {rep['evidence_progress']}",
+        f"Qualification: qualified {rep['qualification']['qualified_eligible_sessions']} / raw "
+        f"{rep['qualification']['raw_eligible_sessions']} eligible sessions; corrections "
+        f"{[c['session_date'] + ':' + c['reason_code'] for c in rep['qualification']['corrections_applied']]}",
         f"Ledger hash chain verified: {rep['ledger_chain_verified']}",
     ]
     return "\n".join(lines)

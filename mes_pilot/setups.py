@@ -41,6 +41,7 @@ Causality rules enforced here (regression-tested in tests/test_setups.py):
 """
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from hashlib import sha256
@@ -107,6 +108,12 @@ class SetupDetector:
         self.book = book
         self.setups: dict[str, Setup] = {}
         self.events: list[dict] = []   # rejections/skips for the ledger
+        # Pure diagnostics (never read by any decision): per-completed-M5 funnel counts.
+        self.counters: Counter = Counter()
+
+    def reset_counters(self):
+        """Clear the diagnostic funnel counters (e.g. at a session boundary)."""
+        self.counters = Counter()
 
     # ------------------------------------------------------------------ helpers
     def _bias(self) -> str:
@@ -125,6 +132,15 @@ class SetupDetector:
     def on_m5(self, bar: Bar, window_open: bool):
         bias = self._bias()
         m5 = self.tfs[5]
+        c = self.counters
+        c["m5_bars"] += 1
+        if window_open:
+            # Funnel counts are scoped to entry-window M5 bars (where setups can be created):
+            # bias_aligned_long + bias_aligned_short + bias_neutral == m5_window_bars.
+            c["m5_window_bars"] += 1
+            c["bias_aligned_long" if bias == "BULLISH" else "bias_aligned_short" if bias == "BEARISH"
+              else "bias_neutral"] += 1
+            c["m5_gaps_formed"] += sum(1 for g in m5.gaps if g.created_at == bar.end and g.tf == m5.tf)
         for st in self.active():
             self._m5_update(st, bar, bias)
         if not window_open:
@@ -142,6 +158,7 @@ class SetupDetector:
                  if sweep(bar, lv.price, side, self.tick, self.s.sweep_min_ticks)]
         if not swept:
             return
+        self.counters["sweeps_detected"] += 1
         # One setup per sweep bar: several levels swept by one candle share the same
         # extreme, stop, zone and target, so separate setups would only duplicate (and
         # then conflict-reject) each other. Primary = deepest swept level (long: lowest
@@ -163,13 +180,15 @@ class SetupDetector:
         st.confirmations = {"aligned_bias": True, "sweep_rejection": True}
         st.move("OBSERVING", bar.end, "SWEEP_AND_REJECTION_M5")
         self.setups[sid] = st
+        self.counters["setups_created_REVERSAL_R1"] += 1
         self._r1_try_arm(st, bar)   # the sweep bar itself may displace
 
     def _r1_try_arm(self, st: Setup, bar: Bar):
         m5, m15 = self.tfs[5], self.tfs[15]
         ok_disp, info = m5.is_displacement(bar, st.direction, self.s.displacement_body_atr, self.s.displacement_close_outer)
         st.confirmations["displacement"] = ok_disp
-        st.refs["displacement_info"] = info
+        st.refs["displacement_info"] = info      # original key, kept for compatibility
+        st.refs["displacement"] = info           # same detail under the shared diagnostics key
         if not ok_disp:
             return
         broken = None
@@ -230,16 +249,19 @@ class SetupDetector:
         before_b = TimeframeState(5, self.tick, atr_period=self.s.atr_period)
         before_b.bars.extend(bars[:-2])
         prior_atr = before_b.atr()
-        ok_disp, _ = before_b.is_displacement(b, direction, self.s.displacement_body_atr, self.s.displacement_close_outer)
+        ok_disp, disp_info = before_b.is_displacement(b, direction, self.s.displacement_body_atr,
+                                                      self.s.displacement_close_outer)
         st = Setup(sid, "CONTINUATION_C1", direction, bar.end, self._expiry(bar.end))
         st.frozen_levels = self.book.snapshot(bar.end)
         st.refs = {"gap_low": gap.low, "gap_high": gap.high, "gap_created_at": gap.created_at.isoformat(),
                    "middle_bar_start": b.start.isoformat(), "efficiency_ratio": er, "prior_atr": prior_atr,
                    "impulse_start": a.low if direction == "LONG" else a.high,
-                   "impulse_end": bar.high if direction == "LONG" else bar.low}
+                   "impulse_end": bar.high if direction == "LONG" else bar.low,
+                   "displacement": disp_info}
         st.confirmations = {"aligned_bias": True, "displacement_fvg": bool(ok_disp),
                             "efficiency_ok": er is not None and er >= self.s.continuation_min_er}
         self.setups[sid] = st
+        self.counters["setups_created_CONTINUATION_C1"] += 1
         # Pilot policy (coordinator decision): the displacement candle itself must start
         # inside the entry window, so no premarket structure arms a continuation.
         if b.start.astimezone(ET).time() < self.cfg.session.entry_start:
@@ -305,6 +327,8 @@ class SetupDetector:
                 self._r1_m1(st, bar, confirmed)
             else:
                 self._c1_m1(st, bar, confirmed)
+        for st in confirmed:
+            self.counters[f"setups_confirmed_{st.family}"] += 1
         return confirmed
 
     def _r1_m1(self, st: Setup, bar: Bar, confirmed: list):

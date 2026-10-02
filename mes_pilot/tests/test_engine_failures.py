@@ -26,7 +26,7 @@ from mes_pilot.bars import ET
 from mes_pilot.engine import PilotEngine
 from mes_pilot.events import Event, EventCalendar
 from mes_pilot.risk import PilotRiskManager
-from mes_pilot.tests.helpers import DAY, HOLD, RETEST, bar, et, preset_levels, r1_long_prefix
+from mes_pilot.tests.helpers import DAY, HOLD, RETEST, assume_complete_context, bar, et, preset_levels, r1_long_prefix
 
 UTC_S = (9, 30)
 # 09:42 bar trading 1 tick through the 5005 target (entry 5001.50 -> +3.50 pts = $17.50 gross, $15.80 net).
@@ -47,6 +47,7 @@ def calendar(*days, events=()):
 def engine(cfg, out, cal=None, day=DAY, sweep_at=UTC_S, **kw):
     eng = PilotEngine(cfg, out_dir=out, evidence_label="SYNTHETIC_TEST", data_source="test-hand-built",
                       calendar=cal or calendar(day), **kw)
+    assume_complete_context(eng)
     eng.tfs[60].bias = eng.tfs[240].bias = "BULLISH"
     preset_levels(eng.book, et(day, *sweep_at) - timedelta(hours=2))
     return eng
@@ -147,8 +148,8 @@ def test_restart_with_open_position_reconciles_and_keeps_managing(cfg_no_vol, tm
     feed(eng, bars)
     (pos,) = eng.simulator.open_positions()
     del eng                                    # "crash"
-    eng2 = PilotEngine(cfg_no_vol, out_dir=tmp_path, evidence_label="SYNTHETIC_TEST", data_source="restart",
-                       calendar=calendar(DAY))
+    eng2 = assume_complete_context(PilotEngine(cfg_no_vol, out_dir=tmp_path, evidence_label="SYNTHETIC_TEST",
+                                               data_source="restart", calendar=calendar(DAY)))
     rec = eng2.ledger.records("RECONCILIATION")[-1]
     assert rec["simulator_open"] == [pos.position_id] and rec["risk_open"] == [pos.position_id]
     assert rec["entries_blocked"] is None and eng2.blocked is None
@@ -238,10 +239,14 @@ def test_duplicate_and_out_of_order_bars_ignored(cfg_no_vol, tmp_path):
     bars = scenario(hold_minutes=2)
     feed(eng, bars[:50])
     n = len(eng.tfs[1].bars)
-    eng.process_bar(bars[49])                       # duplicate
-    eng.process_bar(bars[10])                       # out of order
+    eng.process_bar(bars[49])                       # identical duplicate (overlap): dropped, counted
+    eng.process_bar(bars[10])                       # identical, out of order: dropped, counted
+    assert eng.ledger.records("MARKET_FAULT") == []
+    assert eng._session_stats["duplicate_bars_ignored"] == 2
+    from dataclasses import replace as _replace
+    eng.process_bar(_replace(bars[49], volume=bars[49].volume + 7))   # same minute, different values
     faults = [r["fault"] for r in eng.ledger.records("MARKET_FAULT")]
-    assert faults == ["DUPLICATE_OR_OUT_OF_ORDER_BAR"] * 2
+    assert faults == ["CONFLICTING_DUPLICATE_BAR"]
     assert len(eng.tfs[1].bars) == n
     feed(eng, bars[50:])
     assert candidates(eng) == [("REVERSAL_R1", "ACCEPT", None)]   # outcome unaffected

@@ -10,6 +10,22 @@ Execution sequence per completed M1 bar (master spec execution_sequence):
      ACCEPT -> reserve capacity -> PAPER intent or PROP advisory alert
 Every decision and transition is appended to the evidence ledger with UTC
 decision time, market-data time, strategy version and config hash.
+
+Context readiness (repair 2026-10-02):
+  * every M1 bar carries a provenance ``source``; a CoverageTracker records
+    scheduled closures, evidence-backed zero-trade minutes and UNEXPECTED
+    missing minutes (bare continuity labels certify nothing);
+  * an unexpected gap resets all derived structure (timeframes, aggregators,
+    liquidity levels, setups) so stale bias/levels/ATR never bridge a hole;
+  * an aggregated bucket with any unknown open minute is EXCLUDED before
+    structure consumes it;
+  * new entries ABSTAIN ``CONTEXT_INCOMPLETE:<reason>`` unless required context
+    is complete; a session with any not-ready entry-window minute is
+    ``CONTEXT_INCOMPLETE`` (ineligible evidence);
+  * ``context=True`` bars (historical fill / live intraday replay) update
+    structure only: no decisions, no simulator bar processing, no time exits,
+    no equity marks and no persisted daily-risk roll. Fresh live quotes keep
+    protecting open paper positions through ``process_quote``.
 """
 from __future__ import annotations
 
@@ -25,6 +41,7 @@ from mes_pilot.alerts import AlertOutbox, EntryAlert, ManagementAlert
 from mes_pilot.account_rules import TrailingFloor, check_trade
 from mes_pilot.bars import Aggregator, Bar, ET, is_exchange_holiday, session_date_for, validate_bar
 from mes_pilot.config import PilotConfig
+from mes_pilot.coverage import CoverageTracker, bar_completeness, evaluate_readiness
 from mes_pilot.events import EventCalendar
 from mes_pilot.ledger import EvidenceLedger
 from mes_pilot.levels import LiquidityBook
@@ -116,6 +133,11 @@ class PilotEngine:
         self.vol_state = ("UNAVAILABLE", None)
         self.blocked: str | None = None
         self.last_quote: Quote | None = None
+        self.coverage = CoverageTracker()
+        self.incomplete_bars: dict[int, set] = {tf: set() for tf in TFS}
+        self.readiness = None
+        self._last_ready_state: bool | None = None
+        self._recent_bars: dict = {}   # start -> (o, h, l, c, v, contract), bounded; conflict detection
         self._session_stats = self._new_stats()
         self.session_summaries: list[dict] = []
 
@@ -185,7 +207,13 @@ class PilotEngine:
     def _new_stats() -> dict:
         return {"bars": 0, "window_bars": 0, "faults": [], "setups_created": Counter(), "confirmed": 0,
                 "decisions": Counter(), "reasons": Counter(), "entries": 0, "positions": 0, "net_pnl": 0.0,
-                "calendar_available": None, "max_gap_min": 0.0}
+                "calendar_available": None, "max_gap_min": 0.0,
+                # context readiness / provenance (repair 2026-10-02)
+                "bars_by_source": Counter(), "context_bars": 0, "live_bars": 0, "window_context_bars": 0,
+                "window_bars_ready": 0, "window_bars_not_ready": 0, "not_ready_reasons": Counter(),
+                "first_ready_at": None, "coverage_gaps": [], "incomplete_htf": [], "structure_resets": 0,
+                "context_cancelled_setups": 0, "duplicate_bars_ignored": 0, "funnel": Counter(),
+                "feed_events": Counter()}
 
     def _local(self, ts: datetime) -> time:
         return ts.astimezone(ET).time()
@@ -194,33 +222,41 @@ class PilotEngine:
         t = self._local(ts)
         return self.cfg.session.entry_start <= t < self.cfg.session.entry_end
 
-    def _roll(self, bar: Bar):
-        self._roll_session(session_date_for(bar.start))
-        if self.contract is not None and _series(bar.contract) != _series(self.contract):
+    def _roll(self, bar: Bar, *, historical: bool = False):
+        self._roll_session(session_date_for(bar.start), historical=historical)
+        if self.contract is not None and not same_price_series(bar.contract, self.contract):
             self._structure_reset(bar, f"CONTRACT_ROLL {self.contract}->{bar.contract}")
         self.contract = bar.contract
 
-    def _roll_session(self, day: date):
+    def _roll_session(self, day: date, *, historical: bool = False):
         if self.session is not None and day != self.session:
             self._close_session()
         if day != self.session:
             self.session = day
-            self.risk.roll_session(day)
+            if not historical:
+                # Warmup/context replay must never move the persisted trading day or reset daily limits.
+                self.risk.roll_session(day)
             self.vol.roll(day)
             self._session_stats = self._new_stats()
+            reset = getattr(self.detector, "reset_counters", None)
+            if callable(reset):
+                reset()
             # Point-in-time: availability as of the entry-window open (when decisions start).
             cal = self.calendar.status(datetime.combine(day, self.cfg.session.entry_start, ET).astimezone(UTC), day, currencies=(), impacts=(),
                                        before_min=0, after_min=0, flatten_before_min=0, required=self.cfg.events.required)
             self._session_stats["calendar_available"] = cal.calendar_available
 
-    def _structure_reset(self, bar: Bar, reason: str):
+    def _structure_reset(self, bar: Bar, reason: str, log: bool = True):
         for tf in self.tfs.values():
             tf.reset()
         for agg in self.aggs.values():
             agg.reset()
         self.book.reset()
         self.detector.reset(at=bar.start)
-        self.ledger.append("STRUCTURE_RESET", at=bar.start, reason=reason)
+        self.accum = AccumulationTracker(self.cfg.accumulation.lookback_closes, self.cfg.accumulation.max_range_atr,
+                                         self.cfg.accumulation.max_er, self.cfg.accumulation.stale_after_bars)
+        if log:
+            self.ledger.append("STRUCTURE_RESET", at=bar.start, reason=reason)
 
     def _close_session(self):
         st = self._session_stats
@@ -232,6 +268,10 @@ class PilotEngine:
             cls = "NO_SESSION_DATA_IN_WINDOW"
         elif st["faults"]:
             cls = "OPERATIONAL_FAULT"
+        elif st["window_bars_not_ready"] > 0 or st["window_context_bars"] > 0:
+            # Any entry-window minute without complete required context, or entry-window minutes the
+            # process only saw as replayed context (no decisions possible): not qualified evidence.
+            cls = "CONTEXT_INCOMPLETE"
         elif st["positions"] > 0 or st["entries"] > 0:
             cls = "TRADED"
         elif st["calendar_available"] is False and self.cfg.events.required:
@@ -249,16 +289,47 @@ class PilotEngine:
                    "equity_after": self.risk.state.cash,
                    "paper_floor": self.risk.state.floor_usd,
                    "paper_peak_equity": self.risk.state.peak_equity,
-                   "paper_floor_breached": self.risk.state.floor_breached}
+                   "paper_floor_breached": self.risk.state.floor_breached,
+                   "readiness": {"window_bars_ready": st["window_bars_ready"],
+                                 "window_bars_not_ready": st["window_bars_not_ready"],
+                                 "window_context_bars": st["window_context_bars"],
+                                 "first_ready_at": st["first_ready_at"],
+                                 "not_ready_reasons": dict(st["not_ready_reasons"])},
+                   "coverage": {"new_unexpected_gaps": st["coverage_gaps"][:20],
+                                "new_unexpected_gap_count": len(st["coverage_gaps"]),
+                                "structure_resets": st["structure_resets"],
+                                "incomplete_htf_bars_excluded": st["incomplete_htf"][:20],
+                                "incomplete_htf_bar_count": len(st["incomplete_htf"]),
+                                "bars_by_source": dict(st["bars_by_source"]),
+                                "context_bars": st["context_bars"], "live_bars": st["live_bars"],
+                                "duplicate_bars_ignored": st["duplicate_bars_ignored"],
+                                "context_cancelled_setups": st["context_cancelled_setups"]},
+                   "status_layers": self._status_layers(st, cls),
+                   "funnel": {**dict(getattr(self.detector, "counters", {}) or {}), **dict(st["funnel"])},
+                   "feed_events": dict(st["feed_events"])}
         self.session_summaries.append(summary)
         self.ledger.append("SESSION_SUMMARY", dedupe_key=f"SESSION:{self.session}:{self.run_id}", **summary)
 
     def end_warmup(self):
-        """Leave warmup: discard the warmup session's stats so it never produces a SESSION_SUMMARY."""
+        """Leave warmup without counting historical outcomes in the live session."""
+        # Terminal setup logging is suppressed during warmup. Drop that completed
+        # history here so the first live bar cannot flush it into today's ledger
+        # and skip counters. Preserve active setups and the warmed market state.
+        historical_terminals = [sid for sid, st in self.detector.setups.items()
+                                if st.terminal] if self.warmup else []
+        for sid in historical_terminals:
+            del self.detector.setups[sid]
         self.session = None
         self._session_stats = self._new_stats()
+        reset = getattr(self.detector, "reset_counters", None)
+        if callable(reset):
+            reset()   # warmup funnel counts never leak into the first live session
         self.warmup = False
-        self.ledger.append("WARMUP_COMPLETE", last_bar=self.last_bar.end if self.last_bar else None)
+        self.readiness = None
+        self._last_ready_state = None
+        self.ledger.append("WARMUP_COMPLETE", last_bar=self.last_bar.end if self.last_bar else None,
+                           discarded_terminal_setups=len(historical_terminals),
+                           coverage=self.coverage.to_dict())
 
     def finish(self):
         if self.simulator is not None and not self.warmup:
@@ -271,7 +342,53 @@ class PilotEngine:
         self.session = None
 
     # ------------------------------------------------------------------ main entry
-    def process_bar(self, bar: Bar, live_quote: Quote | None = None):
+    def record_feed_event(self, kind: str, **fields):
+        """Feed/bridge lifecycle events (replay start/completion, conflicts, resume points)."""
+        if self.warmup:
+            return
+        self._session_stats["feed_events"][kind] += 1
+        self.ledger.append("FEED_EVENT", kind=kind, **_jsonable(fields))
+
+    def attest_zero_trade(self, minute_start: datetime, evidence: str):
+        """Documented provider evidence that an open minute had no trades (see coverage.py)."""
+        self.coverage.attest_zero_trade(minute_start, evidence)
+
+    @staticmethod
+    def _status_layers(st: dict, cls: str) -> dict:
+        """Separate what happened at each layer; a completed process never implies a ready strategy."""
+        ready, not_ready = st["window_bars_ready"], st["window_bars_not_ready"]
+        if ready + not_ready == 0:
+            strategy = "NOT_EVALUATED"
+        elif not_ready == 0 and st["window_context_bars"] == 0:
+            strategy = "READY"
+        elif ready == 0:
+            strategy = "NOT_READY"
+        else:
+            strategy = "PARTIAL"
+        return {"process_completed": True, "feed_connected": st["live_bars"] > 0,
+                "strategy_ready": strategy, "trade_executed": st["entries"] > 0,
+                "classification": cls}
+
+    def _refresh_readiness(self, now: datetime):
+        self.readiness = evaluate_readiness(now=now, tracker=self.coverage, tfs=self.tfs,
+                                            session_day=self.session or session_date_for(now - timedelta(minutes=1)),
+                                            cfg=self.cfg, vol_state=self.vol_state,
+                                            incomplete_bar_starts=self.incomplete_bars)
+        if not self.warmup and self.readiness.ready != self._last_ready_state:
+            self._last_ready_state = self.readiness.ready
+            self.ledger.append("CONTEXT_READINESS", at=now, ready=self.readiness.ready,
+                               reasons=list(self.readiness.reasons)[:20], details=_jsonable(self.readiness.details))
+        return self.readiness
+
+    def _duplicate_or_conflict(self, bar: Bar) -> str | None:
+        key = (bar.open, bar.high, bar.low, bar.close, bar.volume, bar.contract)
+        prior = self._recent_bars.get(bar.start)
+        if prior is None:
+            return None
+        return "IDENTICAL" if prior == key else "CONFLICT"
+
+    def process_bar(self, bar: Bar, live_quote: Quote | None = None, *, context: bool = False,
+                    continuity: str | None = None, source: str | None = None):
         fault = validate_bar(bar)
         if fault:
             if bar.start.tzinfo is not None:
@@ -281,19 +398,53 @@ class PilotEngine:
             self.ledger.append("MARKET_FAULT", at=bar.start, fault=fault, contract=bar.contract)
             return
         if self.last_bar is not None and bar.start <= self.last_bar.start:
-            self.ledger.append("MARKET_FAULT", at=bar.start, fault="DUPLICATE_OR_OUT_OF_ORDER_BAR")
+            kind = self._duplicate_or_conflict(bar)
+            if kind == "IDENTICAL":
+                # Overlap between context sources / reconnect replay: drop silently, count it.
+                self._session_stats["duplicate_bars_ignored"] += 1
+                return
+            fault = "CONFLICTING_DUPLICATE_BAR" if kind == "CONFLICT" else "DUPLICATE_OR_OUT_OF_ORDER_BAR"
+            if not self.warmup:
+                self._session_stats["faults"].append({"at": bar.start.isoformat(), "fault": fault,
+                                                      "source": source})
+            self.ledger.append("MARKET_FAULT", at=bar.start, fault=fault, contract=bar.contract, source=source)
             return
-        self._roll(bar)
+        historical = self.warmup or context
+        self._roll(bar, historical=historical)
         st = self._session_stats
         st["bars"] += 1
+        st["bars_by_source"][source or "UNSPECIFIED"] += 1
+        if context:
+            st["context_bars"] += 1
+        elif not self.warmup:
+            st["live_bars"] += 1
+        self._recent_bars[bar.start] = (bar.open, bar.high, bar.low, bar.close, bar.volume, bar.contract)
+        if len(self._recent_bars) > 3000:
+            for k in sorted(self._recent_bars)[:1000]:
+                del self._recent_bars[k]
+        new_gaps = self.coverage.observe(bar, continuity, source)
+        if new_gaps:
+            for gap in new_gaps:
+                rec = gap.to_dict()
+                if not self.warmup:
+                    st["coverage_gaps"].append(rec)
+                    self.ledger.append("CONTEXT_GAP", **{f"gap_{k}": v for k, v in rec.items()})
+            # A hole in the data invalidates every derived structure: rebuild from complete bars only.
+            st["structure_resets"] += 1
+            self._structure_reset(bar, "CONTEXT_GAP:%d_open_minutes" % sum(g.open_minutes for g in new_gaps),
+                                  log=not self.warmup)
         gap_min = (bar.start - self.last_bar.end).total_seconds() / 60 if self.last_bar else 0.0
         if self._window_open(bar.start):
             st["window_bars"] += 1
             st["max_gap_min"] = max(st["max_gap_min"], gap_min)
+            if context and not self.warmup:
+                st["window_context_bars"] += 1
 
         # 1. executable quote for anything queued at the previous decision
         quote = live_quote or (modeled_quote(bar, self.cfg.instrument.tick_size, self.cfg.costs.spread_ticks)
                                if self.quote_mode == "MODELED" else None)
+        if context or self.warmup:
+            quote = None   # a historical/replayed bar is never an executable quote
         if quote is not None:
             self.last_quote = quote
             self._execute_pending(quote, bar)
@@ -304,6 +455,16 @@ class PilotEngine:
         m5_closed = []
         for tf, agg in self.aggs.items():
             for done in agg.push(bar):
+                comp = bar_completeness(self.coverage, done)
+                if not comp["complete"]:
+                    # Partial bucket: never reaches structure (bias, swings, gaps, ATR, levels).
+                    self.incomplete_bars[tf].add(done.start)
+                    if not self.warmup:
+                        rec = {"tf": tf, "start": done.start.isoformat(), "end": done.end.isoformat(),
+                               **{k: v for k, v in comp.items() if k != "complete"}}
+                        st["incomplete_htf"].append(rec)
+                        self.ledger.append("INCOMPLETE_BAR_EXCLUDED", **rec)
+                    continue
                 ev = self.tfs[tf].push(done)
                 if tf in (60, 240):
                     for sw in ev["new_swings"]:
@@ -318,12 +479,30 @@ class PilotEngine:
             self.vol_state = self.vol.classify(m5.end, atr)
             self.accum.on_m5(list(self.tfs[5].bars), self.tfs[5].atr(exclude_last=1))
             before = set(self.detector.setups)
-            self.detector.on_m5(m5, self._window_open(m5.start))
+            if self.warmup:
+                creation_allowed = self._window_open(m5.start)
+            else:
+                ready = self._refresh_readiness(m5.end).ready
+                # New setups only from complete, live context; existing setups keep lifecycle updates.
+                creation_allowed = self._window_open(m5.start) and ready and not context
+            self.detector.on_m5(m5, creation_allowed)
             for sid in set(self.detector.setups) - before:
                 st["setups_created"][self.detector.setups[sid].family] += 1
 
-        # 3. protective management
-        if self.simulator is not None:
+        if not self.warmup and not context and self._window_open(bar.start):
+            r = self._refresh_readiness(bar.end)
+            if r.ready:
+                st["window_bars_ready"] += 1
+                if st["first_ready_at"] is None:
+                    st["first_ready_at"] = bar.end.isoformat()
+            else:
+                st["window_bars_not_ready"] += 1
+                for reason in r.reasons:
+                    st["not_ready_reasons"][reason] += 1
+
+        # 3. protective management: real bars only. Replayed context never executes retrospective fills or
+        #    exits against persisted positions; fresh live quotes keep protecting them via process_quote.
+        if self.simulator is not None and not context and not self.warmup:
             for pos in self.simulator.on_bar(bar):
                 self._record_close(pos)
             self._time_exits(bar)
@@ -340,6 +519,10 @@ class PilotEngine:
         if confirmed and self.warmup:
             for c in confirmed:
                 c.move("CANCELLED", bar.end, "WARMUP_NO_DECISIONS")
+        elif confirmed and context:
+            for c in confirmed:
+                c.move("CANCELLED", bar.end, "CONTEXT_REPLAY_NO_DECISIONS")
+            st["context_cancelled_setups"] += len(confirmed)
         elif confirmed:
             st["confirmed"] += len(confirmed)
             self._decide(confirmed, bar, gap_min, live_quote)
@@ -404,6 +587,7 @@ class PilotEngine:
                                    status="CANCELLED", reason="KILL_SWITCH")
                 continue
             res = self.route.submit(intent, quote)
+            self._session_stats["funnel"]["orders_submitted"] += 1
             self.ledger.append("ORDER", dedupe_key=f"ORDER:{intent.intent_id}", intent_id=intent.intent_id,
                                order_id=res.order_id, signal_id=intent.signal_id, status=res.status, reason=res.reason,
                                quote={"ts": quote.ts, "bid": quote.bid, "ask": quote.ask, "source": quote.source},
@@ -431,6 +615,7 @@ class PilotEngine:
                                    initial_risk_usd=pos.initial_risk_usd, protection_status=pos.protection_status,
                                    **({"mirror_id": mirror_id} if mirror_id else {}))
                 self._session_stats["entries"] += 1
+                self._session_stats["funnel"]["fills"] += 1
                 if res.status == "EMERGENCY_FLATTENED":
                     self.blocked = "EMERGENCY:PROTECTION_REJECTED"
                     self.ledger.append("EMERGENCY", reason="PROTECTION_REJECTED", position_id=pos.position_id,
@@ -485,6 +670,7 @@ class PilotEngine:
                                  exit_fee=pos.exit_fees, gross_pnl=pos.gross_pnl, net_pnl=pos.net_pnl,
                                  exit_reason=pos.exit_reason)
         self.risk.on_close(pos.position_id, pos.net_pnl, self.session)
+        self._session_stats["funnel"][f"exits_{(pos.exit_reason or 'UNKNOWN').lower()}"] += 1
         self._session_stats["positions"] += 1
         self._session_stats["net_pnl"] += pos.net_pnl
 
@@ -520,6 +706,7 @@ class PilotEngine:
         for st in confirmed:
             decision, reason, risk_rec, extra = self._evaluate(st, bar, gap_min, live_quote, conflict)
             self._session_stats["decisions"][decision] += 1
+            self._session_stats["funnel"][f"decision_{decision.lower()}"] += 1
             if decision != "ACCEPT":
                 self._session_stats["reasons"][reason] += 1
                 st.move("REJECTED" if decision == "REJECT" else "CANCELLED", bar.end, reason)
@@ -571,6 +758,10 @@ class PilotEngine:
             return out("ABSTAIN", "OUTSIDE_ENTRY_WINDOW")
         if is_exchange_holiday(self.session):
             return out("ABSTAIN", "EXCHANGE_HOLIDAY_SESSION")
+        readiness = self._refresh_readiness(bar.end)
+        extra["context_readiness"] = {"ready": readiness.ready, "reasons": list(readiness.reasons)[:10]}
+        if not readiness.ready:
+            return out("ABSTAIN", "CONTEXT_INCOMPLETE:" + (readiness.reasons[0] if readiness.reasons else "UNKNOWN"))
         ev = self.calendar.status(bar.end, self.session, currencies=cfg.events.currencies, impacts=cfg.events.impacts,
                                   before_min=cfg.events.before_min, after_min=cfg.events.after_min,
                                   flatten_before_min=cfg.events.flatten_before_min, required=cfg.events.required)
@@ -661,6 +852,32 @@ class PilotEngine:
 
 def _jsonable(obj):
     return json.loads(json.dumps(obj, default=lambda o: o.isoformat() if hasattr(o, "isoformat") else str(o)))
+
+
+_MONTH_CODES = "FGHJKMNQUVXZ"
+_PRICE_ROOTS = {"ES": "ES_INDEX", "MES": "ES_INDEX"}   # same S&P 500 futures index; MES = 1/10 ES
+
+
+def parse_contract(contract: str) -> tuple[str, str, str] | None:
+    """('MES','Z','6') for 'MESZ6'; None if not an ES/MES outright symbol."""
+    c = (contract or "").upper()
+    for root in sorted(_PRICE_ROOTS, key=len, reverse=True):
+        rest = c[len(root):]
+        if c.startswith(root) and len(rest) in (2, 3) and rest[0] in _MONTH_CODES and rest[1:].isdigit():
+            return root, rest[0], rest[1:]
+    return None
+
+
+def same_price_series(a: str, b: str) -> bool:
+    """True only for explicit ES/MES roots of the same index and the same expiry (month + year digit).
+
+    Suffix equality alone is not enough; unknown symbols compare by exact equality.
+    The proxy identity (ES vs MES) is kept on every bar and in provenance, never erased.
+    """
+    pa, pb = parse_contract(a), parse_contract(b)
+    if pa is None or pb is None:
+        return a == b
+    return _PRICE_ROOTS[pa[0]] == _PRICE_ROOTS[pb[0]] and pa[1] == pb[1] and pa[2][-1] == pb[2][-1]
 
 
 def _series(contract: str) -> str:

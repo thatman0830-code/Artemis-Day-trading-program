@@ -174,9 +174,13 @@ class PilotRiskManager:
 
     # ------------------------------------------------------------------ session
     def roll_session(self, day: date):
+        """Advance the persisted trading day. Never rewinds: replaying historical context after a
+        same-day restart must not reset today's entries or realized loss (repair 2026-10-02)."""
         with self._lock:
             key = day.isoformat()
             if self.state.session_day == key:
+                return
+            if self.state.session_day is not None and key < self.state.session_day:
                 return
             self.state.session_day = key
             self.state.day_start_cash = self.state.cash

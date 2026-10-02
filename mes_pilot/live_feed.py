@@ -24,6 +24,18 @@
 * Reconnection with exponential backoff; the session is bounded by an explicit
   ET time window (default 09:00-11:45 ET, hard cap 4 h) on exchange trading
   days only.
+* Context bridge (repair 2026-10-02): ``replay_start`` subscribes the bar
+  schema with Databento intraday replay from that time (quotes stay live-only),
+  so history from the last context bar through the moving live edge arrives in
+  ONE ordered stream. Bars before the gateway's ``replay_completed`` system
+  message (or the first on-time bar) are CONTEXT: delivered with
+  ``context=True``, never with a quote, never decided on. ``end_of_interval``
+  system messages bracketing a minute with no OHLCV record are forwarded as
+  zero-trade evidence (``on_attest``); nothing else certifies a missing minute.
+  Identical overlap bars are dropped; conflicting duplicates are rejected and
+  reported. On reconnect the bar schema is resubscribed from the last
+  delivered bar end, so an outage is replayed rather than skipped. Gap
+  tracking is seeded from the last context bar end.
 * HARD RULE: market data only. This module has no order, submit, cancel or
   position methods and refuses a client object that exposes any.
 * The API key is read from ``DATABENTO_API_KEY`` at connect time, passed only
@@ -105,6 +117,8 @@ class LiveFeedConfig:
     reconnect_max_attempts: int = 6
     backoff_initial_s: float = 1.0
     backoff_max_s: float = 30.0
+    replay_start: datetime | None = None  # intraday replay start for the bar schema (UTC); None = live only
+    max_replay_lookback: timedelta = timedelta(hours=23, minutes=50)
 
     def __post_init__(self):
         if self.bar_schema not in ("ohlcv-1m", "trades"):
@@ -217,8 +231,21 @@ class LiveFeed:
                  key_provider: Callable[[], str | None] | None = None,
                  clock: Callable[[], datetime] | None = None, sleep: Callable[[float], None] | None = None,
                  log_path: Path | None = None, pass_receive_ts: bool = True, use_stop_timer: bool = True,
-                 on_quote: Callable[[Quote], None] | None = None):
+                 on_quote: Callable[[Quote], None] | None = None,
+                 on_event: Callable[..., None] | None = None,
+                 on_attest: Callable[[datetime, str], None] | None = None,
+                 extended_callback: bool = False,
+                 last_context_bar_end: datetime | None = None):
         self.on_bar = on_bar
+        self.on_event = on_event          # optional engine.record_feed_event(kind, **fields)
+        self.on_attest = on_attest        # optional engine.attest_zero_trade(minute_start, evidence)
+        self.extended_callback = extended_callback  # call on_bar(bar, quote, context=, continuity=, source=)
+        self.seed_end = last_context_bar_end
+        self._replay_active = False
+        self._next_replay_start = None
+        self._eoi: set = set()            # end_of_interval timestamps seen in the current connection
+        self._conn_bars = 0
+        self._recent: dict = {}           # bar start -> value key (bounded), for overlap dedupe/conflicts
         self.on_quote = on_quote  # optional: execute pending paper intents on the first fresh quote
         self.cfg = config or LiveFeedConfig()
         self._client_factory = client_factory or _databento_client_factory
@@ -242,7 +269,11 @@ class LiveFeed:
                       "max_quote_transport_delay_s": 0.0, "bars_delivered": 0,
                       "bars_late": 0, "bars_rejected": 0, "bars_held_until_close": 0,
                       "duplicate_bars": 0, "late_trades": 0, "gaps": 0, "unexpected_gap_minutes": 0,
-                      "stale_quote_bars": 0, "reconnects": 0, "heartbeats": 0, "errors": 0}
+                      "stale_quote_bars": 0, "reconnects": 0, "heartbeats": 0, "errors": 0,
+                      "conflicting_bars": 0, "replay_bars": 0, "end_of_interval_msgs": 0,
+                      "zero_trade_minutes_attested": 0, "replay_completed_msgs": 0}
+        self.replay_info = {"requested_start": None, "subscribed_starts": [], "completed_at": None,
+                            "completion_signal": None, "first_live_bar": None}
 
     # ------------------------------------------------------------------ logging
     @staticmethod
@@ -303,10 +334,21 @@ class LiveFeed:
                 self._log("SYMBOL_MAPPING", requested=requested, raw_symbol=raw, instrument_id=iid)
             return
         if name == "SystemMsg":
-            if getattr(rec, "is_heartbeat", False) or "heartbeat" in str(getattr(rec, "code", "")).lower():
+            code = str(getattr(rec, "code", "") or "")
+            hb = getattr(rec, "is_heartbeat", False)
+            hb = hb() if callable(hb) else bool(hb)   # databento exposes a METHOD (always truthy as attribute)
+            if code == "end_of_interval":
+                ts = getattr(rec, "ts_event", None)
+                if isinstance(ts, int) and ts > 0:
+                    self._eoi.add(_ns_to_dt(ts))
+                self.stats["end_of_interval_msgs"] += 1
+            elif code == "replay_completed":
+                self.stats["replay_completed_msgs"] += 1
+                self._end_replay("PROVIDER_REPLAY_COMPLETED", received_at)
+            elif hb or "heartbeat" in code.lower():
                 self.stats["heartbeats"] += 1
             else:
-                self._log("SYSTEM", code=str(getattr(rec, "code", "")), msg=str(getattr(rec, "msg", "")))
+                self._log("SYSTEM", code=code, msg=str(getattr(rec, "msg", "")))
             return
         if name == "ErrorMsg":
             text = str(getattr(rec, "err", "")) or str(getattr(rec, "msg", ""))
@@ -400,30 +442,95 @@ class LiveFeed:
             self._deliver(self._pending_ohlcv.popleft(), now)
 
     # ------------------------------------------------------------------ delivery
+    def _event(self, kind: str, **fields):
+        self._log(kind, **fields)
+        if self.on_event is not None:
+            try:
+                self.on_event(kind, **fields)
+            except Exception as exc:
+                self._log("ENGINE_CALLBACK_ERROR", error=f"{type(exc).__name__}: {exc}")
+                raise EngineCallbackError(str(exc)) from exc
+
+    def _end_replay(self, signal: str, received_at: datetime):
+        if not self._replay_active:
+            return
+        self._replay_active = False
+        self.replay_info["completed_at"] = received_at.isoformat()
+        self.replay_info["completion_signal"] = signal
+        self._event("REPLAY_COMPLETED", signal=signal, replay_bars=self.stats["replay_bars"],
+                    last_context_bar_end=self.last_bar.end if self.last_bar else None)
+
+    def _attest_gap(self, prev_end: datetime, next_start: datetime) -> int:
+        """Forward documented zero-trade evidence for open minutes in [prev_end, next_start)."""
+        if self.on_attest is None:
+            return 0
+        n = 0
+        for seg in classify_gap(prev_end, next_start):
+            if seg.kind != UNEXPECTED:
+                continue
+            m = seg.start
+            while m < seg.end:
+                # Conservative: the minute's interval must be bracketed by end_of_interval messages on BOTH
+                # sides (covers either timestamp convention) received in this same connection.
+                if m in self._eoi and (m + ONE_MIN) in self._eoi:
+                    self.on_attest(m, "LIVE_END_OF_INTERVAL")
+                    n += 1
+                m += ONE_MIN
+        self.stats["zero_trade_minutes_attested"] += n
+        return n
+
     def _deliver(self, bar: Bar, received_at: datetime):
         fault = validate_bar(bar)
         if fault:
             self.stats["bars_rejected"] += 1
             self._log("BAR_FAULT", fault=fault, bar_start=bar.start)
             return
+        key = (bar.open, bar.high, bar.low, bar.close, bar.volume, bar.contract)
+        prior = self._recent.get(bar.start)
+        if prior is not None:
+            if prior == key:
+                self.stats["duplicate_bars"] += 1          # identical overlap (reconnect replay): drop
+            else:
+                self.stats["conflicting_bars"] += 1
+                self._event("CONFLICTING_DUPLICATE", bar_start=bar.start, kept=list(prior), rejected=list(key))
+            return
         if self.last_bar is not None and bar.start <= self.last_bar.start:
             self.stats["duplicate_bars"] += 1
             return
-        if self.last_bar is not None and bar.start > self.last_bar.end:
-            segments = classify_gap(self.last_bar.end, bar.start)
+        prev_end = self.last_bar.end if self.last_bar is not None else self.seed_end
+        if prev_end is not None and bar.start > prev_end:
+            segments = classify_gap(prev_end, bar.start)
             unexpected = sum(s.minutes for s in segments if s.kind == UNEXPECTED)
+            attested = self._attest_gap(prev_end, bar.start) if unexpected else 0
             self.stats["gaps"] += 1
-            self.stats["unexpected_gap_minutes"] += unexpected
-            self._log("GAP", start=self.last_bar.end, end=bar.start, unexpected_minutes=unexpected,
+            self.stats["unexpected_gap_minutes"] += max(0, unexpected - attested)
+            self._log("GAP", start=prev_end, end=bar.start, unexpected_minutes=unexpected,
+                      zero_trade_attested=attested, seeded=self.last_bar is None,
                       segments=[{"kind": s.kind, "minutes": s.minutes} for s in segments])
         now = self.clock()
-        late = (received_at - bar.end).total_seconds() > self.cfg.max_bar_delay_s
-        quote = None if late else self.executable_quote(now)
+        on_time = (received_at - bar.end).total_seconds() <= self.cfg.max_bar_delay_s
+        if self._replay_active and on_time:
+            self._end_replay("FIRST_ON_TIME_BAR", received_at)
+        context = self._replay_active
+        continuity = "SAME_STREAM" if self._conn_bars > 0 else None
+        self._conn_bars += 1
+        self._recent[bar.start] = key
+        if len(self._recent) > 3000:
+            for k in sorted(self._recent)[:1000]:
+                del self._recent[k]
+        if context:
+            self.stats["replay_bars"] += 1
+            late, quote = False, None   # replayed context never carries an executable quote
+        else:
+            if self.replay_info["first_live_bar"] is None:
+                self.replay_info["first_live_bar"] = bar.start.isoformat()
+            late = not on_time
+            quote = None if late else self.executable_quote(now)
         q_state, q_age = self.quote_status(now)
         if late:
             self.stats["bars_late"] += 1
             self._log("LATE_BAR", bar_end=bar.end, received_at=received_at)
-        elif quote is None:
+        elif quote is None and not context:
             self.stats["stale_quote_bars"] += 1
         self.last_bar = bar
         self.deliveries.append({"bar_start": bar.start.isoformat(), "bar_close_ts": bar.end.isoformat(),
@@ -431,10 +538,14 @@ class LiveFeed:
                                 "contract": bar.contract, "quote_state": q_state,
                                 "quote_age_s": None if q_age is None else round(q_age, 4),
                                 "quote_exchange_ts": quote.ts.isoformat() if quote else None,
-                                "late": late})
+                                "late": late, "context": context})
         self.stats["bars_delivered"] += 1
         try:
-            self.on_bar(bar, quote)
+            if self.extended_callback:
+                self.on_bar(bar, quote, context=context, continuity=continuity,
+                            source="MES_LIVE_REPLAY" if context else "MES_LIVE")
+            else:
+                self.on_bar(bar, quote)
         except Exception as exc:  # engine faults are not feed faults: never retried
             self._log("ENGINE_CALLBACK_ERROR", error=f"{type(exc).__name__}: {exc}")
             raise EngineCallbackError(str(exc)) from exc
@@ -451,10 +562,27 @@ class LiveFeed:
         finally:
             del key
         assert_read_only(client)
+        start = self._next_replay_start
+        if start is not None:
+            floor = self.clock() - self.cfg.max_replay_lookback
+            if start < floor:
+                self._event("REPLAY_START_CLAMPED", requested=start, clamped_to=floor)
+                start = floor
+        # Quotes are always live-only: a replayed quote is never fresh.
         client.subscribe(dataset=self.cfg.dataset, schema=self.cfg.quote_schema,
                          stype_in=self.cfg.stype_in, symbols=[self.cfg.symbol])
-        client.subscribe(dataset=self.cfg.dataset, schema=self.cfg.bar_schema,
-                         stype_in=self.cfg.stype_in, symbols=[self.cfg.symbol])
+        if start is not None:
+            client.subscribe(dataset=self.cfg.dataset, schema=self.cfg.bar_schema,
+                             stype_in=self.cfg.stype_in, symbols=[self.cfg.symbol], start=start)
+        else:
+            client.subscribe(dataset=self.cfg.dataset, schema=self.cfg.bar_schema,
+                             stype_in=self.cfg.stype_in, symbols=[self.cfg.symbol])
+        self._replay_active = start is not None
+        self._eoi = set()
+        self._conn_bars = 0
+        if start is not None:
+            self.replay_info["subscribed_starts"].append(start.isoformat())
+            self._event("REPLAY_STARTED", start=start, schema=self.cfg.bar_schema)
         return client
 
     def run(self, *, session_day: date | None = None, wait_for_window: bool = False) -> dict:
@@ -479,6 +607,8 @@ class LiveFeed:
                   symbol=self.cfg.symbol, schemas=[self.cfg.quote_schema, self.cfg.bar_schema])
         failures = 0
         status = "COMPLETED"
+        self.replay_info["requested_start"] = self.cfg.replay_start.isoformat() if self.cfg.replay_start else None
+        self._next_replay_start = self.cfg.replay_start
         while self.clock() < end:
             client, timer, received_any = None, None, False
             try:
@@ -514,6 +644,10 @@ class LiveFeed:
                 self._log("RECONNECT_EXHAUSTED", attempts=failures - 1)
                 break
             delay = min(self.cfg.backoff_max_s, self.cfg.backoff_initial_s * 2 ** (failures - 1))
+            # Resume: replay the outage from the last delivered bar (or the original context end).
+            resume = self.last_bar.end if self.last_bar is not None else (self.cfg.replay_start or self.seed_end)
+            self._next_replay_start = resume
+            self._event("RESUME_FROM", start=resume, attempt=failures)
             self.stats["reconnects"] += 1
             self._log("RECONNECTING", attempt=failures, delay_s=delay)
             self.sleep(delay)
@@ -524,6 +658,8 @@ class LiveFeed:
     def summary(self, status: str) -> dict:
         return {"status": status, "symbol": self.cfg.symbol, "contract": self.contract,
                 "stats": dict(self.stats), "last_bar_end": self.last_bar.end.isoformat() if self.last_bar else None,
+                "replay": dict(self.replay_info),
+                "seeded_from_context_end": self.seed_end.isoformat() if self.seed_end else None,
                 "read_only": True, "order_capability": False}
 
 
@@ -546,7 +682,8 @@ assert_read_only(LiveFeed)
 
 
 def run_session(engine, cfg, *, config: LiveFeedConfig | None = None, wait_for_window: bool = True,
-                log_path: Path | None = None, **feed_kwargs) -> dict:
+                log_path: Path | None = None, replay_start: datetime | None = None,
+                last_context_bar_end: datetime | None = None, **feed_kwargs) -> dict:
     """Run one bounded live PAPER session into ``engine.process_bar(bar, live_quote=quote)``.
 
     Enforces the live calendar rule on a file-backed engine calendar
@@ -560,12 +697,17 @@ def run_session(engine, cfg, *, config: LiveFeedConfig | None = None, wait_for_w
         calendar.point_in_time = True
         if calendar.max_snapshot_age is None or calendar.max_snapshot_age > LIVE_MAX_SNAPSHOT_AGE:
             calendar.max_snapshot_age = LIVE_MAX_SNAPSHOT_AGE
-    feed_cfg = config or LiveFeedConfig.from_pilot_config(cfg)
+    feed_cfg = config or LiveFeedConfig.from_pilot_config(cfg, replay_start=replay_start)
     if log_path is None and getattr(engine, "out_dir", None) is not None:
         log_path = Path(engine.out_dir) / "live-feed.jsonl"
     on_quote = getattr(engine, "process_quote", None)  # engine hook, if/when it exists
-    feed = LiveFeed(lambda bar, quote: engine.process_bar(bar, live_quote=quote), feed_cfg,
-                    log_path=log_path, on_quote=on_quote if callable(on_quote) else None, **feed_kwargs)
+    on_event = getattr(engine, "record_feed_event", None)
+    on_attest = getattr(engine, "attest_zero_trade", None)
+    feed = LiveFeed(lambda bar, quote, **kw: engine.process_bar(bar, live_quote=quote, **kw), feed_cfg,
+                    log_path=log_path, on_quote=on_quote if callable(on_quote) else None,
+                    on_event=on_event if callable(on_event) else None,
+                    on_attest=on_attest if callable(on_attest) else None,
+                    extended_callback=True, last_context_bar_end=last_context_bar_end, **feed_kwargs)
     return feed.run(wait_for_window=wait_for_window)
 
 

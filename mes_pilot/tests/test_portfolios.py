@@ -8,7 +8,7 @@ from mes_pilot.config import parse_config
 from mes_pilot.portfolios import NAMES, PortfolioGroup, load_portfolio_configs
 from mes_pilot.risk import PilotRiskManager
 from mes_pilot.simulator import Quote
-from mes_pilot.tests.helpers import DAY, preset_levels, et
+from mes_pilot.tests.helpers import DAY, assume_complete_context, preset_levels, et
 from mes_pilot.tests.test_engine_failures import calendar, scenario
 
 
@@ -29,6 +29,7 @@ def test_three_profiles_share_strategy_but_have_separate_100k_trailing_books(tmp
     group = PortfolioGroup(configs, out_dir=tmp_path, calendar=calendar(DAY),
                            data_source="TEST", quote_mode="MODELED")
     for eng in group.engines.values():
+        assume_complete_context(eng)
         eng.tfs[60].bias = eng.tfs[240].bias = "BULLISH"
         preset_levels(eng.book, et(DAY, 9, 30) - timedelta(hours=2))
     for bar in scenario(hold_minutes=2):

@@ -113,6 +113,24 @@ def r1_long_prefix(day: date = DAY, sweep_at: tuple[int, int] = (9, 30), *, swee
     return out
 
 
+def assume_complete_context(eng):
+    """TEST-ONLY: declare the hand-built context complete so unrelated mechanics can be exercised.
+
+    Production readiness is evaluated from data coverage (mes_pilot.coverage); these focused tests build a
+    few minutes of bars plus preset bias/levels, which the real gate correctly refuses. The gate itself is
+    tested with real coverage in test_context_readiness.py. The override is recorded in the readiness
+    details so it can never be mistaken for evidence.
+    """
+    from mes_pilot.coverage import ReadinessResult
+
+    def _ready(now):
+        eng.readiness = ReadinessResult(True, [], {"test_override": "CONTEXT_ASSUMED_COMPLETE_FOR_UNIT_TEST"})
+        return eng.readiness
+
+    eng._refresh_readiness = _ready
+    return eng
+
+
 def preset_levels(book: LiquidityBook, known_at: datetime) -> None:
     """Directly premark the two scenario levels (focused-unit-test shortcut, documented)."""
     book.levels["TEST_LOW"] = Level("TEST_LOW", "TEST_LOW", "SELL_SIDE", LOW_LEVEL, known_at)
