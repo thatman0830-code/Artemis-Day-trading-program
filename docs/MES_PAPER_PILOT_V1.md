@@ -1,5 +1,7 @@
 # MES Paper Pilot v1 (`mes_pilot/`)
 
+For the active three-account runner, read the [current handoff](../HANDOFF.md), [portfolio settings](MES_THREE_PAPER_PORTFOLIOS.md), and [October 2 repair](MES_CONTEXT_READINESS_REPAIR_2026-10-02.md). The single-account values below describe the original pilot; the scheduled launcher now uses the portfolio configuration.
+
 Implements the autonomous PAPER path from *Trading-bot-code-master.pdf v1.2*
 (sha256 `8296c98e…0cbc0fce`) and the Claude Code environment XML v2.1.
 Every numeric default lives in `config/mes_paper_pilot_v1.json` with a
@@ -20,7 +22,7 @@ user-attested *source engine* benchmark, not this bot.
 
 `mes_pilot/tests/test_modes_isolation.py` statically scans the package for
 order/UI/network imports; `databento` (read-only market data) is allowed only
-in `mes_pilot/live_feed.py`.
+in `mes_pilot/live_feed.py` and `mes_pilot/history_bridge.py`.
 
 ## Gap list versus the audit (verified against this checkout, 2026-10-01)
 

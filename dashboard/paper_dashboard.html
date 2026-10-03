@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Artemis · Paper Trading</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1018;--panel:#131c28;--panel2:#192536;--line:#29394c;--text:#eef4fb;--muted:#a9b8c9;--green:#61d6a3;--amber:#ffca74;--red:#ff777e;--blue:#82b6ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#162a3c 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.5 Segoe UI,Arial,sans-serif}main{max-width:1450px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding:4px 0 20px}.brand{font-size:23px;font-weight:700;letter-spacing:.02em}.sub{color:var(--muted);font-size:14px}.badge{border:1px solid #347d65;color:#a7f1ce;background:#123126;padding:7px 13px;border-radius:999px;font-weight:700;font-size:13px;letter-spacing:.06em}.banner{margin:20px 0;padding:14px 18px;border:1px solid #6e5428;background:#2b2111;border-radius:12px;color:#ffe0a7}.banner.good{border-color:#276b53;background:#10281f;color:#b3f2d4}.grid{display:grid;gap:16px}.books{grid-template-columns:repeat(3,minmax(0,1fr))}.two{grid-template-columns:1.4fr 1fr;margin-top:16px}.panel,.book{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}.book h2,.panel h2{margin:0 0 12px;font-size:19px}.book .type{font-size:13px;color:var(--muted);margin-top:-8px;margin-bottom:14px}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric{border-top:1px solid var(--line);padding-top:8px}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}.value{font-size:20px;font-weight:700;margin-top:2px}.small{font-size:13px;color:var(--muted)}.target{color:var(--amber)}.placeholder{color:var(--muted);font-weight:500;font-size:16px}.chart{height:230px;width:100%;display:block}.decision{border-top:1px solid var(--line);padding:12px 0}.decision:first-child{border-top:0}.reason{color:var(--amber)}.feed{max-height:310px;overflow:auto}.feedrow{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}.status{font-weight:700}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.footer{margin-top:18px;border-top:1px solid var(--line);padding:15px 0;color:var(--muted);font-size:13px;word-break:break-word}.pill{display:inline-block;background:#202f42;border:1px solid #334860;border-radius:999px;padding:3px 9px;font-size:12px;color:#cfdded;margin-left:6px}ul{margin:8px 0;padding-left:19px;color:var(--muted)}@media(max-width:900px){.books,.two{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}main{padding:14px}}
+</style></head><body><main>
+<header class="top"><div><div class="brand">Artemis</div><div class="sub">Paper trading · three portfolios · local read-only monitor</div></div><div class="badge">PAPER ONLY <span class="pill">LIVE ORDERS DISABLED</span></div></header>
+<div id="banner" class="banner">Connecting to local paper-run files…</div>
+<section class="grid books" id="books"></section>
+<section class="grid two"><article class="panel"><h2>Session qualification &amp; status layers</h2><div class="small">Qualified sessions use the runner's own rules plus the append-only corrections registry. Raw ledgers are never rewritten.</div><div id="qual" class="placeholder">No sessions recorded yet.</div></article><article class="panel"><h2>Shared signals · one signal, three sizing outcomes</h2><div class="small">Each setup is shown once. The three books are sizing policies on the same signal, not independent opportunities.</div><div id="signals" class="placeholder">No live signals recorded yet.</div></article></section>
+<section class="grid two"><article class="panel"><h2>Closed-trade equity · simulated starting balance $100,000</h2><div class="small">Calculated from completed ledger results only. Open-position marks are excluded.</div><canvas id="chart" class="chart"></canvas><div id="chartNote" class="placeholder">Awaiting the first paper session.</div></article><article class="panel"><h2>Feed & session status</h2><div id="feedStatus" class="placeholder">Awaiting runner output.</div><div class="small" style="margin-top:12px">Feed events are logged records, not a live quote stream. The dashboard cannot claim a quote is current between recorded updates.</div><div id="feedEvents" class="feed" style="margin-top:12px"></div></article></section>
+<section class="grid two"><article class="panel"><h2>Latest strategy decisions</h2><div id="decisions" class="placeholder">No decisions recorded yet.</div></article><article class="panel"><h2>Risk controls & evidence</h2><div id="risk" class="placeholder">Risk state appears after the first runner output.</div><ul><li>70% win rate is a target; 75% is the higher objective.</li><li>Actual performance requires completed, out-of-sample paper trades and uncertainty intervals.</li><li>Open-trade unrealized P&amp;L is shown as unavailable unless a persisted mark exists.</li></ul></article></section>
+<footer class="footer" id="footer">Reading local runner files. No broker connection, order controls, or write actions.</footer>
+</main><script>const booksEl=document.querySelector('#books'), banner=document.querySelector('#banner');
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const numeric=x=>x!==null&&x!==undefined&&x!==''&&Number.isFinite(Number(x));
+const fmt=(x,d=2)=>numeric(x)?Number(x).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const find=(o,keys)=>{for(const k of keys)if(o&&o[k]!==undefined&&o[k]!==null)return o[k];return null};
+const names={conservative:'Conservative',moderate:'Moderate',aggressive:'Aggressive'};
+const eventType=r=>String(r.event_type||r.type||r.kind||'').toUpperCase();
+const dateOf=ts=>{if(!ts)return null;const d=new Date(ts);if(Number.isNaN(d.getTime()))return null;const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);return ['year','month','day'].map(k=>p.find(v=>v.type===k).value).join('-')};
+const timeLabel=ts=>{if(!ts)return 'time unavailable';const d=new Date(ts);return Number.isNaN(d.getTime())?String(ts):new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(d)};
+const latestSession=b=>[...(b.ledger||[])].reverse().find(r=>eventType(r)==='SESSION_SUMMARY')||null;
+function openCount(b){
+ const positions=b.simulator?.positions;
+ if(Array.isArray(positions))return {count:positions.filter(p=>p.is_open||p.status==='OPEN').length,source:'saved simulator'};
+ const risk=b.risk?.open_risk;
+ if(risk&&typeof risk==='object'&&!Array.isArray(risk)&&Object.keys(risk).length===0)return {count:0,source:'saved risk state'};
+ return {count:null,source:'position state unavailable'};
+}
+function metric(label,value){return '<div class="metric"><div class="label">'+label+'</div><div class="value">'+value+'</div></div>'}
+function card(name,b,q){
+ const r=b.report||{},risk=b.risk||{},c=b.config||{},result=r.comparison?.CURRENT_BOT_RESULT||{};
+ const n=find(r.positions,['completed'])??find(result,['completed_positions'])??find(r,['closed_positions','completed_positions','trade_count']);
+ const wr=find(result,['observed_win_rate'])??find(r,['win_rate']);
+ const pnl=find(r.pnl,['net_usd'])??find(r,['net_pnl','net_pnl_usd']);
+ const rmean=find(r.pnl,['mean_net_r'])??find(r,['mean_net_r','expectancy_mean_net_r']);
+ const open=openCount(b),session=latestSession(b),eligible=find(r.sessions,['eligible_dates']),progress=r.evidence_progress||{};
+ return '<article class="book"><h2>'+names[name]+'</h2><div class="type">Paper book · '+esc(c.max_contracts??'—')+' MES cap · synthetic $100,000 start</div><div class="metrics">'+
+ metric('Closed trades',n===null?(b.report?'Unavailable':'Awaiting session'):esc(n))+
+ metric('Win rate',wr===null?'—':fmt(Number(wr)>1?wr:wr*100,1)+'%')+
+ metric('Net P&amp;L',pnl===null?'—':'$'+fmt(pnl))+
+ metric('Mean net R',rmean===null?'—':fmt(rmean,3))+
+ metric('Open positions',open.count===null?'—':open.count)+
+ metric('Trailing floor',risk.floor_usd==null?'$97,000 initial':'$'+fmt(risk.floor_usd))+
+ metric('New-trade risk budget',c.max_new_trade_budget_usd==null?'—':'$'+fmt(c.max_new_trade_budget_usd))+
+ metric('Daily stop / capacity',(c.net_daily_stop_usd==null?'—':'$'+fmt(c.net_daily_stop_usd))+' / '+(c.capacity_fraction==null?'—':fmt(c.capacity_fraction*100,0)+'%'))+
+ metric('Qualified sessions',q?esc(q.qualified_eligible_sessions)+' / 20'+(q.raw_eligible_sessions!==q.qualified_eligible_sessions?'<div class="small">raw recorded: '+esc(q.raw_eligible_sessions)+' (not approved)</div>':''):'—')+
+ metric('Validation target','<span class="target">70% / 75%</span>')+
+ '</div><div class="small" style="margin-top:12px">'+
+ (session?'Latest completed date: '+esc(session.session_date)+' · '+esc(session.classification==='NO_VALID_SETUP'?'No valid setup':session.classification)+'<br>':'')+
+ (r.ledger_chain_verified===true?'<span class="ok">Ledger chain verified</span>':r.ledger_chain_verified===false?'<span class="warn">Ledger chain not verified</span>':'Evidence not available yet')+
+ ' · open positions from '+esc(open.source)+'<br>'+(n===0?'No completed trades; win rate and mean net R are unavailable.':'Win-rate target is not a result.')+'</div></article>';
+}
+function renderChart(state){
+ const cv=document.querySelector('#chart'),ctx=cv.getContext('2d'),series=[];
+ for(const key of Object.keys(names)){
+  const b=state.books[key]||{},values=[100000];
+  for(const row of b.ledger||[]){if(eventType(row)==='POSITION_CLOSED'){const p=find(row,['net_pnl','net_pnl_usd','realized_net_pnl']);if(numeric(p))values.push(values.at(-1)+Number(p));}}
+  if(values.length>1)series.push({key,values});
+ }
+ cv.width=cv.clientWidth*devicePixelRatio;cv.height=cv.clientHeight*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);
+ const w=cv.clientWidth,h=cv.clientHeight;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#2b3c50';ctx.fillStyle='#a9b8c9';ctx.font='12px Segoe UI';
+ for(let i=0;i<4;i++){const y=15+i*(h-35)/3;ctx.beginPath();ctx.moveTo(70,y);ctx.lineTo(w-8,y);ctx.stroke();}
+ if(!series.length){document.querySelector('#chartNote').textContent='No completed paper trades yet. The saved account balances appear in the risk panel; no trade equity curve is inferred.';return}
+ document.querySelector('#chartNote').textContent='Closed-trade ledger only. Starting balance: $100,000 per book.';
+ const colors={conservative:'#61d6a3',moderate:'#82b6ff',aggressive:'#ffca74'},all=series.flatMap(s=>s.values),lo=Math.min(...all)-100,hi=Math.max(...all)+100;
+ for(let i=0;i<4;i++){const y=15+i*(h-35)/3,val=hi-i*(hi-lo)/3;ctx.fillText('$'+Math.round(val).toLocaleString(),0,y+4)}
+ for(const s of series){ctx.strokeStyle=colors[s.key];ctx.lineWidth=2.5;ctx.beginPath();s.values.forEach((v,i)=>{const x=72+(i/Math.max(1,s.values.length-1))*(w-84),y=15+((hi-v)/(hi-lo))*(h-35);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()}
+}
+const reasonLabels={
+ CONTEXT_INCOMPLETE:'Not qualified: required market history was incomplete, so new entries were (or should have been) blocked.',
+ CONTEXT_INCOMPLETE_HISTORY_GAP:'Not qualified: market history was missing between warmup and live data.',
+ C1_NO_DISPLACEMENT_FVG:'Rejected: the price move did not meet the required displacement and fair-value-gap confirmation.',
+ C1_EFFICIENCY_BELOW_MIN:'Rejected: price movement was too choppy for the continuation rule.',
+ NO_UNCONSUMED_TARGET:'Rejected: no unused price target remained.',
+ TARGET_CONSUMED_BEFORE_ENTRY:'Rejected: the price target was reached before an entry could be placed.',
+ SETUP_LIFETIME_ELAPSED:'Expired: the setup did not complete within its allowed time.',
+ SWEEP_EXTREME_EXCEEDED:'Rejected: price moved beyond the allowed sweep level.',
+ GAP_DISRESPECTED_M1_CLOSE:'Rejected: a one-minute candle closed beyond the permitted gap boundary.',
+ NO_DISPLACEMENT_WITHIN_6_M5_BARS:'Expired: the required confirming price move did not appear in time.'
+};
+function sessionDecisions(b){
+ const session=latestSession(b),day=session?.session_date;
+ // Use market-data time, never file-write time: warmup records can be written during the live run.
+ if(!day)return {day:null,rows:[]};
+ const rows=(b.ledger||[]).filter(r=>{
+  if(!['SETUP_TERMINAL','CANDIDATE'].includes(eventType(r)))return false;
+  const ts=eventType(r)==='SETUP_TERMINAL'?r.transitions?.at(-1)?.market_data_ts:(r.market_data_ts??r.at);
+  return dateOf(ts)===day&&(!session.run_id||r.run_id===session.run_id);
+ }).map(r=>({...r,display_ts:eventType(r)==='SETUP_TERMINAL'?r.transitions.at(-1).market_data_ts:(r.market_data_ts??r.at)}));
+ return {day,rows};
+}
+function render(s){
+ s.books=s.books||{};
+ booksEl.innerHTML=Object.keys(names).map(k=>card(k,s.books[k]||{},s.qualification?.books?.[k])).join('');
+ renderQualification(s);renderSignals(s);
+ const fs=s.feed_summary||{},stats=fs.stats||{},events=s.feed_events||[],has=Object.values(s.books).some(b=>(b.ledger||[]).length||b.report);
+ const complete=fs.status==='COMPLETED',lastBar=find(fs,['last_bar_end','last_bar_end_utc']);
+ banner.className='banner '+(complete?'good':'');
+ banner.textContent=complete?'Paper session completed. Showing saved results through '+timeLabel(lastBar)+'. This is the completed session record.':has?'Saved paper output found. A completed-session feed summary is not available; current runner status is unverified.':'Awaiting first three-portfolio paper session. No completed trades or win rate are being claimed.';
+ document.querySelector('#footer').textContent='Runner data: '+s.output_dir+' · dashboard refreshed '+new Date().toLocaleTimeString()+' · local read-only dashboard.';
+ document.querySelector('#feedStatus').innerHTML=s.output_exists?'<div class="metrics">'+
+ metric('Latest saved bar',esc(timeLabel(lastBar)))+
+ metric('Feed session',esc(complete?'Completed':fs.status||'Unavailable'))+
+ metric('Bars delivered',esc(find(stats,['bars_delivered'])??'—'))+
+ metric('Delayed quotes',esc(find(stats,['delayed_quotes'])??find(fs,['delayed_quotes','delayed_quote_count'])??'—'))+
+ metric('Stale quote bars',esc(find(stats,['stale_quote_bars'])??find(fs,['stale_quote_bars'])??'—'))+
+ metric('Feed errors',esc(find(stats,['errors'])??'—'))+'</div>':'No runner output folder exists yet.';
+ document.querySelector('#feedEvents').innerHTML=events.slice(-8).reverse().map(e=>'<div class="feedrow"><b>'+esc(e.kind||e.event_type||e.type||'Feed event')+'</b> · '+esc(timeLabel(e.at||e.written_at_utc||e.timestamp))+'<br>'+esc(e.reason||e.status||e.message||'')+'</div>').join('')||'<div class="small">No feed events recorded.</div>';
+ const decisions=[];
+ for(const k of Object.keys(names)){
+  const result=sessionDecisions(s.books[k]||{});
+  let text='<div class="decision"><b>'+names[k]+'</b>';
+  if(!result.day){decisions.push(text+'<br>No completed session date available for filtering.</div>');continue}
+  text+=' · '+esc(result.day)+'<br><span class="small">Live-date evidence: '+result.rows.length+' terminal setup / candidate record'+(result.rows.length===1?'':'s')+'. Historical warmup excluded.</span>';
+  if(!result.rows.length)text+='<br>No matching setup decision recorded.';
+  for(const c of result.rows.slice(-3).reverse()){
+   text+='<div style="margin-top:10px"><b>'+esc(c.state||c.decision_state||c.decision||'Candidate')+' · '+esc(c.direction||'Direction unavailable')+'</b><br><span class="small">'+esc(c.family||c.setup_family||'Setup unavailable')+' · '+esc(timeLabel(c.display_ts))+'</span><br><span class="reason">'+esc(reasonLabels[c.reason]||c.reason||'No reason logged')+'</span>';
+   if(c.entry_ref!=null||c.stop!=null||c.target!=null)text+='<br><span class="small">Entry '+esc(c.entry_ref??'—')+' · stop '+esc(c.stop??'—')+' · target '+esc(c.target??'—')+' · gross R:R '+esc(c.gross_reward_risk??'—')+'</span>';
+   text+='</div>';
+  }
+  decisions.push(text+'</div>');
+ }
+ document.querySelector('#decisions').innerHTML=decisions.join('');
+ const kill=s.group_kill_switch;
+ let riskHtml='<div class="decision"><b>Group kill-switch record:</b> '+(kill?esc(JSON.stringify(kill)):'not recorded')+'</div>';
+ for(const k of Object.keys(names)){const r=s.books[k]?.risk||{};riskHtml+='<div class="decision"><b>'+names[k]+':</b> cash '+(r.cash==null?'—':'$'+fmt(r.cash))+' · peak '+(r.peak_equity==null?'—':'$'+fmt(r.peak_equity))+' · floor '+(r.floor_usd==null?'—':'$'+fmt(r.floor_usd))+' · breached '+(r.floor_breached==null?'—':String(r.floor_breached))+' · kill switch '+(r.kill_switch_latched==null?'unavailable':r.kill_switch_latched?'latched':'not latched')+'</div>'}
+ document.querySelector('#risk').innerHTML=riskHtml;renderChart(s);
+}
+function chip(label,state){const cls=state===true||state==='READY'?'ok':(state===false||state==='NOT_READY'||state==='NOT READY'?'warn':'');return '<span class="pill '+cls+'" style="margin-right:6px">'+esc(label)+': '+esc(state===true?'yes':state===false?'no':state)+'</span>'}
+function renderQualification(s){
+ const q=s.qualification||{},el=document.querySelector('#qual');
+ if(!q.available){el.innerHTML='<div class="small">'+esc(q.note||'Qualification unavailable.')+'</div>';return}
+ const b=q.books?.conservative||Object.values(q.books||{})[0];
+ if(!b||!b.dates.length){el.innerHTML='<div class="small">No sessions recorded yet.</div>';return}
+ const fs=s.feed_summary||{};
+ el.innerHTML=b.dates.slice().reverse().map(d=>{
+  const corrected=d.qualified_classification!==d.raw_classification;
+  const layers=d.status_layers||{process_completed:fs.status==='COMPLETED',feed_connected:(fs.stats?.bars_delivered||0)>0,
+    strategy_ready:corrected?'NOT READY':'UNVERIFIED (recorded before readiness checks)',trade_executed:false};
+  return '<div class="decision"><b>'+esc(d.session_date)+'</b> · '+(d.qualified?'<span class="ok">QUALIFIED</span>':'<span class="warn">NOT QUALIFIED</span>')+
+   ' · completed '+(corrected?'diagnostic ':'')+'session · <b>'+esc(d.qualified_classification)+'</b>'+(corrected?' <span class="small">(recorded as '+esc(d.raw_classification)+')</span>':'')+
+   '<div style="margin:6px 0">'+chip('Process completed',layers.process_completed)+chip('Feed connected',layers.feed_connected)+chip('Strategy ready',layers.strategy_ready)+chip('Trade executed',layers.trade_executed)+'</div>'+
+   (d.reason_detail?'<span class="reason">'+esc(d.reason_detail)+'</span>':'')+'</div>'}).join('')+
+  '<div class="small">Qualified totals: '+Object.entries(q.books).map(([k,v])=>names[k]+' '+v.qualified_eligible_sessions+'/20 (raw '+v.raw_eligible_sessions+')').join(' · ')+'</div>';
+}
+function dispText(d){if(!d)return '';return 'body '+fmt(d.body,2)+' vs required '+fmt(d.required_body,2)+' (prior ATR '+fmt(d.prior_atr,2)+', ratio '+fmt(d.body_atr_ratio,2)+') · direction '+(d.direction_ok?'ok':'fail')+' · close location '+fmt(d.close_location,3)+' '+(d.close_location_ok?'ok':'fail')+' · result '+esc(d.reason)}
+function renderSignals(s){
+ const el=document.querySelector('#signals'),sig=s.shared_signals||[],diag=s.diagnostics||{};
+ let html=sig.length?sig.slice().reverse().map(x=>{
+  const disp=x.refs?.displacement;
+  let t='<div class="decision"><b>'+esc(x.family)+' '+esc(x.direction)+'</b> · '+esc(timeLabel(x.market_data_ts))+'<br><span class="reason">'+esc(reasonLabels[x.reason]||x.reason||'')+'</span><br><span class="small">'+
+   Object.keys(names).map(k=>{const o=x.books?.[k];return names[k]+': '+(o?esc(o.decision)+' · qty '+esc(o.quantity??0):'—')}).join(' · ')+'</span>';
+  if(disp)t+='<br><span class="small">Displacement: '+dispText(disp)+'</span>';
+  else if(x.reason==='C1_NO_DISPLACEMENT_FVG'){
+   const rec=diag.oct02_original_reconstruction?.reconstructed?.[0]?.displacement;
+   t+='<br><span class="small">Displacement detail not recorded in the original ledger.'+(rec?' DIAGNOSTIC reconstruction (same inputs, pre-repair engine): '+dispText(rec):'')+'</span>';
+  }
+  return t+'</div>'}).join(''):'<div class="small">No live signals recorded yet.</div>';
+ const cc=diag.oct02_complete_context;
+ if(cc&&cc.setups_terminal?.length)html+='<div class="decision"><b>DIAGNOSTIC · Oct 2 rerun with complete history (not forward evidence)</b><br><span class="small">'+cc.setups_terminal.map(x=>esc(x.family)+' '+esc(x.direction)+': '+esc(x.reason)+' (efficiency '+fmt(x.efficiency_ratio,3)+'; '+dispText(x.displacement)+')').join('<br>')+'</span></div>';
+ el.innerHTML=html;
+}
+async function refresh(){try{const res=await fetch('/api/state',{cache:'no-store'});if(!res.ok)throw new Error('Data service unavailable');render(await res.json())}catch(e){banner.className='banner';banner.textContent='Local dashboard cannot reach its read-only data service.'}}
+refresh();setInterval(refresh,7000);</script></body></html>
