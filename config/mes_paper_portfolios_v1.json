@@ -1,0 +1,30 @@
+{
+  "schema_version": "mes-paper-portfolios-v1",
+  "paper_only": true,
+  "model_status": "PROVISIONAL_SYNTHETIC_100K_INTRADAY_TRAIL_NOT_A_CONFIGURED_PROP_ACCOUNT",
+  "floor_note": "The floor trails peak liquidation-side equity, including unrealized P&L, and does not lock. Verify the exact purchased firm's plan and stage before any prop use.",
+  "starting_equity_usd": 100000,
+  "initial_floor_usd": 97000,
+  "drawdown_allowance_usd": 3000,
+  "execution_reserve_usd": 200,
+  "profiles": {
+    "CONSERVATIVE": {
+      "max_contracts": 1,
+      "max_new_trade_budget_usd": 100,
+      "capacity_fraction": 0.05,
+      "net_daily_stop_usd": 150
+    },
+    "MODERATE": {
+      "max_contracts": 2,
+      "max_new_trade_budget_usd": 200,
+      "capacity_fraction": 0.10,
+      "net_daily_stop_usd": 300
+    },
+    "AGGRESSIVE": {
+      "max_contracts": 3,
+      "max_new_trade_budget_usd": 300,
+      "capacity_fraction": 0.15,
+      "net_daily_stop_usd": 450
+    }
+  }
+}

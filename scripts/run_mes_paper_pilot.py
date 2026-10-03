@@ -1,0 +1,364 @@
+"""MES paper pilot command line (PAPER_AUTO by default; LIVE_AUTO is refused).
+
+  demo                      synthetic end-to-end: one qualifying trade, one rejected setup
+  replay --start --end      chronological replay of the ES 1-minute archive (MES-sized fills)
+  live                      bounded live PAPER session via the read-only Databento feed
+  report --dir              evidence report for one ledger directory
+  kill-switch on|off        persistent kill switch for a run directory
+  review --note             log the review that clears a 3-consecutive-loss pause
+  clear-block --note        operator reconciliation after an emergency/mismatch
+  alert-resolve             record Frank's actual decision for a manual prop alert
+
+All outputs go under outputs/mes_pilot/ (relative to the repository).
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import uuid
+from datetime import date, datetime, time, timedelta
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from mes_pilot.bars import ET, UTC, load_archive_sessions  # noqa: E402
+from mes_pilot.config import load_config  # noqa: E402
+from mes_pilot.engine import PilotEngine  # noqa: E402
+from mes_pilot.events import EventCalendar  # noqa: E402
+from mes_pilot.modes import LiveAutoDisabled, OperatingMode  # noqa: E402
+from mes_pilot.report import build_report, render_text  # noqa: E402
+from mes_pilot.portfolios import PortfolioGroup, load_portfolio_configs, NAMES  # noqa: E402
+
+OUT = ROOT / "outputs" / "mes_pilot"
+CAL_DIR = ROOT / "data" / "mes_pilot" / "calendar"
+ARCHIVES = [ROOT / "data" / "backtests" / "es_nq_pass_b_archive_3" / "ES", ROOT / "data" / "futures_forward" / "ES"]
+
+
+def _run_dir(kind: str) -> Path:
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    path = OUT / kind / stamp
+    path.mkdir(parents=True, exist_ok=False)
+    return path
+
+
+def _print_report(directory: Path, cfg) -> dict:
+    ledgers = sorted(directory.glob("*-ledger.jsonl"))
+    rep = {}
+    for ledger in ledgers:
+        rep = build_report(ledger, cfg)
+        print(render_text(rep))
+        (directory / "report.json").write_text(json.dumps(rep, indent=1, default=str), encoding="utf-8")
+    return rep
+
+
+# ---------------------------------------------------------------------------------- demo
+def cmd_demo(args):
+    from mes_pilot import synthetic as S
+
+    cfg = load_config(overrides={"strategy": {"volatility_filter_enabled": False}})
+    days = [date(2026, 9, 14) + timedelta(days=i) for i in range(4)]
+    calendar = EventCalendar([], set(days), "SYNTHETIC_COVERAGE_NO_EVENTS")
+    base = _run_dir("synthetic_demo")
+    until = datetime.combine(days[-1], time(9, 0), ET).astimezone(UTC)
+    history = S.history(days, until)
+    results = {}
+    for scenario in ("qualifying", "rejected"):
+        out = base / scenario
+        eng = PilotEngine(cfg, out_dir=out, evidence_label="SYNTHETIC_TEST", data_source=f"mes_pilot.synthetic:{scenario}",
+                          calendar=calendar, calendar_policy_label="SYNTHETIC")
+        for bar in history:
+            eng.process_bar(bar)
+        x, target_rel = S.choose_geometry(eng, until, history[-1].close, max(S.SCENARIO_DEPTH.values()))
+        for bar in S.demo_segment(days[-1], x, history[-1].close, S.SCENARIO_DEPTH[scenario], target_rel):
+            eng.process_bar(bar)
+        eng.finish()
+        print(f"\n##### SCENARIO {scenario.upper()} (swept level {x}, target +{target_rel} pts) -> {out}")
+        _summarize_ledger(eng)
+        results[scenario] = str(out)
+    print(f"\nSynthetic demo ledgers: {base}")
+    return results
+
+
+def _summarize_ledger(eng):
+    for rec in eng.ledger.records():
+        t = rec["type"]
+        if t == "CANDIDATE":
+            risk = rec.get("risk") or {}
+            print(f"  CANDIDATE {rec['setup_family']} {rec['direction']} decision={rec['decision_state']} reason={rec['reason']}"
+                  f" entry_ref={rec['entry_ref']} stop={rec['stop']} target={rec['target']} RR={rec['gross_reward_risk']}"
+                  f" qty={risk.get('quantity')} budget={risk.get('budget')} unit_loss={risk.get('unit_loss')}"
+                  f" stop_ticks={risk.get('stop_ticks')}")
+        elif t in ("INTENT", "ORDER", "FILL", "POSITION_OPENED"):
+            keep = {k: rec.get(k) for k in ("intent_id", "status", "reason", "fill_price", "filled_qty", "entry_price",
+                                             "stop", "target", "quantity", "slippage_ticks", "quote_source") if rec.get(k) is not None}
+            print(f"  {t} {keep}")
+        elif t == "POSITION_CLOSED":
+            print(f"  POSITION_CLOSED exit={rec['exit_reason']} entry={rec['entry_price']} exit_px={rec['exit_price']}"
+                  f" gross=${rec['gross_pnl']} fees=${rec['fees']} net=${rec['net_pnl']} netR={rec['net_r']}"
+                  f" outcome={rec['outcome']} hold={rec['hold_minutes']}m MAE={rec['mae_ticks']}t MFE={rec['mfe_ticks']}t")
+        elif t == "SESSION_SUMMARY":
+            print(f"  SESSION {rec['session_date']} classification={rec['classification']} positions={rec['positions']}"
+                  f" net=${rec['net_pnl']} skips={rec['skip_reasons']}")
+    print(f"  ledger: {eng.ledger.path}  hash-chain verified: {eng.ledger.verify_chain()}")
+
+
+# ---------------------------------------------------------------------------------- replay
+def cmd_replay(args):
+    overrides = {}
+    diag = args.calendar_policy == "diagnostic-not-required"
+    if diag:
+        overrides = {"events": {"required": False}}
+    cfg = load_config(overrides=overrides or None)
+    start, end = date.fromisoformat(args.start), date.fromisoformat(args.end)
+    sp = cfg.splits
+    if not (end < sp.protected_oos[0] or start > sp.protected_oos[1]):
+        raise SystemExit(f"Refusing: {start}..{end} overlaps PROTECTED_OOS {sp.protected_oos}; it stays untouched until its planned release.")
+    labels = {sp.label_for(start), sp.label_for(end)}
+    if len(labels) != 1:
+        raise SystemExit(f"Range spans evidence segments {labels}; replay one segment at a time.")
+    label = labels.pop()
+    if diag:
+        label = "REPLAY_DIAGNOSTIC_NON_DEPLOYABLE"
+    sessions = load_archive_sessions(ARCHIVES, start=start - timedelta(days=400), end=end)
+    warm = [s for s in sessions if s.session_date < start and not (sp.protected_oos[0] <= s.session_date <= sp.protected_oos[1])]
+    warm = warm[-cfg.strategy.volatility_sessions:]
+    run = [s for s in sessions if start <= s.session_date <= end]
+    calendar = EventCalendar.load_dir(CAL_DIR) if CAL_DIR.exists() else EventCalendar.empty()
+    out = _run_dir(f"replay_{label.lower()}")
+    eng = PilotEngine(cfg, out_dir=out, evidence_label=label, calendar=calendar,
+                      data_source=f"ES 1m archive (MES price proxy) {start}..{end}; warmup {len(warm)} sessions",
+                      calendar_policy_label="DIAGNOSTIC_NOT_REQUIRED" if diag else "REQUIRED")
+    eng.warmup = True
+    for s in warm:
+        for bar in s.bars:
+            eng.process_bar(bar)
+    eng.end_warmup()
+    for s in run:
+        for bar in s.bars:
+            eng.process_bar(bar)
+    eng.finish()
+    print(f"Replay {start}..{end}: {len(run)} sessions, warmup {len(warm)}; ledger {eng.ledger.path}")
+    _print_report(out, cfg)
+
+
+# ---------------------------------------------------------------------------------- live
+def cmd_live(args):
+    cfg = load_config()
+    if args.mode == OperatingMode.LIVE_AUTO.value:
+        raise LiveAutoDisabled("LIVE_AUTO is disabled in this version; no personal-live adapter is qualified.")
+    from mes_pilot import live_feed  # lazy: databento only needed here
+
+    # Live: point-in-time and a snapshot retrieved within the last 7 days.
+    calendar = EventCalendar.load_for_live(CAL_DIR) if CAL_DIR.exists() else EventCalendar.empty()
+    label = "AUTONOMOUS_PAPER" if args.mode == "PAPER_AUTO" else "MANUAL_PROP"
+    out = OUT / label.lower()
+    eng = PilotEngine(cfg, out_dir=out, evidence_label=label, mode=args.mode, quote_mode="LIVE", calendar=calendar,
+                      data_source="Databento GLBX.MDP3 MES.c.0 live (read-only)",
+                      allow_unconfigured_prop_dry_run=args.prop_dry_run)
+    # Warm up structure and volatility history from the archive (most recent sessions, never protected OOS).
+    sp = cfg.splits
+    hist = [s for s in load_archive_sessions(ARCHIVES, start=date.today() - timedelta(days=400))
+            if not (sp.protected_oos[0] <= s.session_date <= sp.protected_oos[1])]
+    eng.warmup = True
+    for s in hist[-cfg.strategy.volatility_sessions:]:
+        for bar in s.bars:
+            eng.process_bar(bar)
+    eng.end_warmup()
+    feed_result = None
+    try:
+        feed_result = live_feed.run_session(eng, cfg)
+    finally:
+        # Finalize the ledger even when the feed raises unexpectedly.
+        eng.finish()
+        _print_report(out, cfg)
+    (out / "live-feed-summary.json").write_text(json.dumps(feed_result, indent=1, default=str), encoding="utf-8")
+    if feed_result["status"] != "COMPLETED":
+        raise RuntimeError(f"MES paper feed did not complete: {feed_result['status']}")
+
+
+def cmd_live_portfolios(args):
+    """One read-only MES feed, three isolated synthetic paper ledgers."""
+    configs = load_portfolio_configs()
+    cfg = configs[NAMES[0]]
+    from mes_pilot import live_feed
+
+    from mes_pilot.history_bridge import build_context
+
+    calendar = EventCalendar.load_for_live(CAL_DIR) if CAL_DIR.exists() else EventCalendar.empty()
+    out = OUT / "autonomous_paper_portfolios"
+    group = PortfolioGroup(configs, out_dir=out, calendar=calendar,
+                           data_source="Databento GLBX.MDP3 MES.c.0 live (read-only); context: ES archive proxy "
+                                       "+ MES historical (zero-cost guarded) + live intraday replay")
+    # Context bridge: archive -> native MES history -> live intraday replay from the last context bar.
+    bridge = build_context(group, cfg=cfg, archives=ARCHIVES, now=datetime.now(UTC))
+    last_end = datetime.fromisoformat(bridge["last_context_bar_end"]) if bridge["last_context_bar_end"] else None
+    bridge_dir = out / "context-bridge"
+    bridge_dir.mkdir(parents=True, exist_ok=True)
+    (bridge_dir / f"bridge-{datetime.now(UTC):%Y%m%dT%H%M%SZ}.json").write_text(
+        json.dumps(bridge, indent=1, default=str), encoding="utf-8")
+    group.record_feed_event("CONTEXT_BRIDGE_BUILT", last_context_bar_end=bridge["last_context_bar_end"],
+                            mes_historical_status=bridge["mes_historical"]["status"],
+                            fallback_to_archive=bridge["fallback_to_archive"])
+    feed_result = None
+    try:
+        feed_result = live_feed.run_session(group, cfg, replay_start=last_end, last_context_bar_end=last_end)
+    finally:
+        group.finish()
+        comparison = group.comparison()
+        print(json.dumps({"same_signal_ids": comparison["same_signal_ids"],
+                          "shared_signal_count": comparison["shared_signal_count"],
+                          "portfolio_results": comparison["portfolio_results"]}, indent=1))
+    (out / "live-feed-summary.json").write_text(json.dumps(feed_result, indent=1, default=str), encoding="utf-8")
+    if feed_result["status"] != "COMPLETED":
+        raise RuntimeError(f"MES portfolio feed did not complete: {feed_result['status']}")
+
+
+def cmd_bridge_check(args):
+    """DIAGNOSTIC (non-deployable): build context + a short live intraday-replay connection, report coverage.
+
+    Writes only under outputs/mes_pilot/diagnostic_bridge_check/<stamp>/ with label
+    REPLAY_DIAGNOSTIC_NON_DEPLOYABLE. Never touches the scheduled books. Read-only market data.
+    """
+    from mes_pilot import live_feed
+    from mes_pilot.history_bridge import build_context
+
+    configs = load_portfolio_configs()
+    cfg = configs[NAMES[0]]
+    now = datetime.now(UTC)
+    out = _run_dir("diagnostic_bridge_check")
+    calendar = EventCalendar.load_dir(CAL_DIR) if CAL_DIR.exists() else EventCalendar.empty()
+    eng = PilotEngine(cfg, out_dir=out, evidence_label="REPLAY_DIAGNOSTIC_NON_DEPLOYABLE", quote_mode="LIVE",
+                      calendar=calendar, calendar_policy_label="DIAGNOSTIC",
+                      data_source="bridge-check: ES archive proxy + MES historical + MES live intraday replay")
+    bridge = build_context(eng, cfg=cfg, archives=ARCHIVES, now=now)
+    last_end = datetime.fromisoformat(bridge["last_context_bar_end"]) if bridge["last_context_bar_end"] else None
+    local = now.astimezone(ET)
+    win_start = (local - timedelta(minutes=1)).time().replace(second=0, microsecond=0)
+    win_end = (local + timedelta(minutes=args.minutes)).time().replace(second=0, microsecond=0)
+    feed_cfg = live_feed.LiveFeedConfig.from_pilot_config(cfg, replay_start=last_end, window_start=win_start,
+                                                          window_end=win_end, connect_lead_s=0)
+    summary = live_feed.run_session(eng, cfg, config=feed_cfg, wait_for_window=False, replay_start=last_end,
+                                    last_context_bar_end=last_end, log_path=out / "live-feed.jsonl")
+    eng.finish()
+    readiness = eng._refresh_readiness(eng.last_bar.end if eng.last_bar else now)
+    result = {"label": "REPLAY_DIAGNOSTIC_NON_DEPLOYABLE (bridge-check; not forward evidence)",
+              "bridge": bridge, "feed": summary, "coverage_final": eng.coverage.to_dict(),
+              "readiness_at_last_bar": {"ready": readiness.ready, "reasons": readiness.reasons,
+                                        "details": readiness.details}}
+    (out / "bridge-check.json").write_text(json.dumps(result, indent=1, default=str), encoding="utf-8")
+    print(json.dumps({"out": str(out), "feed_status": summary["status"], "replay": summary.get("replay"),
+                      "mes_historical": {k: bridge["mes_historical"][k] for k in ("status", "bars", "effective",
+                                                                                 "cost_usd", "contracts")},
+                      "archive_last_bar_end": bridge["archive_last_bar_end"],
+                      "last_context_bar_end": bridge["last_context_bar_end"],
+                      "unexpected_gaps": result["coverage_final"]["unexpected_gap_count"],
+                      "ready": readiness.ready, "reasons": readiness.reasons}, indent=1, default=str))
+
+
+def cmd_portfolio_kill(args):
+    root = OUT / "autonomous_paper_portfolios"
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / "group-kill-switch.json"
+    tmp = path.with_name(f".group-kill.{uuid.uuid4().hex}.tmp")
+    tmp.write_text(json.dumps({"active": args.state == "on", "reason": args.reason,
+                               "at_utc": datetime.now(UTC).isoformat()}), encoding="utf-8")
+    os.replace(tmp, path)
+    print(f"Three-portfolio paper kill switch {'ACTIVE' if args.state == 'on' else 'cleared'}")
+
+
+# ---------------------------------------------------------------------------------- admin
+def _engine_for_dir(directory: Path, cfg):
+    led = sorted(directory.glob("*-ledger.jsonl"))
+    label = led[0].name.replace("-ledger.jsonl", "").upper() if led else "AUTONOMOUS_PAPER"
+    return PilotEngine(cfg, out_dir=directory, evidence_label=label, data_source="admin", calendar=EventCalendar.empty())
+
+
+def cmd_report(args):
+    _print_report(Path(args.dir), load_config())
+
+
+def cmd_kill(args):
+    eng = _engine_for_dir(Path(args.dir), load_config())
+    eng.set_kill_switch(args.state == "on", args.reason)
+    print(f"kill switch {'ACTIVE' if args.state == 'on' else 'cleared'} for {args.dir}")
+
+
+def cmd_review(args):
+    eng = _engine_for_dir(Path(args.dir), load_config())
+    res = eng.risk.log_review(args.note)
+    eng.ledger.append("REVIEW_LOGGED", note=args.note, **res)
+    print(res)
+
+
+def cmd_clear(args):
+    eng = _engine_for_dir(Path(args.dir), load_config())
+    eng.clear_block(args.note)
+    print(f"entries blocked: {eng.blocked}")
+
+
+def cmd_alert_resolve(args):
+    from mes_pilot.alerts import AlertOutbox
+
+    box = AlertOutbox(Path(args.dir) / "prop-alerts.jsonl")
+    print(box.resolve(args.alert_id, args.decision, actual_fill_price=args.fill_price, actual_fill_time=args.fill_time,
+                      actual_qty=args.qty, actual_stop=args.stop, actual_target=args.target, note=args.note))
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = p.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("demo").set_defaults(fn=cmd_demo)
+    r = sub.add_parser("replay")
+    r.add_argument("--start", required=True)
+    r.add_argument("--end", required=True)
+    r.add_argument("--calendar-policy", choices=["required", "diagnostic-not-required"], default="required")
+    r.set_defaults(fn=cmd_replay)
+    lv = sub.add_parser("live")
+    lv.add_argument("--mode", choices=["PAPER_AUTO", "PROP_MANUAL_ALERTS", "LIVE_AUTO"], default="PAPER_AUTO")
+    lv.add_argument("--prop-dry-run", action="store_true", help="emit alerts marked DRY RUN while no prop profile is configured")
+    lv.set_defaults(fn=cmd_live)
+    lp = sub.add_parser("live-portfolios", help="run three $100K synthetic PAPER_AUTO accounts on one MES feed")
+    lp.set_defaults(fn=cmd_live_portfolios)
+    bc = sub.add_parser("bridge-check", help="DIAGNOSTIC: context bridge + short live replay; coverage/readiness report")
+    bc.add_argument("--minutes", type=int, default=3)
+    bc.set_defaults(fn=cmd_bridge_check)
+    pk = sub.add_parser("portfolio-kill-switch", help="halt and flatten all three paper books")
+    pk.add_argument("state", choices=["on", "off"])
+    pk.add_argument("--reason", default="operator")
+    pk.set_defaults(fn=cmd_portfolio_kill)
+    rp = sub.add_parser("report")
+    rp.add_argument("--dir", required=True)
+    rp.set_defaults(fn=cmd_report)
+    k = sub.add_parser("kill-switch")
+    k.add_argument("state", choices=["on", "off"])
+    k.add_argument("--dir", default=str(OUT / "autonomous_paper"))
+    k.add_argument("--reason", default="operator")
+    k.set_defaults(fn=cmd_kill)
+    rv = sub.add_parser("review")
+    rv.add_argument("--dir", default=str(OUT / "autonomous_paper"))
+    rv.add_argument("--note", required=True)
+    rv.set_defaults(fn=cmd_review)
+    cb = sub.add_parser("clear-block")
+    cb.add_argument("--dir", default=str(OUT / "autonomous_paper"))
+    cb.add_argument("--note", required=True)
+    cb.set_defaults(fn=cmd_clear)
+    ar = sub.add_parser("alert-resolve")
+    ar.add_argument("--dir", default=str(OUT / "manual_prop"))
+    ar.add_argument("--alert-id", required=True)
+    ar.add_argument("--decision", required=True, choices=["ENTERED", "SKIPPED", "EXPIRED", "MISSED"])
+    ar.add_argument("--fill-price", type=float)
+    ar.add_argument("--fill-time")
+    ar.add_argument("--qty", type=int)
+    ar.add_argument("--stop", type=float)
+    ar.add_argument("--target", type=float)
+    ar.add_argument("--note", default="")
+    ar.set_defaults(fn=cmd_alert_resolve)
+    args = p.parse_args(argv)
+    return args.fn(args)
+
+
+if __name__ == "__main__":
+    main()

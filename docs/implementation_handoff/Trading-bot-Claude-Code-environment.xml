@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<claude_code_trading_bot_handoff version="2.1">
+
+  <purpose>
+    Give Frank's EXISTING day-trading bot a clear operating environment and direct Claude Code
+    to improve that bot. This is an actionable implementation prompt to use together with
+    Trading-bot-code-master.pdf, not a replacement strategy or a request for a 340-section essay.
+    The finished goal is a validated, fully autonomous personal-live bot. The immediate goal
+    is a working, measurable, autonomous paper-trading path in the existing project.
+  </purpose>
+
+  <documents>
+    <document id="approved_master" role="implementation_specification">
+      <filename>Trading-bot-code-master.pdf</filename>
+      <sha256>8296c98ef807f1342023629dec0b2732b8461251ad1be1f3ecce8fa01cbc0fce</sha256>
+      <instruction>
+        Read all 20 pages before changing the bot. Frank will supply this PDF in the same
+        Claude Code session or make it accessible in the project. Its reconciled strategy,
+        safety, risk, stage definitions, proposed pilot defaults, tests, and promotion gates
+        are the detailed implementation requirements. If the PDF is unavailable or unreadable,
+        report that specific dependency and inspect the existing project; do not invent its
+        contents or claim implementation is complete.
+      </instruction>
+    </document>
+    <document id="existing_project" role="current_implementation">
+      <instruction>
+        Inspect the repository, project instructions, configuration, existing audit findings,
+        working risk engine, kill switch, simulator, ledger, data providers, strategy code,
+        tests, and any uncommitted work. Confirm audit claims against the actual checkout.
+        Preserve working behavior and record discrepancies before making bounded edits.
+      </instruction>
+    </document>
+  </documents>
+
+  <authority_and_change_control>
+    <rule>Frank's latest explicit instruction governs his intent and requested scope.</rule>
+    <rule>Respect applicable project instructions and hard safety or authorization boundaries.</rule>
+    <rule>
+      Use the approved master PDF for detailed implementation. This XML defines how to use it,
+      the operating stages, and a bounded research environment. It does not silently override
+      PDF strategy rules, risk limits, or promotion gates.
+    </rule>
+    <rule>
+      Where working repository behavior conflicts with the PDF, inspect the evidence,
+      preserve sound components, implement the PDF's intended behavior in a versioned way,
+      and document the change. Where a material ambiguity cannot be resolved from the PDF,
+      implement independent work and mark only the dependent feature unresolved.
+    </rule>
+    <rule>
+      Do not treat the older research-only XML prompt, its prefilled response, or its list of
+      340 report sections as a second instruction set. This file supersedes that prompt.
+    </rule>
+    <rule>
+      The XML is a prompt and design reference. It is not an executable strategy or broker
+      configuration. Translate chosen rules into typed, versioned repository configuration
+      with validated units, defaults, and tests.
+    </rule>
+    <rule>
+      Record strategy, data, account-rule, cost-model, and code versions. Never silently
+      alter thresholds or relabel past evidence after a material rule change.
+    </rule>
+  </authority_and_change_control>
+
+  <authorization>
+    <allowed_now>
+      Inspect the existing project; make bounded, reversible code and configuration changes
+      needed for the approved autonomous paper path; add the defined strategy and risk tests;
+      run development tests, synthetic replay, and genuine paper sessions when data and
+      time permit; build manual prop alerts and rule interfaces without order access.
+    </allowed_now>
+    <not_authorized_now>
+      Place any real-money order; send, prefill, modify, or cancel an order in the prop
+      account; connect a prop execution route; activate autonomous personal-live trading;
+      use protected final out-of-sample data before its planned release; self-modify a live
+      model or risk parameter; buy or reset a prop account; or expand into new markets or
+      strategy families by default.
+    </not_authorized_now>
+    <scope_rule>
+      A change to this prompt is not an authorization to cross an operating-stage boundary.
+      Promotion requires the evidence and explicit activation specified in the master PDF.
+    </scope_rule>
+  </authorization>
+
+  <owner_intent_and_evidence>
+    <goal>Build a day-trading bot targeting at least 70 percent wins; 75 percent is a higher objective.</goal>
+    <source_engine>
+      Frank reports that the photographed Quant Farming guide summarizes a separate,
+      successful live signal engine at about 70 percent wins. Treat this as a user-attested
+      source-engine benchmark and a source of candidate parameters. It is not the measured
+      win rate of Frank's bot and is not a trade-level ledger supplied with this handoff.
+    </source_engine>
+    <current_bot>
+      The revised audit supplied to the master on 29 September 2026 describes Frank's
+      actual bot and updates his size, risk, exit, and session answers. It still reports
+      no completed strategy paper trades at that point, so the bot's own out-of-sample
+      win rate and net expectancy are unknown. Verify the current checkout rather than
+      assuming the audit is a live view of every file.
+    </current_bot>
+    <evidence_labels>
+      Always distinguish SOURCE_ENGINE_REPORT, SYNTHETIC_TEST, HISTORICAL_DEVELOPMENT,
+      WALK_FORWARD, PROTECTED_OOS, AUTONOMOUS_PAPER, MANUAL_PROP, and PERSONAL_LIVE.
+      Do not pool these ledgers or imply that a target has been demonstrated.
+    </evidence_labels>
+  </owner_intent_and_evidence>
+
+  <operating_modes>
+    <mode id="PAPER_AUTO" initial_target="true">
+      The deterministic bot detects setups, checks data and risk, sizes integer contracts,
+      enters and exits through a simulator, manages protective state, and records results.
+      No real trading adapter or real account credentials are reachable from this mode.
+    </mode>
+    <mode id="PROP_MANUAL_ALERTS" initial_target="false">
+      The bot analyzes and recommends entry, management, and exit actions. Frank personally
+      reviews, enters, protects, modifies, and closes each prop order. Bot alerts cannot
+      submit, prefill, modify, or cancel prop orders or operate the trading interface.
+      Record Frank's actual actions separately from paper fills. Activate only with the
+      selected account's current rule profile and tested route isolation.
+    </mode>
+    <mode id="LIVE_AUTO" initial_target="false" enabled="false">
+      Future autonomous execution is for a permitted personal broker account after all
+      promotion requirements, broker-adapter qualification, and Frank's explicit activation.
+      Merely implementing an adapter must not enable this mode.
+    </mode>
+    <stage_order>PAPER_AUTO to PROP_MANUAL_ALERTS to separately authorized LIVE_AUTO.</stage_order>
+  </operating_modes>
+
+  <active_paper_strategy>
+    <instruction>
+      Preserve the existing multi-timeframe liquidity strategy described in the master.
+      Use sound, already-tested repository definitions when equivalent. Where a definition
+      is missing, use the master's explicitly labeled paper-pilot interpretation in a
+      separately versioned variant. Do not claim proposed values came from the source engine.
+    </instruction>
+    <pilot_instrument>MES first; retain other requested markets as future research candidates.</pilot_instrument>
+    <revised_session>
+      The revised audit permits trading after the market opens and forbids premarket
+      entries. Proposed MES paper window: 09:30-11:30 America/New_York, flat by 11:30.
+      The US equity cash open is 09:30 ET, not the form's stated 09:00. Wait for the
+      required completed bar, valid quote, event and regime checks; do not force an
+      entry at the opening print. The old first-30-minute exclusion no longer applies.
+    </revised_session>
+    <timeframes>
+      H4 and H1 for aligned bias and liquidity context; M15 and M5 for setup confirmation;
+      M1 for entry confirmation. Use completed bars and known-at-decision timestamps.
+    </timeframes>
+    <setup id="REVERSAL_R1">
+      Implement the master's aligned-bias, premarked liquidity, sweep and rejection,
+      displacement, structural confirmation, M1 retest, structural stop, and directional
+      liquidity target as one separately tagged setup.
+    </setup>
+    <setup id="CONTINUATION_C1">
+      Implement the master's aligned-bias, unconsumed target, M5 displacement and aligned
+      gap, qualifying pullback, M1 respect and confirmation, structural stop, and target
+      as a separate setup. Do not impose a reversal sweep on every continuation trade.
+    </setup>
+    <no_trade_rule>
+      Missing confirmation, stale data, unknown contract metadata, insufficient risk capacity,
+      a consumed target, poor executable price, invalid payoff, or an account-rule block
+      produces a recorded skip. Distinguish a valid no-setup session from a broken pipeline.
+    </no_trade_rule>
+    <accumulation_state>
+      Implement the master's proposed accumulation/compression candidate as a causal
+      market state. Use a frozen prior M5 range and completed-bar efficiency and ATR
+      measurements. Price compression is not proof of institutional buying. Record
+      range and transition states, false breaks, skipped interior crossovers, and
+      unknown data. REVERSAL_R1 still needs its complete boundary-sweep setup;
+      CONTINUATION_C1 still needs its full breakout and pullback confirmation.
+      Keep moving-average slope and low-liquidity diagnostics versioned and test
+      their incremental value before adding new numeric gates.
+    </accumulation_state>
+  </active_paper_strategy>
+
+  <research_environment activation="after_or_alongside_working_paper_slice">
+    <purpose>
+      Preserve the useful ideas from Frank's original XML as testable context. They are
+      candidates for diagnostic features or separately versioned strategy variants.
+      They do not automatically become entry gates, change the baseline, or create a
+      claim of incremental edge.
+    </purpose>
+    <candidate_market_structure>
+      Define and test support, resistance, supply, demand, displacement, gaps, fair-value
+      gaps, zone freshness, mitigation, failed breaks, sweeps, and actual follow-through
+      from information available at the decision time. Price reactions may identify a
+      candidate liquidity level; they do not prove resting orders or replenishment without
+      appropriate order-book or trade evidence. Test whether repeated touches strengthen
+      or consume a level rather than assuming either result.
+    </candidate_market_structure>
+    <candidate_accumulation_evidence>
+      Compare observable compression with preceding trend, valid contract volume,
+      and order-flow data only when actually available. Distinguish accumulation,
+      reaccumulation, distribution, and generic range as research labels; do not
+      infer hidden inventory or future breakout direction from price alone.
+    </candidate_accumulation_evidence>
+    <candidate_timeframe_variant>
+      Research H4 trend, M30 structure, M15 location, and M5 entry as an alternative to
+      the active H4/H1/M15/M5/M1 hierarchy. A countertrend mean-reversion setup must be
+      a separate research variant; it must not bypass the active aligned-bias rule.
+      Compare each hierarchy against a simpler baseline using causal, completed bars.
+    </candidate_timeframe_variant>
+    <candidate_indicators>
+      Study RSI as a measured momentum feature, with 14 as a research baseline and
+      5, 7, 9, 21, and 28 as controlled alternatives. Specify smoothing, warm-up,
+      zero-gain/loss handling, and timestamps. Overbought does not itself mean short;
+      oversold does not itself mean long. Test slope, divergence, and thresholds only
+      for value beyond price, trend, volatility, and other correlated measures.
+      Study mathematical moving-average slope and normalized price distance. VIX is
+      conditional context when causally available and useful; no automatic inverse
+      direction rule applies.
+    </candidate_indicators>
+    <candidate_mean_reversion>
+      Define the mean or equilibrium, its anchor and update policy, regime, extension,
+      supply or demand response, entry, invalidation, stop, target, time horizon, and
+      no-hit outcome before testing. VWAP, anchored VWAP, rolling mean, median, range
+      midpoint, and point of control are alternative references, not interchangeable
+      numerical meanings. Test supply-to-mean shorts and demand-to-mean longs separately.
+      A gap need not fill and a price need not return to its mean.
+    </candidate_mean_reversion>
+    <candidate_breakout>
+      Define boundary, close, displacement, acceptance, follow-through, optional retest,
+      expiration, and execution time. Distinguish valid breakout, failed breakout,
+      false breakout, and sweep without using later candles to justify an earlier fill.
+      Test quick spikes as separate continuation and exhaustion hypotheses.
+    </candidate_breakout>
+    <candidate_regime_and_confluence>
+      Quantify bull, bear, range, chop, and transition using completed data. Compare
+      hard gates with simple scores and calibrated models. Do not count RSI, momentum,
+      moving-average slope, and recent returns as independent votes when they encode
+      the same move. More confluence does not automatically raise win probability.
+    </candidate_regime_and_confluence>
+    <candidate_execution>
+      Compare market, limit, marketable-limit, stop, and stop-limit policies under
+      measured spread, fill probability, latency, adverse selection, and missed fills.
+      Initial paper fills must follow the master simulator policy. A diagnostic ablation
+      without costs cannot qualify a deployable strategy.
+    </candidate_execution>
+    <research_order>
+      Form an operational definition; name its observable data and availability time;
+      register a hypothesis and simpler comparator; test on development data; run
+      chronological walk-forward and feature ablations; evaluate net results after
+      execution costs; record failure and uncertainty; promote only by a documented
+      new version and forward evidence. Do not force a 340-section written report.
+    </research_order>
+  </research_environment>
+
+  <instrument_and_data_environment>
+    <universe>
+      Retain Frank's stated research list: US 30, VIX, NAS1, VXI, XAUL, ES, and MES.
+      The old XML also suggested NQ; treat NQ as an unapproved expansion candidate.
+      Do not equate aliases with exchange contracts without mapping provider, venue,
+      symbol, contract month, multiplier, tick size/value, expiry, and session.
+    </universe>
+    <vix_rule>
+      Distinguish the spot VIX index used as context from an actual tradable volatility
+      product. Use VIX only when its feed, timestamp, and market relevance are known.
+    </vix_rule>
+    <futures_rule>
+      Futures expire or settle. Record the actual contract and a causal rollover policy.
+      A continuous research series is not an executable contract. Treat ES and MES as
+      correlated exposure rather than independent opportunities.
+    </futures_rule>
+    <data_rule>
+      Keep exchange, receive, bar-close, and decision timestamps; session timezone,
+      daylight-saving policy, holidays, maintenance windows, quote validity, bid/ask,
+      contract roll, data gaps, and data-source version. Use only data available before
+      each decision. Historical OHLC bars alone cannot validate queue fills or live spread.
+    </data_rule>
+    <event_rule>
+      Scheduled news is a risk, volatility, and liquidity filter; do not infer direction
+      from an announcement. Apply the master's proposed blackout and flattening policy
+      in paper mode unless a stricter existing rule applies. Missing required calendar
+      data blocks new entries while protective handling continues.
+    </event_rule>
+  </instrument_and_data_environment>
+
+  <risk_and_order_invariants>
+    <budget>
+      Implement the master's paper defaults and any stricter existing safeguards:
+      synthetic starting equity 50000 USD, static synthetic floor 48500 USD, execution
+      reserve 100 USD, maximum new-trade dollar cap 100 USD, five percent of remaining
+      usable loss capacity as the capacity cap, net daily stop 150 USD, and one MES
+      contract maximum. These are proposed PAPER settings, not a selected prop firm's
+      rules. With initial usable capacity 1400 USD, the capacity cap is 70 USD.
+      Recompute against active exposure, pending reservations, account floor, daily
+      headroom, and other limits before each entry. The revised audit states
+      0.25-0.5 percent of nominal trading capital per trade, 1 percent nominal
+      daily loss, and 25 percent of the allowed drawdown per day as Frank's
+      upper internal ceilings. At 50000 USD, these correspond to 125-250 USD
+      trade risk, 500 USD daily loss, and 375 USD of the synthetic 1500 USD
+      drawdown allowance. The stricter 70 USD initial capacity budget and
+      150 USD paper daily stop control the pilot. Do not treat these user
+      ceilings as a current prop firm's rules.
+    </budget>
+    <sizing>
+      stop_ticks = abs(entry_price - stop_price) / tick_size.
+      unit_loss = stop_ticks * tick_value + round_trip_cost + stressed_slippage.
+      affordable_quantity = floor(available_trade_budget / unit_loss).
+      approved_quantity = minimum of affordable_quantity and all instrument,
+      internal, account, and margin caps. Round prices to valid ticks without
+      understating loss. If quantity is zero, skip; never move the structural stop
+      merely to fit the budget. Reserve capacity atomically before order submission.
+      The old XML's approximate one-percent-of-equity ceiling is a research scenario,
+      not an active replacement for this capacity-based pilot.
+      The revised one-to-three-micro answer is a maximum range, not a requirement
+      to hold at least one contract. The pilot remains one MES; any later three-micro
+      cap needs a separately validated profile and all dollar-risk checks.
+    </sizing>
+    <payoff_and_expectancy>
+      Use the master's proposed minimum gross target-to-stop ratio of 1.0 for the
+      initial paper variant, then measure realized net results. A 70 to 75 percent
+      win rate alone cannot pass a strategy if average winners, losers, and costs
+      produce negative net expectancy. Planning assumptions such as p = 0.65 may
+      support initial paper decisions only if labeled as assumptions. Do not claim
+      calibrated probabilities before the required evidence exists.
+    </payoff_and_expectancy>
+    <exits>
+      Frank's revised ordinary exit is at the stop or take-profit. The master's
+      30-minute maximum hold and event/session flattening are additional proposed
+      protective exits for paper trading. Record each exit reason distinctly and
+      test the effect before changing the policy. Do not imply those time exits
+      were specified in Frank's revised answer.
+    </exits>
+    <hard_rules>
+      No martingale, averaging into losses, automatic geometric size escalation,
+      backward stop widening, or changing the stop to avoid a loss. Do not start a
+      new entry after the master's daily dollar stop, three-entry session cap, or
+      three-consecutive-loss pause triggers. Existing protective management continues
+      through pauses, stale data, disconnection, and entry lockout.
+    </hard_rules>
+    <execution_sequence>
+      Validate market and account state; detect a causal setup; choose entry,
+      invalidation, stop, and target; estimate executable price and costs; check
+      payoff, assumed or measured expectancy, and uncertainty; size whole contracts;
+      enforce every risk and account rule; reserve capacity; authorize the mode-specific
+      action; submit a simulated order or emit a manual alert; reconcile fills and
+      protection; manage the position; record the final outcome. Execution feasibility
+      analysis may precede risk approval; an actual order cannot.
+    </execution_sequence>
+  </risk_and_order_invariants>
+
+  <probability_and_decision_semantics>
+    <outcomes>
+      For a fixed setup, entry, stop, target, and time horizon, define mutually
+      exclusive target-first, stop-first, time-exit, no-fill, and relevant partial-fill
+      outcomes. Resolve both-levels-touched bars with finer data or a conservative
+      documented policy. Mean-hit and breakout labels can overlap these outcomes;
+      do not sum overlapping probabilities as if disjoint.
+    </outcomes>
+    <estimation>
+      Use explicit NOT_ESTIMATED or null values when a probability or model score is
+      unavailable. A confluence score is not a probability. Calibrate any model on
+      forward data and report sample count, horizon, uncertainty method, and market
+      regime. Do not invent values merely to complete a candidate record.
+    </estimation>
+    <states>
+      ACCEPT means all setup, execution, payoff, and risk checks passed in the current
+      mode. WAIT means a bounded confirmation is pending, with expiry and invalidation.
+      REDUCE means an otherwise valid setup is resized using a tested integer contract
+      rule; when one contract cannot be reduced, reject or abstain. REJECT means a
+      defined rule failed. ABSTAIN means uncertainty, data, market, or execution
+      conditions exceed the approved operating envelope. Keep the reason distinct.
+    </states>
+  </probability_and_decision_semantics>
+
+  <runtime_safety>
+    <deterministic_decisions>
+      Version and make entry, exit, position size, and risk decisions deterministic.
+      An LLM may explain records and assist offline research; it cannot override limits,
+      invent executable prices, alter live parameters, or issue discretionary orders.
+    </deterministic_decisions>
+    <order_integrity>
+      Use durable signal, intent, order, and fill identities. Retries and replays must
+      not create duplicate positions. Reconcile actual fills, partial fills, active
+      protection, cancellations, and late fills. Rejected or unknown protection blocks
+      new entries and enters a documented emergency handling state.
+    </order_integrity>
+    <restart_and_kill>
+      Persist the kill switch and lifecycle. After restart or disconnect, reconcile
+      positions, orders, reservations, and account state before resuming entries.
+      Unknown state blocks new entries. In automated modes, verify cancel/flatten
+      results through approved routes. In manual prop mode, alert Frank urgently and
+      record his actual resolution; never claim automatic flattening.
+    </restart_and_kill>
+    <boundaries>
+      Test PAPER_AUTO has no real order route, PROP_MANUAL_ALERTS has no order or UI
+      submission route, and LIVE_AUTO remains disabled. Do not store credentials in
+      code, logs, or reports. Use no real-account credentials to qualify the paper path.
+    </boundaries>
+  </runtime_safety>
+
+  <account_rules>
+    <profile>
+      Build a versioned interface for firm, account product, purchase cohort, platform,
+      stage, effective date, rule provenance, daily and trailing floors, open-PnL
+      treatment, contract caps, scale rules, trade windows, evaluation targets,
+      consistency, payouts, and permitted automation. Test rule boundaries at just
+      below, exactly at, and just above the limit.
+    </profile>
+    <selection>
+      Frank's intended prop route is Apex through Tradovate, executed manually.
+      Do not select a Topstep example or combine legacy and current Apex terms.
+      Account-specific prop recommendations remain unconfigured until the exact
+      product and applicable current rules are known. Independent paper work proceeds.
+    </selection>
+    <manual_alert>
+      Include strategy and signal IDs, contract, side, setup, detection/expiry,
+      entry zone, stop, target, suggested whole-contract quantity, worst-case risk,
+      current rule status, and invalidation. Record delivery, Frank's decision,
+      actual entry and exit, actual protection, and any missed or stale alert.
+      Keep autonomous paper, delayed-manual simulation, and actual prop results separate.
+    </manual_alert>
+  </account_rules>
+
+  <validation_and_promotion>
+    <development>
+      Register hypotheses and all tested variants. Use chronological development
+      and walk-forward windows; purge overlapping labels at boundaries; keep final
+      protected out-of-sample data untouched until its planned release. Compare to
+      simpler baselines, use feature ablations, and include executable costs in
+      every deployable comparison. Track regime, session, long/short, strategy,
+      parameter, latency, cost, and slippage sensitivity. Do not repeatedly select
+      a winner on the final holdout.
+    </development>
+    <paper_start>
+      A working simulated signal-to-ledger path, correct accounting, and essential
+      failure checks permit paper observations. Do not require a profitable historical
+      result before collecting actual paper data. Label synthetic replay separately.
+    </paper_start>
+    <initial_review>
+      Use the master's initial floor of at least 100 completed positions, 20 sessions,
+      and four calendar weeks under fixed rules. This is a review floor, not proof
+      of a 70 percent population win probability. Count complete positions, define
+      breakeven treatment, and report sample and regime coverage.
+    </initial_review>
+    <paper_to_manual_prop>
+      Require observed net win rate at least 70 percent, positive mean net expectancy
+      with a prespecified session-aware 95 percent lower confidence bound above zero,
+      no hard-rule breach, acceptable execution and stress behavior, a selected exact
+      prop rule profile, and an untouched forward segment. A 70 percent observed
+      rate is not itself a 70 percent lower confidence bound. Keep strategy variants
+      separate unless a pooled policy and test were specified in advance.
+    </paper_to_manual_prop>
+    <stress>
+      Simulate complete paths with the exact floor, daily stop, costs, and size rules.
+      Include correlated loss blocks, adverse slippage, delayed or missed fills,
+      fewer setups, and gaps. Report pass-before-breach, breach and unresolved
+      fractions, drawdown, and time conditional on passing. Use the master's proposed
+      10000-path base and adverse stress tolerances as predeclared paper criteria;
+      label them design tolerances rather than observed guarantees.
+    </stress>
+    <manual_prop_to_live>
+      Preserve Frank's two-funded-payout requirement, continued net-positive and
+      rule-compliant results, the 70 percent objective unless he explicitly revises
+      it, separate autonomous broker execution qualification, minimum size, and
+      explicit personal-live activation. Prop alerts and human-entered orders do
+      not prove autonomous broker reliability.
+    </manual_prop_to_live>
+  </validation_and_promotion>
+
+  <record_schema>
+    <common>
+      Run ID, mode, strategy/config and code version, data source/version, account
+      profile/version, instrument/contract, tick metadata, UTC exchange/receive/
+      decision timestamps, timezone/session, cost model, and outcome provenance.
+    </common>
+    <candidate>
+      Signal/setup ID and strategy family; direction; known-at-decision H4/H1/M15/M5/M1
+      features; level and zone references with creation/confirmation time; regime,
+      event, quote and spread status; entry zone and expiry; stop and target references;
+      gross/net payoff estimate; assumed or calibrated probabilities with status;
+      risk capacity, intended quantity, every limit result, final decision state,
+      and explicit rejection or abstention reason. Optional research fields are
+      nullable and cannot block the baseline merely because an experiment is absent.
+    </candidate>
+    <execution>
+      Intent/order/fill IDs; sent/acknowledged/fill times; requested and filled
+      quantity and prices; partial/rejected protection; fees, slippage, latency;
+      reconciliation and restart events; initial R; net realized R and USD;
+      MAE/MFE; exit cause; rule breaks; correction provenance. Append corrections
+      rather than erasing prior trials or losing trades.
+    </execution>
+    <daily_report>
+      Executed positions, skips by reason, net PnL and costs, observed win rate,
+      mean net R, drawdown and headroom, rule and operational faults, and progress
+      toward fixed evidence gates. Display source-engine benchmark, current-bot
+      result, and user target as three separate labels.
+    </daily_report>
+  </record_schema>
+
+  <implementation_work_order>
+    <step id="1">
+      Read the PDF and repository instructions. Inspect the checkout, preserve
+      uncommitted work, confirm current startup and audit-reported bottlenecks,
+      and write a short evidence-backed gap list. Do not commission another
+      broad research report before connecting the paper path.
+    </step>
+    <step id="2">
+      Add explicit PAPER_AUTO, PROP_MANUAL_ALERTS, and disabled LIVE_AUTO routing.
+      Prove adapter isolation with a focused test or equivalent inspection.
+    </step>
+    <step id="3">
+      Connect candidate, deterministic setup confirmation, risk approval,
+      simulated order, fills, protective exit, and ledger. Demonstrate one
+      qualifying synthetic sequence and one rule-rejected sequence end to end.
+    </step>
+    <step id="4">
+      Formalize REVERSAL_R1 and CONTINUATION_C1 from the master using causal
+      features, setup-specific tests, integer sizing, account capacity,
+      session/event handling, and the existing safeguards. Fix uncovered
+      failures in the same bounded implementation.
+    </step>
+    <step id="5">
+      Run relevant existing tests plus focused cases for delayed pivots,
+      future-bar leakage, duplicate/replayed orders, simultaneous risk
+      reservations, floor ratchets, ambiguous bars, stale quotes, missing
+      calendar, partial or rejected protection, restart recovery, and
+      manual alert expiry. Report commands and results.
+    </step>
+    <step id="6">
+      Run genuine full-session paper observation when accessible. If the
+      market or feed is unavailable, leave an executable launch procedure
+      and label replay results honestly. Then build the manual prop alert
+      loop and exact-profile fixtures without connecting prop execution.
+    </step>
+    <step id="7">
+      Use the research environment to stage and test optional features and
+      strategy variants after the working path exists. A promising idea is
+      not active until a versioned decision and forward validation support it.
+    </step>
+  </implementation_work_order>
+
+  <response_contract>
+    <during_work>
+      Give concise progress updates after meaningful findings or changes.
+      Continue implementation within the authorized scope instead of stopping
+      after a plan or asking Frank to reconfirm work he already requested.
+    </during_work>
+    <final_report>
+      State what was changed with file references, what runs end to end,
+      relevant tests and their outcomes, what remains unverified, and the
+      next concrete paper observation step. Show source benchmark, measured
+      bot performance, and target distinctly. Do not generate a 340-section
+      essay, claim a 70 percent bot win rate without measured trades, or
+      claim a live route is safe merely because the paper simulator works.
+    </final_report>
+    <first_action>
+      Read Trading-bot-code-master.pdf and the existing checkout, identify
+      the smallest missing link in the paper execution path, then implement
+      and verify that link. Continue through the work order as far as the
+      available project and data permit.
+    </first_action>
+  </response_contract>
+
+</claude_code_trading_bot_handoff>

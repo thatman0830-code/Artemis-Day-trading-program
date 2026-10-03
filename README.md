@@ -2,6 +2,16 @@
 
 Python research, backtesting, market-data collection, paper trading, risk controls, and exchange integrations, including the BOT 2.0 and BOT 2.1 work.
 
+## Current Artemis paper pilot
+
+The `mes-paper-pilot-v1` branch contains the three-account MES paper pilot, the October 2 context/readiness repair, and the read-only **Artemis dashboard**. Start with the [current handoff](HANDOFF.md), [three-portfolio settings](docs/MES_THREE_PAPER_PORTFOLIOS.md), and [dashboard instructions](dashboard/PAPER_DASHBOARD_README.md).
+
+Conservative, moderate, and aggressive accounts each start with a synthetic $100,000 and compare sizing policies on the same strategy. Live order routing remains disabled. The 70–75% win rate is a target, not a demonstrated result. The repaired engine still needs its first open-market forward paper session; diagnostic replays and synthetic fills are separate evidence.
+
+The dashboard opens locally on your computer. GitHub stores its source; it does not host the dashboard or run the scheduled bot. Credentials, recorded market data, account ledgers, and machine-specific schedules remain local. A fresh clone therefore needs its own environment, data, calendar, and scheduling setup before running the pilot.
+
+## Original project archive
+
 This repository contains the source and documentation imported from the owner's September 25, 2026 project archive. The full archive is also available as one downloadable file.
 
 **[Download the complete project ZIP](https://github.com/thatman0830-code/Artemis-Day-trading-program/releases/download/project-archive-2026-09-25/AI-Day-Trading-Project-Expanded-2026-09-25.zip)** · **[Release and checksum](https://github.com/thatman0830-code/Artemis-Day-trading-program/releases/tag/project-archive-2026-09-25)**
